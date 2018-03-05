@@ -17,7 +17,7 @@ class GaussianKernel(object):
     norms = np.linalg.norm(input_val, axis=1).reshape(n_sample, 1)
     cross = np.dot(input_val, input_val.T)
     kernel = np.exp(-0.5 / float(self.sigma)**2 \
-      * (np.tile(norms, (1, n_sample) ) + np.tile(norms.T, (n_sample, 1) ) \
+      * (np.tile(norms**2, (1, n_sample) ) + np.tile( (norms.T)**2, (n_sample, 1) ) \
       -2 * cross) )
     return torch.FloatTensor(kernel)
 
@@ -37,7 +37,7 @@ class RFF(object):
     self.input = input_val.T
     if isinstance(self.kernel, GaussianKernel):
       self.get_gaussian_w()
-      self.b = np.random.uniform(low=0.0, high = 2.0 * np.pi, size=(self.n_feat, 1) )
+      self.b = np.random.uniform(low=0.0, high=2.0 * np.pi, size=(self.n_feat, 1) )
       self.feat = np.sqrt(2/float(self.n_feat) ) * np.cos(np.dot(self.w, self.input) + self.b)
     else:
       raise Exception("the kernel type is not supported yet")
@@ -60,7 +60,7 @@ def test_rff_generation():
   rff = RFF(n_rff_feat, kernel=kernel)
   kernel_feat = rff.get_cos_feat(input_val)
   approx_kernel_mat = torch.mm(kernel_feat, torch.transpose(kernel_feat, 0, 1) )
-  np.testing.assert_array_almost_equal(approx_kernel_mat.cpu().numpy(), kernel_mat.cpu().numpy() )
+  np.testing.assert_array_almost_equal(approx_kernel_mat.cpu().numpy(), kernel_mat.cpu().numpy(), decimal=3)
   print("rff generation test passed!")
 
 if __name__ == "__main__":
