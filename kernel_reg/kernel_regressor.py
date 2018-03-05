@@ -105,7 +105,7 @@ def test_random_quantizer():
   print("quantizer test passed!")
 
 
-def test_kernel_ridge_regression():
+def test_kernel_ridge_regression1():
   '''
   We test the linear kernel case and gaussian kernel case
   '''
@@ -144,10 +144,45 @@ def test_kernel_ridge_regression():
   test_error = regressor.get_test_error(Y_test)
   assert np.abs(train_error - test_error) >= 1e-3
 
-  print("kernel ridge regression test passed!")
+  print("kernel ridge regression test1 passed!")
+
+
+def test_kernel_ridge_regression2():
+  '''
+  We test the linear kernel case and gaussian kernel case
+  '''
+  n_feat = 10
+  n_rff_feat = 1000
+  X_train  = np.ones( [2, n_feat] )
+  X_train[0, :] *= 1
+  X_train[0, :] *= 2
+  Y_train = np.ones( [2, 1] )
+  kernel = GaussianKernel(sigma=2.0)
+  kernel = RFF(n_rff_feat, n_feat, kernel)
+  reg_lambda = 1.0
+  regressor = KernelRidgeRegression(kernel, reg_lambda=reg_lambda)
+  regressor.fit(X_train, Y_train)
+
+  # compare the two ways of calculating feature weights as sanity check
+  # feature weight using the approach inside KernelRidgeRegression
+  kernel.get_kernel_matrix(X_train, X_train)
+  # print kernel.rff_x2.size(), regressor.alpha.size()
+  w1 = torch.mm(torch.transpose(kernel.rff_x2, 0, 1), regressor.alpha)
+  # print w1.size()
+  # feature weight using alternative way of calculation
+  val = torch.inverse( (regressor.reg_lambda * torch.eye(n_rff_feat) \
+    + torch.mm(torch.transpose(kernel.rff_x1, 0, 1), kernel.rff_x1) ) )
+  val = torch.mm(val, torch.transpose(kernel.rff_x2, 0, 1) )
+  w2 = torch.mm(val, torch.FloatTensor(Y_train) )
+  np.testing.assert_array_almost_equal(w1.cpu().numpy(), w2.cpu().numpy() )
+  # print(w1.cpu().numpy().ravel()[-10:-1], w2.cpu().numpy().ravel()[-10:-1] )
+  print("kernel ridge regression test2 passed!")
+
 
 if __name__ == "__main__":
   test_random_quantizer()
-  test_kernel_ridge_regression()
+  test_kernel_ridge_regression1()
+  test_kernel_ridge_regression2()
+
 
 

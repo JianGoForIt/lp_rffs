@@ -9,17 +9,6 @@ class GaussianKernel(object):
   def __init__(self, sigma):
     self.sigma = sigma
 
-  # def get_kernel_matrix(self, input_val):
-  #   '''
-  #   the input value has shape [n_sample, n_dim]
-  #   '''
-  #   n_sample = input_val.shape[0]
-  #   norms = np.linalg.norm(input_val, axis=1).reshape(n_sample, 1)
-  #   cross = np.dot(input_val, input_val.T)
-  #   kernel = np.exp(-0.5 / float(self.sigma)**2 \
-  #     * (np.tile(norms**2, (1, n_sample) ) + np.tile( (norms.T)**2, (n_sample, 1) ) \
-  #     -2 * cross) )
-  #   return torch.FloatTensor(kernel)
   def get_kernel_matrix(self, X1, X2):
     '''
     the input value has shape [n_sample, n_dim]
@@ -65,6 +54,7 @@ class RFF(object):
     '''
     rff_x1 = self.get_cos_feat(X1)
     rff_x2 = self.get_cos_feat(X2)
+    self.rff_x1, self.rff_x2 = rff_x1, rff_x2
     return torch.mm(rff_x1, torch.transpose(rff_x2, 0, 1) )
 
 
