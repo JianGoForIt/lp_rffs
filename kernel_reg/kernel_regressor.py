@@ -1,5 +1,6 @@
 import numpy as np
 import torch
+from rff import GaussianKernel, RFF
 
 class Quantizer(object):
   def __init__(self, nbit, min_val, max_val, scale=None):
@@ -22,6 +23,41 @@ class Quantizer(object):
     quant_val = floor_val * (sample < floor_prob).float() \
       + ceil_val * (sample >= floor_prob).float()
     return quant_val
+
+
+class KernelRidgeRegression(object):
+  def __init__(self, kernel, reg_lambda):
+    '''
+    reg_lambda is the strength of the regression regularizor
+    kernel matrix is a Pytorch Tensor
+    '''
+    # self.kernel_mat = kernel_mat
+    self.reg_lambda = reg_lambda
+    self.kernel = kernel
+
+  def fit(self, X_train=None, Y_train=None, kernel_mat=None):
+    self.X_train, self.Y_train = X_train, Y_train
+    self.kernel_mat = self.kernel.get_kernel_matrix(X_train, X_train)
+    n_sample = self.kernel_mat.size(0)
+    self.alpha = torch.mm(torch.inverse(self.kernel_mat + self.reg_lambda * torch.eye(n_sample) ), 
+      torch.FloatTensor(Y_train) )
+
+  def get_train_error(self):
+    prediction = torch.mm(self.kernel_mat, self.alpha)
+    error = prediction - torch.FloatTensor(self.Y_train)
+    return torch.mean(error)
+
+  def predict(self, X_test):
+    self.X_test = X_test
+    self.kernel_mat_pred = self.kernel.get_kernel_matrix(self.X_test, self.X_train)
+    self.prediction = torch.mm(self.kernel_mat_pred, self.alpha)
+    return self.prediction.clone()
+
+  def get_test_error(self, Y_test):
+    # should only be called right after the predict function
+    self.Y_test = Y_test
+    error = self.prediction - torch.FloatTensor(self.Y_test)
+    return torch.mean(error)
 
 
 def test_random_quantizer():
@@ -66,9 +102,52 @@ def test_random_quantizer():
   ratio = np.sum(quant_val == lower) / np.sum(quant_val == (lower + 1) ).astype(np.float)
   assert ratio > 0.95 and ratio < 1.05
 
+  print("quantizer test passed!")
+
+
+def test_kernel_ridge_regression():
+  '''
+  We test the linear kernel case and gaussian kernel case
+  '''
+  n_feat = 10
+  n_rff_feat = 1000000
+  X_train  = np.ones( [2, n_feat] )
+  X_train[0, :] *= 1
+  X_train[0, :] *= 2
+  Y_train = np.ones( [2, 1] )
+  kernel = GaussianKernel(sigma=2.0)
+  kernel = RFF(n_rff_feat, n_feat, kernel)
+  reg_lambda = 1.0
+  regressor = KernelRidgeRegression(kernel, reg_lambda=reg_lambda)
+  regressor.fit(X_train, Y_train)
+
+  # if test data equals traing data, it should the same L2 error
+  X_test = np.copy(X_train)
+  Y_test = np.copy(Y_train)
+  test_pred = regressor.predict(X_test)
+  train_error = regressor.get_train_error()
+  test_error = regressor.get_test_error(Y_test)
+  assert np.abs(train_error - test_error) < 1e-6
+
+  # if test data is different from traing data, L2 error for train and test should be different
+  X_test = np.copy(X_train) * 2
+  Y_test = np.copy(Y_train)
+  test_pred = regressor.predict(X_test)
+  train_error = regressor.get_train_error()
+  test_error = regressor.get_test_error(Y_test)
+  assert np.abs(train_error - test_error) >= 1e-3
+
+  X_test = np.copy(X_train)
+  Y_test = np.copy(Y_train) * 2
+  test_pred = regressor.predict(X_test)
+  train_error = regressor.get_train_error()
+  test_error = regressor.get_test_error(Y_test)
+  assert np.abs(train_error - test_error) >= 1e-3
+
+  print("kernel ridge regression test passed!")
 
 if __name__ == "__main__":
   test_random_quantizer()
-
+  test_kernel_ridge_regression()
 
 

@@ -9,35 +9,48 @@ class GaussianKernel(object):
   def __init__(self, sigma):
     self.sigma = sigma
 
-  def get_kernel_matrix(self, input_val):
+  # def get_kernel_matrix(self, input_val):
+  #   '''
+  #   the input value has shape [n_sample, n_dim]
+  #   '''
+  #   n_sample = input_val.shape[0]
+  #   norms = np.linalg.norm(input_val, axis=1).reshape(n_sample, 1)
+  #   cross = np.dot(input_val, input_val.T)
+  #   kernel = np.exp(-0.5 / float(self.sigma)**2 \
+  #     * (np.tile(norms**2, (1, n_sample) ) + np.tile( (norms.T)**2, (n_sample, 1) ) \
+  #     -2 * cross) )
+  #   return torch.FloatTensor(kernel)
+  def get_kernel_matrix(self, X1, X2):
     '''
     the input value has shape [n_sample, n_dim]
     '''
-    n_sample = input_val.shape[0]
-    norms = np.linalg.norm(input_val, axis=1).reshape(n_sample, 1)
-    cross = np.dot(input_val, input_val.T)
+    n_sample_X1 = X1.shape[0]
+    n_sample_X2 = X2.shape[0]
+    norms_X1 = np.linalg.norm(X1, axis=1).reshape(n_sample_X1, 1)
+    norms_X2 = np.linalg.norm(X2, axis=1).reshape(n_sample_X2, 1)
+    cross = np.dot(X1, X2.T)
     kernel = np.exp(-0.5 / float(self.sigma)**2 \
-      * (np.tile(norms**2, (1, n_sample) ) + np.tile( (norms.T)**2, (n_sample, 1) ) \
+      * (np.tile(norms_X1**2, (1, n_sample_X2) ) + np.tile( (norms_X2.T)**2, (n_sample_X1, 1) ) \
       -2 * cross) )
     return torch.FloatTensor(kernel)
 
 
-# TODO additioanl sanity check with exact gaussian kernel
 class RFF(object):
-  def __init__(self, n_feat, kernel=None):
-    self.n_feat = n_feat
+  def __init__(self, n_feat, n_input_feat, kernel=None):
+    self.n_feat = n_feat  # number of rff features
     self.kernel = kernel
+    self.n_input_feat = n_input_feat # dimension of the original input
+    self.get_gaussian_wb()
 
-  def get_gaussian_w(self):
+  def get_gaussian_wb(self):
     self.w = np.random.normal(scale=1.0/float(self.kernel.sigma), 
-      size=(self.n_feat, self.input.shape[0] ) )
+      size=(self.n_feat, self.n_input_feat) )
+    self.b = np.random.uniform(low=0.0, high=2.0 * np.pi, size=(self.n_feat, 1) )
 
   def get_cos_feat(self, input_val):
-    # input are original representaiton with the shape [n_dim, n_sample]
+    # input are original representaiton with the shape [n_sample, n_dim]
     self.input = input_val.T
     if isinstance(self.kernel, GaussianKernel):
-      self.get_gaussian_w()
-      self.b = np.random.uniform(low=0.0, high=2.0 * np.pi, size=(self.n_feat, 1) )
       self.feat = np.sqrt(2/float(self.n_feat) ) * np.cos(np.dot(self.w, self.input) + self.b)
     else:
       raise Exception("the kernel type is not supported yet")
@@ -45,6 +58,14 @@ class RFF(object):
 
   def get_sin_cos_feat(self, input_val):
     pass
+
+  def get_kernel_matrix(self, X1, X2):
+    '''
+    X1 shape is [n_sample, n_dim]
+    '''
+    rff_x1 = self.get_cos_feat(X1)
+    rff_x2 = self.get_cos_feat(X2)
+    return torch.mm(rff_x1, torch.transpose(rff_x2, 0, 1) )
 
 
 def test_rff_generation():
@@ -55,11 +76,11 @@ def test_rff_generation():
   input_val[0, :] *= 2
   # get exact gaussian kernel
   kernel = GaussianKernel(sigma=2.0)
+  kernel_mat = kernel.get_kernel_matrix(input_val, input_val)
   # get RFF approximate kernel matrix
-  kernel_mat = kernel.get_kernel_matrix(input_val)
-  rff = RFF(n_rff_feat, kernel=kernel)
-  kernel_feat = rff.get_cos_feat(input_val)
-  approx_kernel_mat = torch.mm(kernel_feat, torch.transpose(kernel_feat, 0, 1) )
+  rff = RFF(n_rff_feat, n_feat, kernel=kernel)
+  rff.get_gaussian_wb()
+  approx_kernel_mat = rff.get_kernel_matrix(input_val, input_val)
   np.testing.assert_array_almost_equal(approx_kernel_mat.cpu().numpy(), kernel_mat.cpu().numpy(), decimal=3)
   print("rff generation test passed!")
 
