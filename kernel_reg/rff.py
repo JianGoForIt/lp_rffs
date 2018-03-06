@@ -9,15 +9,17 @@ class GaussianKernel(object):
   def __init__(self, sigma):
     self.sigma = sigma
 
-  def get_kernel_matrix(self, X1, X2):
+  def get_kernel_matrix(self, X1, X2, quantizer=None):
     '''
     the input value has shape [n_sample, n_dim]
+    quantizer is dummy here
     '''
     n_sample_X1 = X1.shape[0]
     n_sample_X2 = X2.shape[0]
     norms_X1 = np.linalg.norm(X1, axis=1).reshape(n_sample_X1, 1)
     norms_X2 = np.linalg.norm(X2, axis=1).reshape(n_sample_X2, 1)
     cross = np.dot(X1, X2.T)
+    print("using sigma ", self.sigma)
     kernel = np.exp(-0.5 / float(self.sigma)**2 \
       * (np.tile(norms_X1**2, (1, n_sample_X2) ) + np.tile( (norms_X2.T)**2, (n_sample_X1, 1) ) \
       -2 * cross) )
@@ -32,8 +34,10 @@ class RFF(object):
     self.get_gaussian_wb()
 
   def get_gaussian_wb(self):
+    print("using sigma ", 1.0/float(self.kernel.sigma) )
     self.w = np.random.normal(scale=1.0/float(self.kernel.sigma), 
       size=(self.n_feat, self.n_input_feat) )
+    print("using n rff features ", self.w.shape[0] )
     self.b = np.random.uniform(low=0.0, high=2.0 * np.pi, size=(self.n_feat, 1) )
 
   def get_cos_feat(self, input_val):
@@ -48,12 +52,18 @@ class RFF(object):
   def get_sin_cos_feat(self, input_val):
     pass
 
-  def get_kernel_matrix(self, X1, X2):
+  def get_kernel_matrix(self, X1, X2, quantizer=None):
     '''
     X1 shape is [n_sample, n_dim]
     '''
     rff_x1 = self.get_cos_feat(X1)
     rff_x2 = self.get_cos_feat(X2)
+    if quantizer != None:
+      print("quantization activated ", X1.shape, X2.shape)
+      print("quantizer bits", quantizer.nbit)
+      print("quantizer scale", quantizer.scale)
+      rff_x1 = quantizer.quantize(rff_x1)
+      rff_x2 = quantizer.quantize(rff_x2)
     self.rff_x1, self.rff_x2 = rff_x1, rff_x2
     return torch.mm(rff_x1, torch.transpose(rff_x2, 0, 1) )
 

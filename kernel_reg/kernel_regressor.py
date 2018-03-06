@@ -1,6 +1,7 @@
 import numpy as np
 import torch
 from rff import GaussianKernel, RFF
+from time import time
 
 class Quantizer(object):
   def __init__(self, nbit, min_val, max_val, scale=None):
@@ -14,15 +15,21 @@ class Quantizer(object):
     value = torch.clamp(value, self.min_val, self.max_val)
     floor_val = self.min_val + torch.floor( (value - self.min_val) / self.scale) * self.scale
     ceil_val = self.min_val + torch.ceil( (value - self.min_val) / self.scale) * self.scale
-    floor_prob = ceil_val - value
-    ceil_prob = value - floor_val
+    # print("test in the middle ", torch.min(floor_val), torch.max(ceil_val), self.min_val, self.max_val)
+    # exit(0)
+    floor_prob = (ceil_val - value) / self.scale
+    ceil_prob = (value - floor_val) / self.scale
     # sanity check
-    np.testing.assert_array_almost_equal(floor_prob.cpu().numpy(), 
-      1 - ceil_prob.cpu().numpy() )
+    # np.testing.assert_array_almost_equal(floor_prob.cpu().numpy(), 
+    #   1 - ceil_prob.cpu().numpy(), decimal=6)
     sample = torch.FloatTensor(np.random.uniform(size=list(value.size() ) ) )
     quant_val = floor_val * (sample < floor_prob).float() \
       + ceil_val * (sample >= floor_prob).float()
     return quant_val
+
+  def quantize(self, value):
+    # TODO update if we have other quantization schemes
+    return self.quantize_random(value)
 
 
 class KernelRidgeRegression(object):
@@ -35,21 +42,43 @@ class KernelRidgeRegression(object):
     self.reg_lambda = reg_lambda
     self.kernel = kernel
 
-  def fit(self, X_train=None, Y_train=None, kernel_mat=None):
+  def fit(self, X_train=None, Y_train=None, kernel_mat=None, quantizer=None):
     self.X_train, self.Y_train = X_train, Y_train
-    self.kernel_mat = self.kernel.get_kernel_matrix(X_train, X_train)
+    self.kernel_mat = self.kernel.get_kernel_matrix(X_train, X_train, quantizer)
     n_sample = self.kernel_mat.size(0)
-    self.alpha = torch.mm(torch.inverse(self.kernel_mat + self.reg_lambda * torch.eye(n_sample) ), 
-      torch.FloatTensor(Y_train) )
+
+    # # DEBUG
+    # print("start timing ", self.kernel_mat.size() )
+    # test = (self.kernel_mat + self.reg_lambda * torch.eye(n_sample) )
+    # test = test.cpu().numpy()
+    # start_time = time()
+    # np.linalg.inv(test)
+    # end_time = time()
+    # print("numpy inverse time ", end_time - start_time)
+
+    # # test = (self.kernel_mat + self.reg_lambda * torch.eye(n_sample) )[0:5000, 0:5000]
+    # # start_time = time()
+    # # torch.inverse(test)
+    # # end_time = time()
+    # # print("pytorch inverse time ", end_time - start_time)
+    # exit(0)
+    
+    # pytorch is super slow in inverse, so we finish this operation in numpy
+    print("using regularior strength ", self.reg_lambda)
+    self.alpha = torch.FloatTensor( \
+      np.dot(np.linalg.inv( (self.kernel_mat + self.reg_lambda * torch.eye(n_sample) ).cpu().numpy() ), Y_train) )
+    # self.alpha = torch.mm(torch.inverse(self.kernel_mat + self.reg_lambda * torch.eye(n_sample) ), 
+    #   torch.FloatTensor(Y_train) )
 
   def get_train_error(self):
     prediction = torch.mm(self.kernel_mat, self.alpha)
     error = prediction - torch.FloatTensor(self.Y_train)
-    return torch.mean(error)
+    return torch.mean(error**2)
 
-  def predict(self, X_test):
+  def predict(self, X_test, quantizer=None):
     self.X_test = X_test
-    self.kernel_mat_pred = self.kernel.get_kernel_matrix(self.X_test, self.X_train)
+    self.kernel_mat_pred = \
+      self.kernel.get_kernel_matrix(self.X_test, self.X_train, quantizer)
     self.prediction = torch.mm(self.kernel_mat_pred, self.alpha)
     return self.prediction.clone()
 
@@ -57,7 +86,7 @@ class KernelRidgeRegression(object):
     # should only be called right after the predict function
     self.Y_test = Y_test
     error = self.prediction - torch.FloatTensor(self.Y_test)
-    return torch.mean(error)
+    return torch.mean(error**2)
 
 
 def test_random_quantizer():
