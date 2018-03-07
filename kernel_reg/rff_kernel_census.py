@@ -60,6 +60,8 @@ if __name__=="__main__":
   kernel_mat_approx_error_train = torch.sum( (regressor.kernel_mat - kernel_mat_exact_train)**2)
   kernel_mat_approx_error_test = torch.sum( (regressor.kernel_mat_pred - kernel_mat_exact_test)**2)
 
+  print "F norm exact kernel ", torch.sum(kernel_mat_exact_train**2)
+
   dict_res = {}
   if os.path.isfile(args.output_file):
     with open(args.output_file, "r") as f:
