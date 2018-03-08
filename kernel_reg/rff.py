@@ -27,17 +27,20 @@ class GaussianKernel(object):
 
 
 class RFF(object):
-  def __init__(self, n_feat, n_input_feat, kernel=None):
+  def __init__(self, n_feat, n_input_feat, kernel=None, rand_seed=1):
     self.n_feat = n_feat  # number of rff features
     self.kernel = kernel
     self.n_input_feat = n_input_feat # dimension of the original input
+    self.rand_seed = rand_seed
     self.get_gaussian_wb()
 
   def get_gaussian_wb(self):
-    print("using sigma ", 1.0/float(self.kernel.sigma) )
+    print("using sigma ", 1.0/float(self.kernel.sigma), "using rand seed ", self.rand_seed)
+    np.random.seed(self.rand_seed)
     self.w = np.random.normal(scale=1.0/float(self.kernel.sigma), 
       size=(self.n_feat, self.n_input_feat) )
     print("using n rff features ", self.w.shape[0] )
+    np.random.seed(self.rand_seed)
     self.b = np.random.uniform(low=0.0, high=2.0 * np.pi, size=(self.n_feat, 1) )
 
   def get_cos_feat(self, input_val):

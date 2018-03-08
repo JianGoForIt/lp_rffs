@@ -4,12 +4,13 @@ from rff import GaussianKernel, RFF
 from time import time
 
 class Quantizer(object):
-  def __init__(self, nbit, min_val, max_val, scale=None):
+  def __init__(self, nbit, min_val, max_val, scale=None, rand_seed=1):
     self.nbit = nbit
     self.min_val = min_val
     self.max_val = max_val
     if scale == None:
       self.scale = (max_val - min_val) / float(2**self.nbit - 1)
+    self.rand_seed = rand_seed
 
   def quantize_random(self, value):
     value = torch.clamp(value, self.min_val, self.max_val)
@@ -22,6 +23,8 @@ class Quantizer(object):
     # sanity check
     # np.testing.assert_array_almost_equal(floor_prob.cpu().numpy(), 
     #   1 - ceil_prob.cpu().numpy(), decimal=6)
+    print("quantizer using random seed", self.rand_seed)
+    np.random.seed(self.rand_seed)
     sample = torch.FloatTensor(np.random.uniform(size=list(value.size() ) ) )
     quant_val = floor_val * (sample < floor_prob).float() \
       + ceil_val * (sample >= floor_prob).float()

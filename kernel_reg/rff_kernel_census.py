@@ -18,6 +18,7 @@ parser.add_argument("--reg_lambda", type=float, default=0.001)
 parser.add_argument("--sigma", type=float, default=1.0, help="the kernel width")
 parser.add_argument("--data_path", type=str, default="../../data/census/")
 parser.add_argument("--output_file", type=str, default="./output.pkl")
+parser.add_argument("--random_seed", type=int, default=1)
 args = parser.parse_args()
 
 
@@ -41,8 +42,8 @@ if __name__=="__main__":
     n_quantized_rff = int(np.floor(args.n_fp_rff / float(args.n_bit) * 32.0) )
     min_val = -np.sqrt(2.0/float(n_quantized_rff) )
     max_val = np.sqrt(2.0/float(n_quantized_rff) )
-    quantizer = Quantizer(args.n_bit, min_val, max_val)
-    kernel = RFF(n_quantized_rff, n_input_feat, kernel)
+    quantizer = Quantizer(args.n_bit, min_val, max_val, rand_seed=args.random_seed)
+    kernel = RFF(n_quantized_rff, n_input_feat, kernel, rand_seed=args.random_seed)
     config_name = "lp_rff_lambda_" + str(args.reg_lambda) + "_sigma_" \
       + str(args.sigma) + "_n_fp_rff_" + str(args.n_fp_rff) + "_nbit_" + str(args.n_bit) 
 
@@ -59,8 +60,7 @@ if __name__=="__main__":
   # get kernel approximation error 
   kernel_mat_approx_error_train = torch.sum( (regressor.kernel_mat - kernel_mat_exact_train)**2)
   kernel_mat_approx_error_test = torch.sum( (regressor.kernel_mat_pred - kernel_mat_exact_test)**2)
-
-  print "F norm exact kernel ", torch.sum(kernel_mat_exact_train**2)
+  # print "F norm exact kernel ", torch.sum(kernel_mat_exact_train**2)
 
   dict_res = {}
   if os.path.isfile(args.output_file):
