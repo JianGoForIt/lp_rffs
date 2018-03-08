@@ -34,7 +34,7 @@ if __name__=="__main__":
     quantizer = None
     config_name = "exact_kernel_lambda_" + str(args.reg_lambda) + "_sigma_" + str(args.sigma)
   elif args.do_fp:
-    kernel = RFF(args.n_fp_rff, n_input_feat, kernel)
+    kernel = RFF(args.n_fp_rff, n_input_feat, kernel, rand_seed=args.random_seed)
     quantizer = None
     config_name = "fp_rff_lambda_" + str(args.reg_lambda) + "_sigma_" \
       + str(args.sigma) + "_n_fp_rff_" + str(args.n_fp_rff)
