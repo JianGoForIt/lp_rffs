@@ -17,7 +17,7 @@ parser.add_argument("--exact_kernel", action="store_true")
 parser.add_argument("--reg_lambda", type=float, default=0.001)
 parser.add_argument("--sigma", type=float, default=1.0, help="the kernel width")
 parser.add_argument("--data_path", type=str, default="../../data/census/")
-parser.add_argument("--output_file", type=str, default="./output.pkl")
+parser.add_argument("--output_folder", type=str, default="./output.pkl")
 parser.add_argument("--random_seed", type=int, default=1)
 args = parser.parse_args()
 
@@ -62,21 +62,33 @@ if __name__=="__main__":
   kernel_mat_approx_error_test = torch.sum( (regressor.kernel_mat_pred - kernel_mat_exact_test)**2)
   # print "F norm exact kernel ", torch.sum(kernel_mat_exact_train**2)
 
-  dict_res = {}
-  if os.path.isfile(args.output_file):
-    with open(args.output_file, "r") as f:
-      dict_res.update(cp.load(f) )
-  dict_res[config_name] = {"train_l2_error": train_error,
+  # dict_res = {}
+  # if os.path.isfile(args.output_folder):
+  #   with open(args.output_folder, "r") as f:
+  #     dict_res.update(cp.load(f) )
+  # dict_res[config_name] = {"train_l2_error": train_error,
+  #   "test_l2_error": test_error, "train_approx_error": kernel_mat_approx_error_train,
+  #   "test_approx_error": kernel_mat_approx_error_test}
+  # with open(args.output_folder, "w") as f:
+  #   cp.dump(dict_res, f)
+  
+  if not os.path.isdir(args.output_folder):
+    os.makedirs(args.output_folder)
+  dict_res = {"train_l2_error": train_error,
     "test_l2_error": test_error, "train_approx_error": kernel_mat_approx_error_train,
     "test_approx_error": kernel_mat_approx_error_test}
-  with open(args.output_file, "w") as f:
+  with open(args.output_folder + "/results.pkl", "w") as f:
     cp.dump(dict_res, f)
 
 
   # dict_res = {}
-  # if os.path.isfile(args.output_file):
-  #   with open(args.output_file, "r") as f:
+  # if os.path.isfile(args.output_folder):
+  #   with open(args.output_folder, "r") as f:
   #     dict_res.update(cp.load(f) )
+  # print(dict_res)
+  
+  # with open("./test/lambda_0.01_seed_2_fp_rff_nbit_16/results.pkl", "r") as f:
+  #     dict_res = cp.load(f)
   # print(dict_res)
 
 
