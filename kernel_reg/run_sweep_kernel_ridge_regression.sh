@@ -9,11 +9,7 @@ if [ ! -f "${output}_exact/results.pkl" ]; then
   python rff_kernel_census.py --exact_kernel --sigma=${sigma} --reg_lambda=${lambda} --output_folder="${output}_exact"
 fi
 
-<<<<<<< b011e943a8087ffaa5fba116878c11970942141b
-for n_fp_rff in 32 
-=======
 for n_fp_rff in 32 64 128 256 512 1024 2048 4096 8192
->>>>>>> add 32 feature test
   do 
     # run fp rff kernel
     if [ ! -f "${output}_n_fp_feat_${n_fp_rff}_fp_rff/results.pkl" ]; then
