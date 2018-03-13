@@ -9,7 +9,6 @@ if [ ! -f "${output}_exact/results.pkl" ]; then
   python rff_kernel_census.py --exact_kernel --sigma=${sigma} --reg_lambda=${lambda} --output_folder="${output}_exact"
 fi
 
-#for n_fp_rff in 64 128 256 512 1024 2048 4096 8192 16384
 for n_fp_rff in 32 
   do 
     # run fp rff kernel
@@ -19,7 +18,7 @@ for n_fp_rff in 32
     fi    
 
     # run lp rff kernel
-    for nbit in 32 16 8 4 2 1
+    for nbit in 1 2 4 8 16 32
       do
 	if [ ! -f "${output}_nbit_${nbit}_n_fp_feat_${n_fp_rff}_lp_rff/results.pkl" ]; then
           echo "${output}_nbit_${nbit}_n_fp_feat_${n_fp_rff}_lp_rff"
