@@ -19,6 +19,7 @@ parser.add_argument("--sigma", type=float, default=1.0, help="the kernel width")
 parser.add_argument("--data_path", type=str, default="../../data/census/")
 parser.add_argument("--output_folder", type=str, default="./output.pkl")
 parser.add_argument("--random_seed", type=int, default=1)
+parser.add_argument("--test_var_reduce", action="store_true")
 args = parser.parse_args()
 
 
@@ -31,18 +32,24 @@ if __name__=="__main__":
   assert X_train.shape[1] == X_test.shape[1]
   if args.exact_kernel:
     kernel = kernel
-    quantizer = None
+    quantizer_train = None
+    quantizer_test = None
     config_name = "exact_kernel_lambda_" + str(args.reg_lambda) + "_sigma_" + str(args.sigma)
   elif args.do_fp:
     kernel = RFF(args.n_fp_rff, n_input_feat, kernel, rand_seed=args.random_seed)
-    quantizer = None
+    quantizer_train = None
+    quantizer_test = None
     config_name = "fp_rff_lambda_" + str(args.reg_lambda) + "_sigma_" \
       + str(args.sigma) + "_n_fp_rff_" + str(args.n_fp_rff)
   else:
     n_quantized_rff = int(np.floor(args.n_fp_rff / float(args.n_bit) * 32.0) )
     min_val = -np.sqrt(2.0/float(n_quantized_rff) )
     max_val = np.sqrt(2.0/float(n_quantized_rff) )
-    quantizer = Quantizer(args.n_bit, min_val, max_val, rand_seed=args.random_seed)
+    quantizer_train = Quantizer(args.n_bit, min_val, max_val, rand_seed=args.random_seed)
+    if not args.test_var_reduce:
+      quantizer_test = quantizer_train
+    else:
+      quantizer_test = None
     kernel = RFF(n_quantized_rff, n_input_feat, kernel, rand_seed=args.random_seed)
     config_name = "lp_rff_lambda_" + str(args.reg_lambda) + "_sigma_" \
       + str(args.sigma) + "_n_fp_rff_" + str(args.n_fp_rff) + "_nbit_" + str(args.n_bit) 
@@ -50,10 +57,10 @@ if __name__=="__main__":
   regressor = KernelRidgeRegression(kernel, reg_lambda=args.reg_lambda)
   print("start to do regression!")
   # print("test quantizer", quantizer)
-  regressor.fit(X_train, Y_train, quantizer=quantizer)
+  regressor.fit(X_train, Y_train, quantizer=quantizer_train)
   print("finish regression!")
   train_error = regressor.get_train_error()
-  pred = regressor.predict(X_test, quantizer)
+  pred = regressor.predict(X_test, quantizer_train=quantizer_train, quantizer_test=quantizer_test)
   test_error = regressor.get_test_error(Y_test)
   print("check test error and train error ", test_error, train_error)
 

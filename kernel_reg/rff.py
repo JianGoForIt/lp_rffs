@@ -9,7 +9,7 @@ class GaussianKernel(object):
   def __init__(self, sigma):
     self.sigma = sigma
 
-  def get_kernel_matrix(self, X1, X2, quantizer=None):
+  def get_kernel_matrix(self, X1, X2, quantizer1=None, quantizer2=None):
     '''
     the input value has shape [n_sample, n_dim]
     quantizer is dummy here
@@ -55,18 +55,22 @@ class RFF(object):
   def get_sin_cos_feat(self, input_val):
     pass
 
-  def get_kernel_matrix(self, X1, X2, quantizer=None):
+  def get_kernel_matrix(self, X1, X2, quantizer1=None, quantizer2=None):
     '''
     X1 shape is [n_sample, n_dim]
     '''
     rff_x1 = self.get_cos_feat(X1)
     rff_x2 = self.get_cos_feat(X2)
-    if quantizer != None:
-      print("quantization activated ", X1.shape, X2.shape)
-      print("quantizer bits", quantizer.nbit)
-      print("quantizer scale", quantizer.scale)
-      rff_x1 = quantizer.quantize(rff_x1)
-      rff_x2 = quantizer.quantize(rff_x2)
+    if quantizer1 != None:
+      print("quantization 1 activated ", X1.shape)
+      print("quantizer 1 bits", quantizer1.nbit)
+      print("quantizer 1 scale", quantizer1.scale)
+      rff_x1 = quantizer1.quantize(rff_x1)
+    if quantizer2 != None:
+      print("quantization 2 activated ", X2.shape)
+      print("quantizer 2 bits", quantizer2.nbit)
+      print("quantizer 2 scale", quantizer2.scale)
+      rff_x2 = quantizer2.quantize(rff_x2)
     self.rff_x1, self.rff_x2 = rff_x1, rff_x2
     return torch.mm(rff_x1, torch.transpose(rff_x2, 0, 1) )
 
