@@ -9,9 +9,9 @@ def load_census_data(path="../../data/census/"):
   X_train = X_train.item()['X_tr']
   Y_test = Y_test.item()['Y_ho']
   Y_train = Y_train.item()['Y_tr']
-  # DEBUG
+  # # DEBUG
   # X_train, Y_train, X_test, Y_test = \
-  #   X_train[1:10, :], Y_train[1:10], X_test[1:10, :], Y_test[1:10]
+  #   X_train[1:20, :], Y_train[1:20], X_test[1:10, :], Y_test[1:10]
   return X_train, X_test, Y_train, Y_test
 
 
