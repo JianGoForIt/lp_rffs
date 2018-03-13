@@ -47,7 +47,7 @@ class KernelRidgeRegression(object):
 
   def fit(self, X_train=None, Y_train=None, kernel_mat=None, quantizer=None):
     self.X_train, self.Y_train = X_train, Y_train
-    self.kernel_mat = self.kernel.get_kernel_matrix(X_train, X_train, quantizer)
+    self.kernel_mat = self.kernel.get_kernel_matrix(X_train, X_train, quantizer, quantizer)
     n_sample = self.kernel_mat.size(0)
 
     # # DEBUG
@@ -78,10 +78,11 @@ class KernelRidgeRegression(object):
     error = prediction - torch.FloatTensor(self.Y_train)
     return torch.mean(error**2)
 
-  def predict(self, X_test, quantizer=None):
+  def predict(self, X_test, quantizer_train=None, quantizer_test=None):
+    # quantizer 1 for test data, quantizer 2 for train data
     self.X_test = X_test
     self.kernel_mat_pred = \
-      self.kernel.get_kernel_matrix(self.X_test, self.X_train, quantizer)
+      self.kernel.get_kernel_matrix(self.X_test, self.X_train, quantizer_test, quantizer_train)
     self.prediction = torch.mm(self.kernel_mat_pred, self.alpha)
     return self.prediction.clone()
 
