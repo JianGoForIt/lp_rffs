@@ -25,9 +25,11 @@ class Quantizer(object):
     #   1 - ceil_prob.cpu().numpy(), decimal=6)
     print("quantizer using random seed", self.rand_seed)
     np.random.seed(self.rand_seed)
-    sample = torch.FloatTensor(np.random.uniform(size=list(value.size() ) ) )
-    quant_val = floor_val * (sample < floor_prob).float() \
-      + ceil_val * (sample >= floor_prob).float()
+    sample = torch.DoubleTensor(np.random.uniform(size=list(value.size() ) ) )
+    # quant_val = floor_val * (sample < floor_prob).float() \
+    #   + ceil_val * (sample >= floor_prob).float()
+    quant_val = floor_val * (sample < floor_prob).double() \
+      + ceil_val * (sample >= floor_prob).double()
     return quant_val
 
   def quantize(self, value):
@@ -68,14 +70,14 @@ class KernelRidgeRegression(object):
     
     # pytorch is super slow in inverse, so we finish this operation in numpy
     print("using regularior strength ", self.reg_lambda)
-    self.alpha = torch.FloatTensor( \
-      np.dot(np.linalg.inv( (self.kernel_mat + self.reg_lambda * torch.eye(n_sample) ).cpu().numpy() ), Y_train) )
+    self.alpha = torch.DoubleTensor( \
+      np.dot(np.linalg.inv( (self.kernel_mat + self.reg_lambda * torch.eye(n_sample).double() ).cpu().numpy() ), Y_train) )
     # self.alpha = torch.mm(torch.inverse(self.kernel_mat + self.reg_lambda * torch.eye(n_sample) ), 
-    #   torch.FloatTensor(Y_train) )
+    #   torch.DoubleTensor(Y_train) )
 
   def get_train_error(self):
     prediction = torch.mm(self.kernel_mat, self.alpha)
-    error = prediction - torch.FloatTensor(self.Y_train)
+    error = prediction - torch.DoubleTensor(self.Y_train)
     return torch.mean(error**2)
 
   def predict(self, X_test, quantizer_train=None, quantizer_test=None):
@@ -89,7 +91,7 @@ class KernelRidgeRegression(object):
   def get_test_error(self, Y_test):
     # should only be called right after the predict function
     self.Y_test = Y_test
-    error = self.prediction - torch.FloatTensor(self.Y_test)
+    error = self.prediction - torch.DoubleTensor(self.Y_test)
     return torch.mean(error**2)
 
 
@@ -100,7 +102,7 @@ def test_random_quantizer():
   lower = -2**14+1.0
   shift = 1/3.0
   value = np.ones( (1000, 1000) ) * (lower + shift)
-  value = torch.FloatTensor(value)
+  value = torch.DoubleTensor(value)
   quant_val = quantizer.quantize_random(value)
   quant_val = quant_val.cpu().numpy()
   assert np.unique(quant_val).size == 2
@@ -113,7 +115,7 @@ def test_random_quantizer():
   lower = 2**14-1.0
   shift = 2/3.0
   value = np.ones( (1000, 1000) ) * (lower + shift)
-  value = torch.FloatTensor(value)
+  value = torch.DoubleTensor(value)
   quant_val = quantizer.quantize_random(value)
   quant_val = quant_val.cpu().numpy()
   assert np.unique(quant_val).size == 2
@@ -126,7 +128,7 @@ def test_random_quantizer():
   lower = 0.0
   shift = 0.5
   value = np.ones( (1000, 1000) ) * (lower + shift)
-  value = torch.FloatTensor(value)
+  value = torch.DoubleTensor(value)
   quant_val = quantizer.quantize_random(value)
   quant_val = quant_val.cpu().numpy()
   assert np.unique(quant_val).size == 2
@@ -206,7 +208,7 @@ def test_kernel_ridge_regression2():
   val = torch.inverse( (regressor.reg_lambda * torch.eye(n_rff_feat) \
     + torch.mm(torch.transpose(kernel.rff_x1, 0, 1), kernel.rff_x1) ) )
   val = torch.mm(val, torch.transpose(kernel.rff_x2, 0, 1) )
-  w2 = torch.mm(val, torch.FloatTensor(Y_train) )
+  w2 = torch.mm(val, torch.DoubleTensor(Y_train) )
   np.testing.assert_array_almost_equal(w1.cpu().numpy(), w2.cpu().numpy() )
   # print(w1.cpu().numpy().ravel()[-10:-1], w2.cpu().numpy().ravel()[-10:-1] )
   print("kernel ridge regression test2 passed!")
