@@ -9,7 +9,7 @@ if [ ! -f "${output}_exact/results.pkl" ]; then
   python rff_kernel_census.py --exact_kernel --sigma=${sigma} --reg_lambda=${lambda} --output_folder="${output}_exact"
 fi
 
-for n_fp_rff in 4096
+for n_fp_rff in 32 4096 64 128 256 512 1024 2048  #8192
   do 
     # run fp rff kernel
     if [ ! -f "${output}_n_fp_feat_${n_fp_rff}_fp_rff/results.pkl" ]; then
@@ -17,11 +17,11 @@ for n_fp_rff in 4096
       python rff_kernel_census.py --do_fp --n_fp_rff=${n_fp_rff} --sigma=${sigma} --random_seed=${seed} --reg_lambda=${lambda} --output_folder="${output}_n_fp_feat_${n_fp_rff}_fp_rff"
     fi
     # run lp rff kernel
-    for nbit in 1
+    for nbit in 1 2 4 
       do
         if [ ! -f "${output}_nbit_${nbit}_n_fp_feat_${n_fp_rff}_lp_rff/results.pkl" ]; then
           echo "${output}_nbit_${nbit}_n_fp_feat_${n_fp_rff}_lp_rff"
-          python rff_kernel_census.py --n_bit=${nbit} --n_fp_rff=${n_fp_rff} --sigma=${sigma} --random_seed=${seed} --reg_lambda=${lambda} --output_folder="${output}_nbit_${nbit}_n_fp_feat_${n_fp_rff}_lp_rff" --test_var_reduce
+          python rff_kernel_census.py --n_bit=${nbit} --n_fp_rff=${n_fp_rff} --sigma=${sigma} --random_seed=${seed} --reg_lambda=${lambda} --output_folder="${output}_nbit_${nbit}_n_fp_feat_${n_fp_rff}_lp_rff"
         fi
       done
   done
