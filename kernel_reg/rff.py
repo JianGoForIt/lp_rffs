@@ -23,7 +23,7 @@ class GaussianKernel(object):
     kernel = np.exp(-0.5 / float(self.sigma)**2 \
       * (np.tile(norms_X1**2, (1, n_sample_X2) ) + np.tile( (norms_X2.T)**2, (n_sample_X1, 1) ) \
       -2 * cross) )
-    return torch.FloatTensor(kernel)
+    return torch.DoubleTensor(kernel)
 
 
 class RFF(object):
@@ -50,7 +50,7 @@ class RFF(object):
       self.feat = np.sqrt(2/float(self.n_feat) ) * np.cos(np.dot(self.w, self.input) + self.b)
     else:
       raise Exception("the kernel type is not supported yet")
-    return torch.FloatTensor(self.feat.T)
+    return torch.DoubleTensor(self.feat.T)
 
   def get_sin_cos_feat(self, input_val):
     pass
