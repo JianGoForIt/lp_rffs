@@ -35,6 +35,7 @@
 \newcommand{\eps}{\epsilon}
 \newcommand{\teps}{\tilde{\epsilon}}
 \newcommand{\tS}{\tilde{S}}
+\newcommand{\tA}{\tilde{A}}
 \newcommand{\tsigma}{\tilde{\sigma}}
 \newcommand{\ulq}{\underline{q}}
 \newcommand{\olq}{\overline{q}}
@@ -347,7 +348,30 @@ We can apply the above lemma as follows: Assume $x,y \in \cX$, and that $z_x = \
 Thus, $\phi(x;w,b,a,\theta)\phi(y;w,b,a,\theta)$ is an unbiased estimate of $k(x,y)$ whenever
 $z_x$ and $z_y$ are in different rounding intervals.
 
-
+\section{Why 1-bit spectrum is terrible}
+\begin{eqnarray*}
+	A &=& XX^T \\
+	&=& USU^T \\ %= \sum_i \lambda_i u_i u_i^T \\
+	trace(A^T A) &=& trace( USU^T U S U^T)\\
+	&=& trace( US^2 U^T) \\
+	&=& \sum_i{\lambda_i^2}\\
+	\tA &=& (X+C)(X+D)^T \\
+	%	    &=& VTV^T \\
+	\tA^T\tA &=& (X+D)(X+C)^T(X+C)(X+D)^T \\
+	&=& XX^TXX^T + XC^TCX^T + DX^TXD^T + DC^TCD^T + \text{zero-mean}\\ 
+	&=& A^TA + XC^TCX^T + DX^TXD^T + DC^TCD^T + \text{zero-mean}\\ 
+	trace(\tA^T\tA) &=& trace(A^TA) + trace(XC^TCX^T) + trace(DX^TXD^T) + trace(DC^TCD^T) + trace(\text{zero-mean})\\ 
+	&=& \sum_i \tilde{\lambda_i}^2\\
+	\expect{}{\sum_i \tilde{\lambda_i}^2} &=& \expect{}{trace(\tA^T\tA)} \\
+	&=& trace(A^TA) + \expect{}{trace(XC^TCX^T) + trace(DX^TXD^T) + trace(DC^TCD^T)} + \expect{}{trace(\text{zero-mean})}\\
+	&=& trace(A^TA) + \expect{}{trace(XC^TCX^T) + trace(DX^TXD^T) + trace(DC^TCD^T)}\\	
+	&\geq& trace(A^TA) \\
+	&=&  \sum_i{\lambda_i^2} \\
+	\expect{}{z^T \tA^T\tA z} &=& z^TA^TAz + \expect{}{z^T(XC^TCX^T + DX^TXD^T + DC^TCD^T)z} + \expect{}{z^T\text{zero-mean}z}\\ 
+	&\geq& z^TA^TAz 
+\end{eqnarray*}
+So taking $z = u_i$, we get $\|\tA u_i\|^2 \geq \|Au_i\|^2 = \lambda_i^2$.
+Can we show $\tA-A$ is PSD?
 
 %(z_x+\teps_x)(z_y+\teps_y)$, where $\teps_x \sim X_{z_x}^{-\sq,\sq}$, and $\teps_y \sim X_{z_y}^{-\sq,\sq}$.
 %Then $\var{}{\tS} = 4 - z_x^2 z_y^2$.
