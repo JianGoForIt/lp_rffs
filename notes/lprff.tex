@@ -47,7 +47,7 @@
 
 
 \title{Low-Precision Random Fourier Features (LP-RFF)}
-\author{Avner May}
+\author{Avner May, Jian Zhang}
 \onehalfspacing
 \maketitle
 
@@ -373,6 +373,32 @@ $z_x$ and $z_y$ are in different rounding intervals.
 So taking $z = u_i$, we get $\|\tA u_i\|^2 \geq \|Au_i\|^2 = \lambda_i^2$.
 Can we show $\tA-A$ is PSD?
 
+\section{Experiments}
+\subsection{Kernel Ridge Regression}
+\begin{figure}
+\centering
+\begin{tabular}{c c}
+	\includegraphics[width=.45\linewidth]{figures/kernel_approx_error.pdf} &
+	\includegraphics[width=.45\linewidth]{figures/kernel_approx_error_n_fp.pdf} \\
+	(a) & (b) \\
+	\includegraphics[width=.45\linewidth]{figures/valid_l2.pdf} &
+	\includegraphics[width=.45\linewidth]{figures/valid_l2_n_fp.pdf}  \\
+		(c) & (d) \\
+\end{tabular}
+\caption{Kernel approximation and validation L2 loss for Kernel Ridge Regression on UCI Census data. (a) and (b) compare different precision representation under same memory bits budgets. (c) and (d) compare different precision representation with the same number of random Fourier features.}
+\label{fig:kernel_and_l2}
+\end{figure}
+
+
+\begin{figure}
+	\centering
+	\begin{tabular}{c c}
+		\includegraphics[width=.5\linewidth]{figures/valid_l2_var_reduction.pdf} &
+		\includegraphics[width=.5\linewidth]{figures/valid_l2_n_fp_var_reduction.pdf} \\
+	\end{tabular}
+	\caption{We train with low precision rffs and test with full precision rffs. Though the model is trained with low precision features, the test l2 loss can be improved by reducing variance in test rffs.}
+	\label{fig:var_reduction}
+\end{figure}
 %(z_x+\teps_x)(z_y+\teps_y)$, where $\teps_x \sim X_{z_x}^{-\sq,\sq}$, and $\teps_y \sim X_{z_y}^{-\sq,\sq}$.
 %Then $\var{}{\tS} = 4 - z_x^2 z_y^2$.
 \section{References}
