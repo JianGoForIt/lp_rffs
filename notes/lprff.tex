@@ -299,6 +299,20 @@ I will now discuss a concentration bound for these low-precision random features
 
 \textbf{Open Question}: Can Claim 1 from Rahimi and Recht (2007) be adapted to this low-precision setting?  The most obvious obstacle here is that the randomness depends on the data; in other words, each $x \in \RR$ has a unique quantization noise distribution.  In other words, with the current definition, there is no way to draw all the random feature parameters upfront, in such a way that given these parameters, the feature functions are deterministic.  Can we somehow switch the quantization scheme for it to be deterministic?  For example, splitting the interval $[-\sq,\sq]$ into $r$ sub-intervals---then, for interval
 
+\section{Variance introduced at test time}
+Assume we have learned a model $w$ over an RFF representation (low precision or full precision, doesn't matter).  We now consider the expected value for $(w^T z(x) - y)^2$, relative to $(w^T (z(x) + \eps_x) -y)^2$, where $z(x)$ denotes the full precision RFF representation for $x$, and $z(x) + \eps_x$ represents the randomly quantized representation.
+\begin{eqnarray*}
+	\expect{}{(w^T (z(x) + \eps_x) -y)^2} &=& \expect{}{(w^T z(x) + w^T \eps_x -y)^2} \\
+	&=& \expect{}{(w^T z(x) - y)^2)} + \expect{}{(w^T \eps_x)^2} \\
+	&=& \expect{}{(w^T z(x) - y)^2)} + \expect{}{\Big(\sum_i w_i \eps_{x,i}\Big)^2} \\
+	&=& \expect{}{(w^T z(x) - y)^2)} + \sum_i w_i^2 \expect{}{\eps_{x,i}^2} \\
+	&=& \expect{}{(w^T z(x) - y)^2)} + \|w\|^2\expect{}{\eps_{x,1}^2} \\
+	&\leq& \expect{}{(w^T z(x) - y)^2)} + \|w\|^2\cdot\frac{1}{4}\bigg(\frac{2\sqrt{2/d}}{2^b-1}\bigg)^2\\
+	&=& \expect{}{(w^T z(x) - y)^2)} + \|w\|^2\cdot\frac{2}{d(2^b-1)^2}.
+\end{eqnarray*}
+
+In other words, our expected error on a test point $(x,y)$, if we use quantized features at test time, is in expectation $\|w\|^2\cdot\frac{2}{d(2^b-1)^2}$ larger than the expected error if we used the full precision features at test time.  This suggests that it could be desirable, in certain contexts, to train using low precision (to speed up training), but use full precision features at test time.
+
 \section{``Deterministic'' Quantization Functions}
 In Proposition 3, we defined a set of deterministic quantization functions
 $\{Q_{\theta}:\RR\rightarrow\RR \;|\; \theta\in\Theta \}$, parameterized by some parameter $\theta\in\Theta$.
