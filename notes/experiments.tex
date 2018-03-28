@@ -35,7 +35,7 @@ As shown in Figure~\ref{fig:kernel_and_l2} (b) and (d), when using the same numb
 %\end{figure}
 
 \subsubsection{Spectrum of kernel matrix correlates with l2 loss}
-
+\label{subsubsec:bump_spectrum}
 \begin{figure}
 	\centering
 	\begin{tabular}{c c}
@@ -48,10 +48,20 @@ As shown in Figure~\ref{fig:kernel_and_l2} (b) and (d), when using the same numb
 	\label{fig:spectrums}
 \end{figure}
 
-In our theory in Section~\ref{sec:elevate_spectrum}, we have been discussing how low precision introduce quantization variance, which results in bumping up the spectrum of kernel matrix. In Figure~\ref{fig:spectrums} (a), we demonstrate the kernel matrix spectrum from 8192 random Fourier features in different precision. 
+In our theory in Section~\ref{sec:elevate_spectrum}, we have been discussing how low precision introduce quantization variance, which results in bumping up the spectrum of kernel matrix. To empirically support our analysis on the spectrums, in Figure~\ref{fig:spectrums} (a), we demonstrate the kernel matrix spectrum from 8192 random Fourier features in different precision. Note in this section, we discuss the case where the feature matrix and its transpose are quantized to the same value on the corresponding entries. 
 We can observe 8, 16 and 32 bits representation has spectrums close to the spectrum of full precision RFF kernel matrix. However, for 4, 2 and 1 bits representation has significantly higher spectrums than 8, 16 and 32 bits representation. Remember that in Figure~\ref{fig:kernel_and_l2}, we have seen 8, 16 and 32 bits representation demonstrates similar l2 loss, while 4, 2 and 1 bits can show observably worse performance. \emph{From these observations, we believe spectrum is closely correlated with the validation l2 loss. Indeed if the two RFF kernel matrices has the same spectrum, the RFF features matrices are only different up to rotation and flipping; it is the sole quantity to decide the behavior of a kernel regression model.} 
 
 Additionally, we compare to the correlation between kernel approximation error and l2 loss, to further emphasize the strong correlation between spectrum and l2 loss. In Figure~\ref{fig:spectrums} (b), we demonstrates the spectrums from 3 configurations with very similar kernel approximation error. Specifically, we compare 1 bit RFF with 131k features to two full precision RFF configuration with the closest kernel approximation error; these 2 full precision configurations respectively gives 1) the highest approx. error that is lower than the 1 bit configuration (8192 features) 2) the lowest approx. error that is higher than the 1bit configuration (4096 features). The 3 configurations shows close relative kernel approximation error around $1e^{-2}$, but can demonstrate very different spectrum in Figure~\ref{fig:spectrums} and very different validation l2 loss in Figure~\ref{fig:kernel_and_l2} (d).
+
+\subsubsection{Effect of independent quantization of RFF matrix and its transpose}
+In Section~\ref{subsubsec:bump_spectrum}, we have validated the analysis in Section~\ref{sec:elevate_spectrum}, empirically showing low precision RFF bumps up the kernel matrix spectrum. The discussion in Section~\ref{sec:elevate_spectrum} also suggested that, before we generate the low precision RFF kernel matrix, we can make the bumped spectrum being lower back by quantizing the RFF matrix and its transpose independently (i.e. quantization noise matrices $C\neq D$). We compare this independent quantization to the basic case where the corresponding entries in RFF matrix and its transpose are guaranteed to have the same value after quantization. In Figure~\ref{fig:indep_quant}, we show the comparison under two different memory bits budgets for the feature of each sample. In both the budgets, the spectrum becomes significantly lower after switching to independent quantization for RFF matrix and its transpose. Aligning with the theory in Section~\ref{subsubsec:bump_spectrum}, the more features we have in the low precision representation, the lower the spectrum will be.
+%Given two kernel function $k(\cdot, \cdot)$ and $k'(\cdot, \cdot)$, we assume the prediction on datum $x$ using $k$ and $k'$ are $h(x)$ and $h'(x)$ respectively. The prediction difference $|h(x) - h'(x)|$ has an upper bound involving two quantities $\| \bm{K} - \bm{K}' \|_2$ and $\| \bm{k}_x - \bm{k}_x' \|$ [3]; in this bound, $\bm{K}$ and $\bm{K}'$ are the training data kernel matrices, while $\bm{k}_x$ and $\bm{k}'_x$ are the test kernel values (i.e. kernel values between test sample $x$ and training samples). In this section, we evaluate a simple technique to reduce $\| \bm{K} - \bm{K}' \|_2$. We continue to discuss the influence of $\| \bm{k}_x - \bm{k}_x' \|$ in Section~\ref{subsubsec:test_var_reduce}.
+
+
+\subsubsection{Effect of reducing variance in test sample features}
+\label{subsubsec:test_var_reduce}
+Given two kernel function $k(\cdot, \cdot)$ and $k'(\cdot, \cdot)$, we assume the prediction on datum $x$ using $k$ and $k'$ are $h(x)$ and $h'(x)$ respectively. The prediction difference $|h(x) - h'(x)|$ has an upper bound involving two quantities $\| \bm{K} - \bm{K}' \|_2$ and $\| \bm{k}_x - \bm{k}_x' \|$ [3]; in this bound, $\bm{K}$ and $\bm{K}'$ are the training data kernel matrices, while $\bm{k}_x$ and $\bm{k}'_x$ are the test kernel values (i.e. kernel values between test sample $x$ and training samples).
+To preliminary validate the influence of $\| \bm{k}_x - \bm{k}_x' \|$ on prediction error of low precision kernel regressor, we train the kernel ridge regression with low precision RFF, and then evaluate the validation l2 loss using both full precision and low precision test sample RFF; we call using full precision RFF test feature as variance reduction technique. In Figure~\ref{fig:var_reduction}, by using the variance reduction technique, we can significantly improve the validation l2 loss for models trained using 1, 2 and 4 bits low precision RFF. This observation validates the importance of $\| \bm{k}_x - \bm{k}_x' \|$ in bounding the prediction error of a low precision RFF kernel regressor, when comparing to the prediction of a full precision RFF kernel regressor.
 
 \begin{figure}
 	\centering
@@ -60,7 +70,7 @@ Additionally, we compare to the correlation between kernel approximation error a
 		\includegraphics[width=.45\linewidth]{figures/valid_l2_n_fp_var_reduction.pdf} \\
 		(a) & (b)
 	\end{tabular}
-	\caption{We train with low precision rffs and test with full precision rffs. Though the model is trained with low precision features, the test l2 loss can be improved by reducing variance in test rffs. (a) compare different precision representation under same memory bits budgets. (b) compare different precision representation with the same number of random Fourier features.}
+	\caption{We train with low precision RFF and test with full precision RFF. Though the model is trained with low precision features, the test l2 loss can be improved by reducing variance in test RFF. (a) compare different precision representation under same memory bits budgets. (b) compare different precision representation with the same number of random Fourier features.}
 	\label{fig:var_reduction}
 \end{figure}
 
@@ -76,6 +86,7 @@ Additionally, we compare to the correlation between kernel approximation error a
 		(c) & (d)
 	\end{tabular}
 	\caption{Spectrum (eigen values) of the kernel matrix. (a) The spectrum from different precision representation under 3.2k bits memory budget (1024 full precision rffs) for the feature of each sample. (b) The spectrum from different precision representation under 25.6k bits memory budget (1024 full precision rffs) for the feature of each sample.}
+	\label{fig:indep_quant}
 \end{figure}
 
 %
