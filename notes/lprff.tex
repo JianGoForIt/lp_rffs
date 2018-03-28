@@ -24,6 +24,7 @@
 \newcommand{\bS}{\bar{S}}
 \newcommand{\bT}{\bar{T}}
 \newcommand{\sq}{\sqrt{2}}
+\newcommand{\hk}{\hat{k}}
 \newcommand{\hr}{\hat{r}}
 \newcommand{\hy}{\hat{y}}
 \newcommand{\hY}{\hat{Y}}
@@ -37,6 +38,7 @@
 \newcommand{\tS}{\tilde{S}}
 \newcommand{\tA}{\tilde{A}}
 \newcommand{\tsigma}{\tilde{\sigma}}
+\newcommand{\tlambda}{\tilde{\lambda}}
 \newcommand{\ulq}{\underline{q}}
 \newcommand{\olq}{\overline{q}}
 \newcommand{\ulr}{\underline{r}}
@@ -67,7 +69,7 @@ For $z\in [-\sq,\sq]$, let $\ulq(z)$ be the ``bottom'' of the quantization inter
 \subsection{Initial Theoretical Results}
 \begin{itemize}
 %	\item \noindent\textbf{Definitions}: For $z \in [a,c]$, let $X_z^{a,c}$ be the random variable which with probability $\frac{z-a}{c-a}$ equals $c-z$, and with probability $\frac{c-z}{c-a}$ equals $a-z$. Furthermore, let $Q^{a,c}(z) = z + X_z^{a,c} \in \{a,c\}$ be the ``quantized'' version of $z$, corresponding to randomized rounding to $a$ or $c$.
-	\item \textbf{Proposition 1} (Variance of LP-RFF):  For $x,y\in\cX$ fixed, let $S=Z_x Z_y$, $T = Q_b(Z_x)Q_b(Z_y)$, with $\expect{}{S}=\expect{}{T} = k(x,y)$, and $\expect{S}{(S-k(x,y))^2} = \sigma^2$, $\expect{Q_b}{(Q_b(z_x)Q_b(z_y)-z_x z_y)^2} = \tsigma_b^2$, for $z_x,z_y$ fixed.  Now, let $(S_1,\ldots,S_n)$, $(T_1,\ldots,T_n)$ be a random sequence of i.i.d. draws from $S$ and $T$ respectively.  Define $\bar{S}_n = \frac{1}{n}\sum_{i=1}^n S_i$, and $\bar{T}_n =  \frac{1}{n}\sum_{i=1}^n T_i$, to be the empirical mean of these draws.  It follows that $\expect{}{\bS_n} = \expect{}{\bT_n} = k(x,y)$, and that
+	\item \textbf{Proposition 1} (Variance of LP-RFF **OUTDATED**):  For $x,y\in\cX$ fixed, let $S=Z_x Z_y$, $T = Q_b(Z_x)Q_b(Z_y)$, with $\expect{}{S}=\expect{}{T} = k(x,y)$, and $\expect{S}{(S-k(x,y))^2} = \sigma^2$, $\expect{Q_b}{(Q_b(z_x)Q_b(z_y)-z_x z_y)^2} = \tsigma_b^2$, for $z_x,z_y$ fixed.  Now, let $(S_1,\ldots,S_n)$, $(T_1,\ldots,T_n)$ be a random sequence of i.i.d. draws from $S$ and $T$ respectively.  Define $\bar{S}_n = \frac{1}{n}\sum_{i=1}^n S_i$, and $\bar{T}_n =  \frac{1}{n}\sum_{i=1}^n T_i$, to be the empirical mean of these draws.  It follows that $\expect{}{\bS_n} = \expect{}{\bT_n} = k(x,y)$, and that
 	$\var{}{\bS_n} = \frac{\sigma^2}{n}$, and $\var{}{\bT_n} = \frac{\sigma^2 + \tsigma_b^2}{n}$.
 	Furthermore, $\tsigma_b^2 = (z_x-\ulq(z_x))(\olq(z_x)-z_x)(z_y-\ulq(z_y))(\olq(z_y)-z_y) \leq \frac{1}{4}(\frac{2\sq}{2^b-1})^2= \frac{2}{(2^b-1)^2}$.
 	
@@ -112,11 +114,12 @@ For $z\in [-\sq,\sq]$, let $\ulq(z)$ be the ``bottom'' of the quantization inter
 \subsubsection{Remarks}
 \begin{enumerate}
 \item To better understand Proposition 1, we now plot upper bounds for $\frac{\sigma^2}{n}$ and $\frac{\sigma^2 + \tsigma^2}{n}$, using $\sigma^2\leq 1$, and $\tsigma^2 \leq  \frac{2}{(2^b-1)^2}$; we use a log-log plot, and plot these upper bounds for various values of $b$ and $n$.\\
+**OUTDATED**
 \begin{center}
 	\includegraphics[width=0.6\textwidth]{lprff_variance_figure_numbits.jpg}
 \end{center}
 As you can see, lowering the precision helps reduce the variance by approximately a full order of magnitude ($10\times$ smaller variance) for a fixed number of bits, with $b=2$ giving the lowest variance, and $b=32$ variance matching the full-precision line (they are overlapping in the figure).  In the plot below, we show the kernel approximation variance as a function of the number of features.  As you can see, using $1$ bit per feature gives a noticeable jump in variance, but all other higher precision features perform comparably to the full-precision random features.
-
+**OUTDATED**
 \begin{center}
 	\includegraphics[width=0.6\textwidth]{lprff_variance_figure_numfeat.jpg}
 \end{center}
@@ -160,7 +163,7 @@ As you can see, lowering the precision helps reduce the variance by approximatel
 	\item Can we extend Claim 1 (Uniform convergence of Fourier features) from $[5]$ (Rahimi and Recht, 2007) to low-precision features $z(x)$, to prove that the probability that there exists $x,y\in\cX$ such that $|z(x)^Tz(y) -k(x,y)| \geq \eps$ is small?
 	\item Can we perform training in such a way that the learned weights are also low-precision?  What guarantees can we get with a training algorithm of this form?
 	\item How does the family of functions $\cF_p$ defined in Proposition 3 compare to the one in $[4]$ (Rahimi and Recht, 2008)?	
-	\item What can we say about the spectrum of the low-precision features relative to the full-precision features, and the exact kernel?  Results here would allow us to apply the ``fixed design'' linear regression analysis (from my other notes) here.
+	%\item What can we say about the spectrum of the low-precision features relative to the full-precision features, and the exact kernel?  Results here would allow us to apply the ``fixed design'' linear regression analysis (from my other notes) here.
 	\item Can we use low-precision for $x$,$w$, and $b$ in the features $z(x) = \sq\cos(w^Tx+b)$?  What can we prove about this?
 \end{enumerate}
 
@@ -245,21 +248,32 @@ space.  We present some alternative options to LM-HALP below:
 \end{itemize}
 
 \section{Kernel Approximation Variance Analysis for Low-Precision RFF}
-\noindent\textbf{Definitions}: For $z \in [a,c]$, let $X_z^{a,c}$ be the random variable which with probability $\frac{z-a}{c-a}$ equals $c-z$, and with probability $\frac{c-z}{c-a}$ equals $a-z$. Furthermore, let $Q^{a,c}(z) = z + X_z^{a,c} \in \{a,c\}$ be the ``quantized'' version of $z$, corresponding to randomized rounding to $a$ or $c$.  The following lemmas are easy to verify:\\
+\noindent\textbf{Definitions}: For $z \in [a,c]$, let $X_z^{a,c}$ be the random variable which with probability $\frac{z-a}{c-a}$ equals $c-z$, and with probability $\frac{c-z}{c-a}$ equals $a-z$. Furthermore, let $Q^{a,c}(z) = z + X_z^{a,c} \in \{a,c\}$ be the ``quantized'' version of $z$, corresponding to randomized rounding to $a$ or $c$. \\
 
-\noindent\textbf{Lemma 1}: Using the definitions above, it follows that $\expect{}{X_z^{a,c}} = 0$, $\var{}{X_z^{a,c}} = (z-a)(c-z)$, $\expect{}{Q^{a,c}(z)} = z$, and $\var{}{Q^{a,c}(z)} = (z-a)(c-z)$.\footnote{Note that if $a=0$, $\var{}{X_z^{0,c}} = z(c-z)$, which is maximized at $z=c/2$, with variance $c^2/4$.  If $a=-c$, $\var{}{X_z^{-c,c}} = c^2-z^2$, which is maximized at $z=0$ with variance $c^2$.}\\
+\noindent\textbf{Lemma 1}: Using the definitions above, it follows that $\expect{}{X_z^{a,c}} = 0$, $\var{}{X_z^{a,c}} = (z-a)(c-z)$, $\expect{}{Q^{a,c}(z)} = z$, and $\var{}{Q^{a,c}(z)} = (z-a)(c-z) \leq \frac{(c-a)^2}{4}$.\\
 
-\noindent\textbf{Lemma 2}: Given $z,z' \in [-c,c]$, let $S = Q^{-c,c}(z)Q^{-c,c}(z')$.
-Then $\expect{}{S} = zz'$ and $\var{}{S} = c^4-z^2z'^{2}$.\\
-%and $\eps \sim X_z^{-c,c}$, $\eps' \sim X_{z'}^{-c,c}$, let $S = (z+\eps)(z'+\eps')$.  
+\noindent\textbf{Proposition 1}: For $x,y\in\cX$, assume we have random variables $Z_x,Z_y$ satisfying $\expect{}{Z_xZ_y} = k(x,y)$, and $\var{}{Z_x} = \sigma^2$, and that $k(x,x) = k(y,y) = 1$.\footnote{For example, one specific instance of the random variables $Z_x,Z_y$ is given by random Fourier features, where $z_x = \sq\cos(w^Tx+b),z_y = \sq\cos(w^Ty+b)$, $z_x,z_y\in[-\sq,\sq]$, for random $w,b$.}  For any unbiased random quantization function $Q$ with bounded variance $\var{}{Q(z)} \leq \tsigma^2$ for any $z$, it follows that $\expect{}{Q(Z_x)Q(Z_y)} = k(x,y)$, and that $\var{}{Q(Z_x)Q(Z_y)} \leq 2\tsigma^2 + \tsigma^4 + \sigma^2$.\\
 
-\noindent \textbf{Lemma 3}:
-Assume $z_x\sim Z_x, z_y\sim Z_y$, where
-$z_x,z_y\in[-c,c]$, and $\expect{}{Z_xZ_y} = k(x,y)$, for some $x,y\in\cX$.\footnote{For example, one specific instance of the random variables $Z_x,Z_y$ is given by random Fourier features, where $z_x = \sq\cos(w^Tx+b),z_y = \sq\cos(w^Ty+b)$, $z_x,z_y\in[-\sq,\sq]$, for random $w,b$.}  Assume $\var{}{Z_xZ_y} = \sigma^2$, and let $\tsigma^2 = \var{}{Q^{-c,c}(z_x)Q^{-c,c}(z_y)} = c^4 - z_x^2z_y^2$.
-Now, letting $T = Q^{-c,c}(Z_x)Q^{-c,c}(Z_y)$, it follows that $\expect{}{T} = k(x,y)$, and $\var{}{T} = \sigma^2 + \tsigma^2$. \\
+\noindent\textit{proof}: Let $Q(Z_x) = Z_x + \eps_x$, and $Q(Z_y) = Z_y + \eps_y$, where $\expect{}{\eps_x} =\expect{}{\eps_y} = 0$ and $\expect{}{\eps_x^2} \leq \tsigma^2$, $\expect{}{\eps_y^2} \leq \tsigma^2$.
 
-\noindent\textbf{Proposition 1}: Let $S=Z_x Z_y$, $T = Q^{-c,c}(Z_x)Q^{-c,c}(Z_y)$, and $(S_1,\ldots,S_n)$, $(T_1,\ldots,T_n)$ be a random sequence of i.i.d. draws from $S$ and $T$ respectively.  Define $\bar{S}_n = \frac{1}{n}\sum_{i=1}^n S_i$, and $\bar{T}_n =  \frac{1}{n}\sum_{i=1}^n T_i$, to be the empirical mean of these draws.  It follows that $\expect{}{\bS_n} = \expect{}{\bT_n} = k(x,y)$, and that
-$\var{}{\bS_n} = \frac{\sigma^2}{n}$, and $\var{}{\bT_n} = \frac{\sigma^2 + \tsigma^2}{n}$.\\
+\begin{eqnarray*}
+\expect{}{Q(Z_x)Q(Z_y)} &=& \expect{}{(Z_x + \eps_x)(Z_y + \eps_y)} \\
+&=& \expect{}{Z_xZ_y + Z_y \eps_x + Z_x \eps_y + \eps_x \eps_y} \\
+&=& \expect{}{Z_xZ_y} \\
+&=& k(x,y).
+\end{eqnarray*}
+\begin{eqnarray*}
+\var{}{Q(Z_x)Q(Z_y)} &=&  \expect{}{\Big(Q(Z_x)Q(Z_y) - k(x,y)\Big)^2} \\
+&=& \expect{}{\Big((Z_x + \eps_x)(Z_y + \eps_y) - k(x,y)\Big)^2} \\
+&=& \expect{}{\Big(Z_y \eps_x + Z_x\eps_y + \eps_x \eps_y +  Z_xZ_y - k(x,y)\Big)^2} \\
+&=& \expect{}{\Big(Z_y \eps_x + Z_x\eps_y + \eps_x \eps_y\Big)^2} +  \expect{}{\Big(Z_xZ_y - k(x,y)\Big)^2} \\
+&=& \expect{}{Z_y^2 \eps_x^2 + Z_x^2\eps_y^2 + \eps_x^2 \eps_y^2} +  \sigma^2 \\
+&\leq& k(y,y) \tsigma^2 + k(x,x) \tsigma^2 + \tsigma^4 +  \sigma^2 \\
+&\leq& 2\tsigma^2 + \tsigma^4 +  \sigma^2. 
+\end{eqnarray*}
+
+\noindent\textbf{Proposition 2}: Let $Q$ be any unbiased quantization function with bounded variance ($\expect{}{Q(z)} = z$, $\var{}{Q(z)} \leq \tsigma^2$ for any $z$).  Let $S=Z_x Z_y$, $T = Q(Z_x)Q(Z_y)$, and $(S_1,\ldots,S_n)$, $(T_1,\ldots,T_n)$ be a random sequence of i.i.d. draws from $S$ and $T$ respectively.  Define $\bar{S}_n = \frac{1}{n}\sum_{i=1}^n S_i$, and $\bar{T}_n =  \frac{1}{n}\sum_{i=1}^n T_i$, to be the empirical mean of these draws.  It follows that $\expect{}{\bS_n} = \expect{}{\bT_n} = k(x,y)$, and that
+$\var{}{\bS_n} = \frac{\sigma^2}{n}$, and $\var{}{\bT_n} \leq \frac{2\tsigma^2 + \tsigma^4 +  \sigma^2}{n}$.\\
 
 Now, let's analyze the variance of using $\bS_n$ to approximate $k(x,y)$, relative to $\bT_{n*(32/b)}$.  This corresponds to comparing the variance of using $n$ ``full precision''  features (which we will assume are 32-bit), relative to using $n*(32/b)$ $b$-bit low-precision features. Note that both of these feature representations use the same total number of bits.  We will in this case assume we are using random Fourier features, and thus that
 $z_x,z_y \in [-\sq,\sq]$.  We will upper bound $\sigma^2$ in this context by $1$, given the results in $[3]$ for the RBF kernel.  Furthermore, it is important to note that the quantization noise $\tsigma^2$ is very much tied to the number of bits used to quantize the features $z_x$.  We will thus use $\tsigma_b^2$ to denote the variance introduced by quantizing into $b$-bits.  In this case, we divide the interval $[-\sq,\sq]$ into $2^b-1$ sub-intervals of equal size, and quantization is performed within each of these intervals; each interval is of size $r = \frac{2\sq}{2^b-1}$. 
@@ -268,12 +282,13 @@ Thus, from Lemma 1 (see footnote) the quantization error $\tsigma_b^2 \leq r^2/4
 \begin{eqnarray*}
 	\var{}{\bS_n} &=& \frac{\sigma^2}{n} \\
 	&\leq& \frac{1}{n}. \\
-	\var{}{\bT_{n*(32/b)}} &=& \frac{\sigma^2 + \tsigma_b^2}{n*(32/b)} \\
-	&\leq& \frac{1 + \frac{2}{(2^b-1)^2}}{n*(32/b)}\\
-	&=& \frac{b((2^b-1)^2 + 2)}{32n(2^b-1)^2}
+	\var{}{\bT_{n*(32/b)}} &\leq& \frac{2\tsigma_b^2 + \tsigma_b^4 +  \sigma^2}{n*(32/b)} \\
+	&\leq& \frac{2\frac{2}{(2^b-1)^2}  + \big(\frac{2}{(2^b-1)^2}\big)^2+ 1}{n*(32/b)}\\
+	&\leq& \frac{\frac{4}{(2^b-1)^2} + \frac{4}{(2^b-1)^4} +  1}{n*(32/b)}\\
 \end{eqnarray*}
 
 We now plot these two upper bounds on a log-log plot, for various values of $b$ and $n$.\\
+**OUTDATED**
 \begin{center}
 \includegraphics[width=0.6\textwidth]{lprff_variance_figure.jpg}
 \end{center}
@@ -284,95 +299,105 @@ I will now discuss a concentration bound for these low-precision random features
 
 \textbf{Open Question}: Can Claim 1 from Rahimi and Recht (2007) be adapted to this low-precision setting?  The most obvious obstacle here is that the randomness depends on the data; in other words, each $x \in \RR$ has a unique quantization noise distribution.  In other words, with the current definition, there is no way to draw all the random feature parameters upfront, in such a way that given these parameters, the feature functions are deterministic.  Can we somehow switch the quantization scheme for it to be deterministic?  For example, splitting the interval $[-\sq,\sq]$ into $r$ sub-intervals---then, for interval
 
-\section{Generalization bounds for low-precision RFF}
-We now discuss how to apply the result from Theorem 1 of Rahimi and Recht's 2008 paper to this low-precision setting [4].  That theorem assumes that there is a set of (deterministic) basis functions $\phi: \cX \times \Omega \rightarrow \RR$.  It then argues that if $\{w_1,\ldots,w_K\}$ are drawn independently from some distribution $p$ on $\Omega$, then the generalization performance of the model trained on the features $\phi(\;\cdot\;;w_i)$ is close to the best possible generalization performance of any model in the set $\cF_p = \{f(x) = \int_\Omega \alpha(w)\phi(x;w)dw | |\alpha(x)| \leq Cp(w)\}$.  Unfortunately, our randomly quantized features currently do not fit nicely into this framework, because the basis functions themselves are random, even for a fixed $x$ and $w$.  The purpose of the section below is to construct a parametrized set of basis functions $\phi(x;w,b,\theta)$ which quantize $\cos(w^Tx+b)$ in a deterministic way, given the parameters $\theta$.  This construction is a bit involved, but the goal is simple: 
-
-We discuss how to deal with this below.
-\subsection{Making random features ``deterministic''}
-Let $\gamma > \eps_r > 0$ be two positive constants. Assume that we are using $b$ bits for our random features, and use these $b$ bits to express $2^b$ distinct values in the interval $[-(\sq + \gamma),\sq + \gamma]$.  If we divide the interval into $2^b - 1$ evenly sized intervals, each of size $\frac{2(\sq+\gamma)}{2^b - 1}$, this allows us to express the following set of values: $\frac{2(\sq+\gamma)}{2^b - 1}\cdot (-2^b + 1, -2^b + 3,\ldots, -1,1,\ldots, 2^b-3, 2^b -1)$.\footnote{Note that for simplicity here, I am dividing the entire interval into $2^b -1$ sub-intervals, which gives a symmetric set of $2^b$ positive and negative values expressible in $b$ bits, not including 0.  This differs from the presentation in the HALP paper, in which the set of expressible numbers is of the form $\delta\cdot (-2^{b-1}, \ldots, -1,0,1,\ldots,2^{b-1}-1)$.  We could use easily use the same notation as the HALP paper by using the values $\frac{2(\sq + \gamma)}{2^b-2}\cdot(-2^{b-1}, \ldots, -1,0,1,\ldots,2^{b-1}-1)$, though this ``wastes'' the smallest value $-\delta 2^{b-1}$ because it is smaller than $-(\sq + \gamma)$.}  We will call these intervals the ``quantization intervals'', whose boundaries correspond to the values expressible in $b$ bits.  Let $\hat{Q}_b$ denote this set of values.  Now, we will define another set of intervals, whose union will ``cover'' the set $[-\sq,\sq]$.  We will call these the ``rounding intervals'', and define them as follows.  Let $a$ be a uniformly at random ``offset'' chosen in the interval $[0,\eps_r]$.  Now, consider the following sequence of interval boundaries: $(-\sq-a,-\sq-a+\eps_r,-\sq-a+2\eps_r,\ldots,-\sq-a+R\eps_r)$, where $R=\ceil{(\frac{2\sq + a}{\eps_r})}$ is the smallest integer such that $-\sq-a+R\eps_r \geq \sq$.  Let $\hat{R}_a$ denote the set of boundary points for these rounding intervals, and let $c_k = \frac{1}{2}\Big((-\sq-a+(k-1)\eps_r) + (-\sq-a+k\eps_r)\Big)$ denote the center of the $k^{th}$ rounding interval.  For any value $z\in[-\sq,\sq]$, let $\ulq(z)$ be the ``bottom'' of the quantization interval containing $z$, let $\olq(z)$ denote the ``top'' of this interval, let $\ulr(z)$ be the ``bottom'' of the rounding interval containing $z$, let $\olr(z)$ denote the ``top'' of this interval, and let $c(z) =\frac{1}{2}(\olr(z) + \ulr(z))$  denote the center of this rounding interval.  Now, let $(X_1,\ldots,X_{R+1})$ denote $R+1$ Bernoulli random variables. The probability $p_k$ that
-$X_k=1$ is defined as follows:
-\begin{itemize}
-	\item If the interval $[\ulr(c_k),\olr(c_k)]$ \textit{does not} contain one of the quantization boundaries:  
-	$$p_k = \frac{c_k-\ulq(c_k)}{\olq(c_k)-\ulq(c_k)}.$$
-	\item If the interval $[\ulr(c_k),\olr(c_k)]$ \textit{does} contain one of the quantization boundaries:  
-	$$p_k = \frac{c_k-\ulq(\ulr(c_k))}{\olq(\olr(c_k))-\ulq(\ulr(c_k))}.$$
-\end{itemize}
-Let $k(z)$ denote the \textit{index} of the rounding interval in which $z$ falls: specifically, $k(z) = k' \Leftrightarrow z \in [-\sq-a+(k'-1)\eps_r, -\sq-a+k'\eps_r]$.  Now, if  $\theta=(\theta_1,\ldots,\theta_{R+1})$ are the outcomes of these $R+1$ Bernoullis, and $a$ is the random offset, we can define $g_{a,\theta}(z)$ as follows:
-\begin{itemize}
-	\item If the interval $[\ulr(z),\olr(z)]$ \textit{does not} contain one of the quantization boundaries:
-	$$g_{a,\theta}(z) = (1-\theta_{k(z)})\ulq(z) + \theta_{k(z)}\olq(z).$$
-	\item If the interval $[\ulr(z),\olr(z)]$ \textit{does} contain one of the quantization boundaries:
-	$$g_{a,\theta}(z) = (1-\theta_{k(z)})\ulq(\ulr(z)) + \theta_{k(z)}\olq(\olr(z)).$$
-\end{itemize}
-Note that in the above definitions, even though the RHS does not contain $a$, it is implicitly dependent on $a$ through the $\olr$ and $\ulr$ functions.
-Now, we are finally ready to define a set of ``deterministic'' basis functions:\footnote{I apologize for overloading the letter $b$ for both the number of bits, and the value in the expression $\cos(w^Tx+b)$.}
+\section{``Deterministic'' Quantization Functions}
+In Proposition 3, we defined a set of deterministic quantization functions
+$\{Q_{\theta}:\RR\rightarrow\RR \;|\; \theta\in\Theta \}$, parameterized by some parameter $\theta\in\Theta$.
+We now discuss how to construct these.  The idea is simple: For every quantization interval $[a,c]$, we choose a threshold value $t \in [a,c]$ uniformly at random.  Then if a certain unquantized feature $z$ falls in this interval, we will set $Q_t(z)= a$ if $z \leq t$, and $Q_t(z) = c$ if $z > t$.  It is easy to show that $\expect{t}{Q_t(z)} = z$:
 \begin{eqnarray*}
-	\phi(x;w,b,a,\theta) &=&  g_{\theta,a}(\cos(w^Tx + b)). \\
+	\expect{t}{Q_t(z)} &=& a \cdot \Prob[z \leq t] + c \cdot \Prob[z > t]  \\
+	&=& a \cdot \frac{c-z}{c-a} + c\cdot \frac{z-a}{c-a} \\
+	&=& \frac{ac - az + cz - ac}{c-a} \\
+	&=& z.
 \end{eqnarray*}
+Thus, if for every quantization interval we draw a random threshold $t_i$ as described, and concatenate these thresholds as $\theta = (t_1,\ldots,t_{2^b-1})$, we have successfully constructed a set of unbiased and deterministic quantization functions, as desired.
 
-\textbf{Lemma 5}: If $z$ and $z'$ are in different rounding intervals, it follows that
-\begin{eqnarray*}
-zz' \leq \expect{a,\theta}{g_{a,\theta}(z)g_{a,\theta}(z')} \leq zz' + O(\eps_r).
+
+%We now discuss how to apply the result from Theorem 1 of Rahimi and Recht's 2008 paper to this low-precision setting [4].  That theorem assumes that there is a set of (deterministic) basis functions $\phi: \cX \times \Omega \rightarrow \RR$.  It then argues that if $\{w_1,\ldots,w_K\}$ are drawn independently from some distribution $p$ on $\Omega$, then the generalization performance of the model trained on the features $\phi(\;\cdot\;;w_i)$ is close to the best possible generalization performance of any model in the set $\cF_p = \{f(x) = \int_\Omega \alpha(w)\phi(x;w)dw | |\alpha(x)| \leq Cp(w)\}$.  Unfortunately, our randomly quantized features currently do not fit nicely into this framework, because the basis functions themselves are random, even for a fixed $x$ and $w$.  The purpose of the section below is to construct a parametrized set of basis functions $\phi(x;w,b,\theta)$ which quantize $\cos(w^Tx+b)$ in a deterministic way, given the parameters $\theta$.  
+
+\section{Why low-precision spectra are elevated}
+In this section, we explain our empirical observation that the spectra of our kernel approximation matrices are much higher than the actual spectrum of the exact kernel matrix, in the case where we use 1, 2, or 4 bits to quantize our features.  If we consider the $n$ by $d$ RFF matrix $Z$, whose $i^{th}$ row is $z(x_i)$, and let $C$ denote the zero mean random quantization noise which is added to $Z$, it is easy to see that the kernel approximation matrix $(Z+C)(Z+C)^T$ has an elevated spetrum $\tlambda$, because:
+\begin{eqnarray*} 
+\expect{}{\sum_i \tlambda_i} &=& \expect{}{trace[(Z+C)(Z+C)^T]} \\
+&=& \expect{}{trace[ZZ^T] + trace[ZC^T] + trace[CZ^T] + trace[CC^T]}\\
+&=& trace[ZZ^T] + \expect{}{trace[CC^T]} \\
+&>& trace[ZZ^T] \\
+&=& \expect{}{\sum_i \lambda_i}
 \end{eqnarray*}
-
-\textit{Proof}: We will first consider the case where $z$ is in the $k^{th}$ rounding interval $[\ulr(c_k),\olr(c_k)]$, and this interval \textit{does not} contain one of the quantization boundaries.  In this case, we will show that $\expect{\theta}{g_{a,\theta}(z)} = c_k$ (regardless of the value of $a$).  The case where the interval does contain a quantization boundary is very similar:
-\begin{eqnarray*}
-	\expect{\theta}{g_{a,\theta}(z)} &=&  \expect{\theta_k}{(1-\theta_k)\ulq(z) + \theta_k\olq(z)} \\
-	&=& (1-p_k)\ulq(z) + p_k\olq(z) \\
-	&=& \bigg(1-\frac{c_k-\ulq(c_k)}{\olq(c_k)-\ulq(c_k)}\bigg)\ulq(z) + \frac{c_k-\ulq(c_k)}{\olq(c_k)-\ulq(c_k)}\olq(z) \\
-	&=& \frac{\olq(c_k)-c_k}{\olq(c_k)-\ulq(c_k)}\ulq(z) + \frac{c_k-\ulq(c_k)}{\olq(c_k)-\ulq(c_k)}\olq(z) \\
-	&=& \frac{\olq(c_k)\ulq(z) - c_k\ulq(z) +c_k\olq(z) -\ulq(c_k)\olq(z)}{\olq(c_k)-\ulq(c_k)}\\
-	&=& \frac{c_k\big(\olq(z)-\ulq(z)\big)}{\olq(c_k)-\ulq(c_k)}\\
-	&=& c_k.
-\end{eqnarray*}
-In this sequence of equations, I used the fact that $\olq(z) = \olq(c_k)$, and $\ulq(z) = \ulq(c_k)$.
-
-Now, I will use this fact to show that for $z$ and $z'$ in different rounding intervals ($k=k(z)$, $k'=k(z')$, $k\neq k'$), $\expect{a,\theta}{g_{a,\theta}(z)g_{a,\theta}(z')} = zz'$.
+Notice that the spectrum $\tlambda$ of $(Z+C)(Z+C)^T$ relates to the spectrum $\tsigma$ of $(Z+C)$ via $\tlambda_i = \tsigma_i^2$.  Thus, letting $\sigma$ denote the spectrum of $Z$, we have shown that
+$\expect{}{\sum_i \tsigma_i^2} > \sum_i \sigma_i^2$.  In other words, adding zero mean noise of any kind to a matrix elevates the $\ell_2$ norm of its spectrum.  This is intuitive because the noise will always increase the total weight on the diagonal of $ZZ^T$.
+More interestingly, however, we can also show that if we take two random draws $C$ and $D$ of the quantization noise, the spectrum of $(Z+C)(Z+D)^T$ is also elevated relative to $ZZ^T$, even though the expected value of the entries of the diagonal of this matrix are \textit{equal} to the entries of the $ZZ^T$ diagonal.  This is because we can write $(Z+C)(Z+D)^T = ZZ^T + CZ^T + ZD^T + CD^T = ZZ^T + N$, where $N = CZ^T + ZD^T + CD^T$ is zero mean noise.  Thus, just like the spectrum of $Z+C$ was higher than that of $Z$ because we added zero mean noise $C$ to it, the spectrum of $(Z+C)(Z+D)^T$ will be higher than that of $ZZ^T$ because we are adding zero mean noise $N$ to it.  We show this in more detail below:
 
 \begin{eqnarray*}
-\expect{a,\theta}{g_{a,\theta}(z)g_{a,\theta}(z')} &=& 
-\Exp_a \bigg[\Exp_{\theta}\big[g_{a,\theta}(z)g_{a,\theta}(z')\big] \bigg]   \\
-&=& \Exp_a \bigg[\Exp_{\theta_k}\big[g_{a,\theta}(z)\big]  \Exp_{\theta_{k'}}\big[g_{a,\theta}(z')\big] \bigg]   \\
-&=& \expect{a}{c_k c_{k'}}   \\
-%\expect{a}{b}\expect{b}{f} \\
-%&=& \int_{a=0}^{\eps_r} g_{a,\theta}(z)g_{a,\theta}(z')da\\
-%&=& \int_{a=0}^{\eps_r} g_{a,\theta}(z)g_{a,\theta}(z')da %\sum_{(\theta_1,\ldots,\theta_{R+1})\in\{0,1\}^{R+1}}g_{a,\theta}(z)g_{a,\theta}(z')
-\end{eqnarray*}
-
-We can apply the above lemma as follows: Assume $x,y \in \cX$, and that $z_x = \sq \cos(w^Tx+b)$ and $z_y = \sq \cos(w^Ty+b)$.  It then follows from the lemma that:
-\begin{eqnarray*}
-\expect{w,b,a,\theta}{g_{a,\theta}(z_x)g_{a,\theta}(z_y)} &=& \expect{w,b}{z_x z_y} \\
-&=& k(x,y)
-\end{eqnarray*}
-
-Thus, $\phi(x;w,b,a,\theta)\phi(y;w,b,a,\theta)$ is an unbiased estimate of $k(x,y)$ whenever
-$z_x$ and $z_y$ are in different rounding intervals.
-
-\section{Why 1-bit spectrum is terrible}
-\begin{eqnarray*}
-	A &=& XX^T \\
+	A &=& ZZ^T \\
 	&=& USU^T \\ %= \sum_i \lambda_i u_i u_i^T \\
 	trace(A^T A) &=& trace( USU^T U S U^T)\\
 	&=& trace( US^2 U^T) \\
 	&=& \sum_i{\lambda_i^2}\\
-	\tA &=& (X+C)(X+D)^T \\
+	\tA &=& (Z+C)(Z+D)^T \\
 	%	    &=& VTV^T \\
-	\tA^T\tA &=& (X+D)(X+C)^T(X+C)(X+D)^T \\
-	&=& XX^TXX^T + XC^TCX^T + DX^TXD^T + DC^TCD^T + \text{zero-mean}\\ 
-	&=& A^TA + XC^TCX^T + DX^TXD^T + DC^TCD^T + \text{zero-mean}\\ 
-	trace(\tA^T\tA) &=& trace(A^TA) + trace(XC^TCX^T) + trace(DX^TXD^T) + trace(DC^TCD^T) + trace(\text{zero-mean})\\ 
+	\tA^T\tA &=& (Z+D)(Z+C)^T(Z+C)(Z+D)^T \\
+	&=& ZZ^TZZ^T + ZC^TCZ^T + DZ^TZD^T + DC^TCD^T + \text{zero-mean}\\ 
+	&=& A^TA + ZC^TCZ^T + DZ^TZD^T + DC^TCD^T + \text{zero-mean}\\ 
+\end{eqnarray*}
+\begin{eqnarray*}
+	trace(\tA^T\tA) &=& trace(A^TA) + trace(ZC^TCZ^T) + trace(DZ^TZD^T) + trace(DC^TCD^T) + trace(\text{zero-mean})\\ 
 	&=& \sum_i \tilde{\lambda_i}^2\\
 	\expect{}{\sum_i \tilde{\lambda_i}^2} &=& \expect{}{trace(\tA^T\tA)} \\
-	&=& trace(A^TA) + \expect{}{trace(XC^TCX^T) + trace(DX^TXD^T) + trace(DC^TCD^T)} + \expect{}{trace(\text{zero-mean})}\\
-	&=& trace(A^TA) + \expect{}{trace(XC^TCX^T) + trace(DX^TXD^T) + trace(DC^TCD^T)}\\	
+	&=& trace(A^TA) + \expect{}{trace(ZC^TCZ^T) + trace(DZ^TZD^T) + trace(DC^TCD^T)} + \expect{}{trace(\text{zero-mean})}\\
+	&=& trace(A^TA) + \expect{}{trace(ZC^TCZ^T) + trace(DZ^TZD^T) + trace(DC^TCD^T)}\\	
 	&\geq& trace(A^TA) \\
-	&=&  \sum_i{\lambda_i^2} \\
-	\expect{}{z^T \tA^T\tA z} &=& z^TA^TAz + \expect{}{z^T(XC^TCX^T + DX^TXD^T + DC^TCD^T)z} + \expect{}{z^T\text{zero-mean}z}\\ 
-	&\geq& z^TA^TAz 
+	&=&  \sum_i{\lambda_i^2}. \\
+	%\expect{}{z^T \tA^T\tA z} &=& z^TA^TAz + \expect{}{z^T(ZC^TCZ^T + DZ^TZD^T + DC^TCD^T)z} + %\expect{}{z^T\text{zero-mean}z}\\ 
+	%&\geq& z^TA^TAz 
 \end{eqnarray*}
-So taking $z = u_i$, we get $\|\tA u_i\|^2 \geq \|Au_i\|^2 = \lambda_i^2$.
-Can we show $\tA-A$ is PSD?
+%So taking $z = u_i$, we get $\|\tA u_i\|^2 \geq \|Au_i\|^2 = \lambda_i^2$.
+%Can we show $\tA-A$ is PSD?
 
+Now, we ask the following question: How large is the expected gap between $\expect{}{\sum_i \tilde{\lambda_i}^2}$ and $\sum_i{\lambda_i^2}$? To answer this, we consider the magnitude of 
+$\expect{}{trace(ZC^TCZ^T) + trace(DZ^TZD^T) + trace(DC^TCD^T)}$, relative to the magnitude of
+$\expect{}{trace[ZZ^TZZ^T]}$.  We begin by simply getting a simpler expression for $trace[AB^TBA^T]$ for
+arbitrary matrices $A$ and $B$.\\
+
+\noindent\textbf{Lemma}: $trace[AB^TBA^T] = \sum_{i,j=1}^n \sum_{k,\hk=1}^d a_{jk}a_{j\hk}b_{ik}b_{i\hk}$.\\
+
+\noindent \textbf{Proposition}:  $\expect{}{trace[ZZ^TZZ^T]} = n + \frac{n^2-n}{d}$, while 
+$\expect{}{trace(ZC^TCZ^T) + trace(DZ^TZD^T) + trace(DC^TCD^T)} = \frac{4n^2}{d(2^b-1)^2} + \frac{4n^2}{d(2^b-1)^4} = \frac{4n^2}{d}\Big(\frac{1}{(2^b-1)^2} + \frac{1}{(2^b-1)^4}\Big)$. \\
+
+\noindent \textit{Proof}:  We will use the above Lemma to compute expected values for $trace[ZZ^TZZ^T]$, $trace(ZC^TCZ^T)$, $trace(DZ^TZD^T)$, and $trace(DC^TCD^T)$.  This will directly prove the proposition.
+
+\begin{itemize}
+\item Case 1: $A=B=Z$.
+\begin{eqnarray*}
+\expect{}{trace[ZZ^TZZ^T]} &=& \sum_{i,j=1}^n \sum_{k,\hk=1}^d \expect{}{z_{jk}z_{j\hk}z_{ik}z_{i\hk}}\\
+&=& \sum_{i=1}^n \sum_{k,\hk=1}^d \expect{}{z_{ik}^2}\expect{}{z_{i\hk}^2} + \sum_{i\neq j} \sum_{k=1}^d \expect{}{z_{jk}^2}\expect{}{z_{ik}^2}\\
+&=& \sum_{i=1}^n \sum_{k,\hk=1}^d \frac{1}{d^2} + \sum_{i\neq j} \sum_{k=1}^d \frac{1}{d^2}\\
+&=& nd^2\frac{1}{d^2} + (n^2-n)d\frac{1}{d^2}\\
+&=& n + \frac{n^2-n}{d}.
+\end{eqnarray*}
+Above, we used the fact that $\expect{}{z_{ik}^2} = \expect{w_k,b_k}{\frac{2}{d}\cos(w_k^T x_i + b_k)^2} = \frac{k(x_i,x_i)}{d} = \frac{1}{d}$.
+\item Case 2: $A=Z$, $B=C$ (or $A=D$ and $B=Z$).
+\begin{eqnarray*}
+\expect{}{trace[ZC^TCZ^T]} &=& \sum_{i,j=1}^n \sum_{k,\hk=1}^d \expect{}{z_{jk}z_{j\hk}c_{ik}c_{i\hk}}\\	
+&=& \sum_{i,j=1}^n \sum_{k=1}^d \expect{}{z_{jk}^2}\expect{}{c_{ik}^2}\\	
+&\leq& \sum_{i,j=1}^n \sum_{k=1}^d \frac{1}{d}\cdot \frac{1}{4}\bigg(\frac{2\sqrt{2/d}}{2^b-1}\bigg)^2\\	
+&=& n^2d \cdot \frac{1}{d}\cdot \frac{1}{4}\cdot \frac{8}{d(2^b-1)^2}\\	
+&=& \frac{2n^2}{d(2^b-1)^2} \\
+&=& O\Big(\frac{n^2}{d\cdot 2^{2b}}\Big).
+%&\approx& \frac{2n^2}{d2^{2b}} \\
+%&=& \frac{n^2}{d}\Big(2^{-2b+1}\Big) \\
+\end{eqnarray*}
+Above, we use the fact that $\expect{}{c_{ik}^2} \leq \frac{1}{4}\bigg(\frac{2\sqrt{2/d}}{2^b-1}\bigg)^2 = \frac{2}{d(2^b-1)^2}$, and that $\expect{}{z_{ik}^2} = \frac{1}{d}$.  Note that this bound also holds when $A=D$ and $B=Z$.
+\item Case 3: $A=C$, $B=D$.
+\begin{eqnarray*}
+\expect{}{trace[CD^TDC^T]} &=& \sum_{i,j=1}^n \sum_{k,\hk=1}^d \expect{}{c_{jk}c_{j\hk}d_{ik}d_{i\hk}}\\
+&=& \sum_{i,j=1}^n \sum_{k=1}^d \expect{}{c_{jk}^2}\expect{}{d_{ik}^2}\\
+&=& \sum_{i,j=1}^n \sum_{k=1}^d \bigg(\frac{2}{d(2^b-1)^2}\bigg)^2\\
+&=& n^2d \cdot\frac{4}{d^2(2^b-1)^4}\\
+&=& \frac{4n^2}{d(2^b-1)^4}\\
+&=& O\Big(\frac{n^2}{d \cdot 2^{4b}}\Big).
+\end{eqnarray*}
+\end{itemize}
+This concludes the proof.
 \input{experiments}
 
 %(z_x+\teps_x)(z_y+\teps_y)$, where $\teps_x \sim X_{z_x}^{-\sq,\sq}$, and $\teps_y \sim X_{z_y}^{-\sq,\sq}$.
