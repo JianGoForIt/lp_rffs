@@ -30,13 +30,14 @@
 
 \begin{figure}
 	\centering
-	\begin{tabular}{c c}
+	\begin{tabular}{c c c}
 %		\includegraphics[width=.45\linewidth]{figures/spectrum_1024.pdf} &
-		\includegraphics[width=.45\linewidth]{figures/spectrum_8192.pdf} &
-		\includegraphics[width=.45\linewidth]{figures/different_spectrum_with_same_kernel_approx_error.pdf} \\
+		\includegraphics[width=.33\linewidth]{figures/spectrum_8192.pdf} &
+		\includegraphics[width=.33\linewidth]{figures/different_spectrum_with_same_kernel_approx_error_log.pdf} &
+		\includegraphics[width=.33\linewidth]{figures/different_spectrum_with_same_kernel_approx_error.pdf}\\
 		(a) & (b)
 	\end{tabular}
-	\caption{Spectrum (eigen values) of the kernel matrix. (a) The spectrum from different precision representation under 3.2k bits memory budget (1024 full precision rffs) for the feature of each sample. (b) The spectrum from different precision representation under 25.6k bits memory budget (1024 full precision rffs) for the feature of each sample.}
+	\caption{Spectrum (eigen values) of the kernel matrix. (a) The spectrum from different precision representation under 25.6k bits memory budget (equivalent to 8192 full precision rffs) for the feature of each sample. (b) Configurations with similar approximation errors can demonstrate very different spectrum; we compare the 1 bit representation to the full precision configurations giving 1) the highest approx. error that is lower than the one from 1 bit configuration 2) the lowest approx. error that is higher than the one from 1bit configuration. (c) Replot (b) in decimal scale to visualize the difference of spectrums; the spectrums from kernel matrix using 1) a single stochastic quantization and 2) two independent stochastic quantization for the feature matrix and its transpose.}
 \end{figure}
 
 
