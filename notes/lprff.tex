@@ -252,7 +252,7 @@ Thus, from Lemma \ref{lemma:qvar} the quantization error $\tsigma_b^2 \leq r^2/4
 \end{eqnarray*}
 
 We now plot these two upper bounds on a log-log plot, for various values of $b$ and $n$.\\
-**OUTDATED**
+**OUTDATED**\todo{should we remove this "OUTDATED" flag?}
 \begin{center}
 	\includegraphics[width=0.6\textwidth]{lprff_variance_figure.jpg}
 \end{center}
@@ -398,6 +398,7 @@ We now discuss how to construct these.  The idea is simple: For every quantizati
 Thus, if for every quantization interval we draw a random threshold $t_i$ as described, and concatenate these thresholds as $\theta = (t_1,\ldots,t_{2^b-1})$, we have successfully constructed a set of unbiased and deterministic quantization functions, as desired.
 
 \subsection{Effect of quantization noise at test time}
+\label{sec:reduce_test_noise_theory}
 In this section, we show that the quantization noise at test time results in larger expected 
 mean-squared error, in the context of kernel ridge regression.
 
@@ -485,8 +486,7 @@ first quantize $x$, $W$, and $b$, as $\tx$, $\tW$, $\tb$.  Then, compute $\cos(\
 One important thing to note is that quantizing $x$,$W$, and $b$ in such a way that $\expect{\tx,\tW,\tb}{\tW^T\tx + \tb} = W^Tx+b$ does \textit{not} mean that $\expect{\tx,\tW,\tb}{\cos(\tW^T\tx + \tb)} = \cos(W^Tx + b)$.  Thus, features generated in this way would not necessarily produce unbiased estimates of the kernel function, which satisfy $\expect{}{z(x)^Tz(y)} = k(x,y)$.
 
 \noindent \textbf{Open Question}: Is there anything we can prove about computing low-precision features in the above manner? Would they perform well empirically?
-\section{Experiments}
-\label{sec:experiments}
+
 \input{experiments}
 
 %(z_x+\teps_x)(z_y+\teps_y)$, where $\teps_x \sim X_{z_x}^{-\sq,\sq}$, and $\teps_y \sim X_{z_y}^{-\sq,\sq}$.
