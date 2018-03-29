@@ -47,6 +47,7 @@
 \newtheorem{theorem}{Theorem}[section]
 \newtheorem{corollary}{Corollary}[theorem]
 \newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
 \input{__macros}
 \begin{document}
 
@@ -75,105 +76,18 @@ When using $b$-bits to represent values in the interval $[-\sqrt{2/m},\sqrt{2/m}
 	\item What can we say about the variance of these low-precision features, in their approximation of the kernel?  Concentration inequalities?
 	\item Can we analyze the generalization performance of these features?
 	\item Is there an optimal level of precision, with regard to achieving the best kernel approximation performance, or generalization performance, under a fixed memory budget?
-	\item How should model training be performed on top of these low-precision features? Can we train in low-precision, and if so, what would the effects of such a training scheme be on the performance of the model?
+	\item How should models be trained on top of these low-precision features? Can we train in low-precision, and if so, what would the effects of such a training scheme be on the performance of the model?
 \end{itemize}
-
-%I will now present some initial theoretical results.  In the section below, assume that $Q_b:\RR\rightarrow\RR$ is a random quantization function which quantizes the interval $[-\sq,\sq]$ into $b$ bits, with the property that $\expect{}{Q_b(z)} = z \; \forall b,z$.  Given this quantization, we will define a ``quantization interval'' to be the set of points between two consecutive quantized values.
-%%For $z\in [-\sq,\sq]$, let $\ulq(z)$ be the ``bottom'' of the quantization interval containing $z$, let $\olq(z)$ denote the ``top'' of this interval.
-%
-%\subsection{Initial Theoretical Results}
-%\begin{itemize}
-%%	\item \noindent\textbf{Definitions}: For $z \in [a,c]$, let $X_z^{a,c}$ be the random variable which with probability $\frac{z-a}{c-a}$ equals $c-z$, and with probability $\frac{c-z}{c-a}$ equals $a-z$. Furthermore, let $Q^{a,c}(z) = z + X_z^{a,c} \in \{a,c\}$ be the ``quantized'' version of $z$, corresponding to randomized rounding to $a$ or $c$.
-%	\item \noindent\textbf{Proposition 1}: Let $Q$ be any unbiased quantization function with bounded variance ($\expect{}{Q(z)} = z$, $\var{}{Q(z)} \leq \tsigma^2$ for any $z$).  Let $S=Z_x Z_y$, $T = Q(Z_x)Q(Z_y)$, and $(S_1,\ldots,S_n)$, $(T_1,\ldots,T_n)$ be a random sequence of i.i.d. draws from $S$ and $T$ respectively.  Define $\bar{S}_n = \frac{1}{n}\sum_{i=1}^n S_i$, and $\bar{T}_n =  \frac{1}{n}\sum_{i=1}^n T_i$, to be the empirical mean of these draws.  It follows that $\expect{}{\bS_n} = \expect{}{\bT_n} = k(x,y)$, and that
-%	$\var{}{\bS_n} = \frac{\sigma^2}{n}$, and $\var{}{\bT_n} \leq \frac{2\tsigma^2 + \tsigma^4 +  \sigma^2}{n}$.  Furthermore, in the context of using random rounding for random Fourier features, $\tsigma^2 \leq \frac{2}{(2^b-1)^2}$. 
-%	\item \textbf{Proposition 2} (Concentration bounds for LP-RFF): For a fixed $x,y\in\cX$, let $S$ be any random variable with the property that $\expect{}{S} = k(x,y)$, and $S \in [-2,2]$.\footnote{$S=Q_b(\sq\cos(w^Tx+b))Q_b(\sq\cos(w^Ty+b))$ satisfies these conditions.}  Let $(S_1,\ldots,S_n)$, be a random sequence of i.i.d. draws from $S$, and let $\bS_n = \frac{1}{n}\sum_{i=1}^n S_i$ be the empirical mean of this sequence.  Then, it follows directly from Hoeffding's inequality that $\Prob{\big[|\bS_n - k(x,y)| \geq \epsilon\big]} \leq 2\exp(-n\eps^2/8)$.
-%\end{itemize}
-%\subsubsection{Remarks}
-%\begin{enumerate}
-%\item To better understand Proposition 1, we now plot upper bounds for $\frac{\sigma^2}{n}$ and $\frac{\sigma^2 + \tsigma^2}{n}$, using $\sigma^2\leq 1$, and $\tsigma^2 \leq  \frac{2}{(2^b-1)^2}$; we use a log-log plot, and plot these upper bounds for various values of $b$ and $n$.\\
-%**OUTDATED**
-%\begin{center}
-%	\includegraphics[width=0.6\textwidth]{lprff_variance_figure_numbits.jpg}
-%\end{center}
-%As you can see, lowering the precision helps reduce the variance by approximately a full order of magnitude ($10\times$ smaller variance) for a fixed number of bits, with $b=2$ giving the lowest variance, and $b=32$ variance matching the full-precision line (they are overlapping in the figure).  In the plot below, we show the kernel approximation variance as a function of the number of features.  As you can see, using $1$ bit per feature gives a noticeable jump in variance, but all other higher precision features perform comparably to the full-precision random features.
-%**OUTDATED**
-%\begin{center}
-%	\includegraphics[width=0.6\textwidth]{lprff_variance_figure_numfeat.jpg}
-%\end{center}
-% FIGURES
-%figure; hold on;
-%n = 1:100000;
-%for b = [1,2,3,4,8,16,32]
-%plot(n,(  (1/2) + 2/(2^(2*b)-2^(b+1)+1)  ) ./ n,'LineWidth',2)
-%end
-%plot(n,0.5./n,'LineWidth',2)
-%lgd = legend('b=1','b=2','b=3','b=4','b=8','b=16','b=32','full-prec');
-%lgd.FontSize = 14;
-%xlabel('Total # features','FontSize',14)
-%ylabel('variance','FontSize',14)
-%title('Kernel approximation variance vs. number of features','FontSize',14)
-%set(gca,'yscale','log')
-%set(gca,'xscale','log')
-%
-%figure; hold on;
-%n = 1:100000;
-%for b = [1,2,3,4,8,16,32]
-%plot(n,(  (1/2) + 2/(2^(2*b)-2^(b+1)+1)  ) ./ ((32/b) * n),'LineWidth',2)
-%end
-%plot(n,0.5./n,'LineWidth',2)
-%lgd = legend('b=1','b=2','b=3','b=4','b=8','b=16','b=32','full-prec');
-%lgd.FontSize = 14;
-%xlabel('Total # bits / 32','FontSize',14)
-%ylabel('variance','FontSize',14)
-%title('Kernel approximation variance vs. memory usage','FontSize',14)
-%set(gca,'yscale','log')
-%set(gca,'xscale','log')
-%
-
-
-
-%\item It is important to note that Propositions 2 and 3 hold as a function of the number of low-precision features, and \textit{match} the bounds for the \textit{same number} of high-precision features.\footnote{Some care is needed for Proposition 3, because the set of functions $\cF_p$ we are considering is different than the one in the original.  I believe I can show that for a properly defined set of quantization functions, our $\cF_p$ is a superset of the original, though I may need to update the constant $C$.}  This is pretty amazing!
-%\end{enumerate}
-
-%\subsection{Open Questions}
-%\begin{enumerate}
-%	%\item Can we extend Claim 1 (Uniform convergence of Fourier features) from $[5]$ (Rahimi and Recht, 2007) to low-precision features $z(x)$, to prove that the probability that there exists $x,y\in\cX$ such that $|z(x)^Tz(y) -k(x,y)| \geq \eps$ is small?
-%	%\item Can we perform training in such a way that the learned weights are also low-precision?  What guarantees can we get with a training algorithm of this form?
-%	%\item How does the family of functions $\cF_p$ defined in Proposition 3 compare to the one in $[4]$ (Rahimi and Recht, 2008)?	
-%	%\item What can we say about the spectrum of the low-precision features relative to the full-precision features, and the exact kernel?  Results here would allow us to apply the ``fixed design'' linear regression analysis (from my other notes) here.
-%	%\item Can we use low-precision for $x$,$w$, and $b$ in the features $z(x) = \sq\cos(w^Tx+b)$?  What can we prove about this?
-%\end{enumerate}
-
-%\section{Motivation}
-%Random Fourier features are an effective way of scaling kernel methods to large datasets.  Unfortunately, this method often requires a very large number of features in order to attain strong performance.  For example, in my work in speech recognition, increasing the number of features from 100k to 400k continued to give meaningful improvements.  At this scale, the amount of memory and computation time required to train models becomes a big bottleneck. For example, the size of a GPU's global memory can limit the number of random features which can be used, if one would like to train the model fully on a single GPU.  
-%
-%Furthermore, in my work comparing random Fourier features and the \Nystrom method, I observed that using \textit{many} random Fourier features allows for approximating a larger portion of the kernel's spectrum, which appears to be important for attaining strong performance. This is in contrast to the \Nystrom method, which under a similar computational budget, computes fewer more expensive features; although these features approximate the kernel matrix very well, they are inherently limited in how many of the kernel's eigenvalues they can approximate.  The take-away here appears to be: many cheap features is better than fewer expensive features, even if those expensive features approximate the kernel matrix very well.
-%
-%In light of the computational bottleneck which arises when training models with very many random features, as well as the observation that using a large number of features is important for downstream performance (even if they have higher variance when approximating the kernel), I propose using \textit{low-precision} as a way to further scale these random feature methods.
-%Some challenges involved in implementing and analyzing this idea are as follows:
-%
-%\begin{enumerate}
-%	\item What are the trade-offs in deciding the number of bits of precision which should be used for the data, the random projection matrix, the random features, and the model parameters?  Can we effectively learn models on single-bit random features?
-%	\item If the model is stored in low-precision, what optimization algorithm should be used during training in order to make this possible?
-%	\item Will the final model be low-precision or high-precision?  Another way of asking this is: Is low-precision a trick to speed up the training of a full-precision model (as in HALP), or will the entire system be low-precision at both train and test time?
-%	\item How can we formalize the way the additional noise caused by quantization will affect the training of the model?  Can we use variance reduction techniques like SVRG to deal with this, like in HALP?
-%	\item Can we somehow use this additional randomness in the feature generation process in order to generate ``error bars'' in the estimates of the trained model (\eg, by evaluating the model on several random draws of the randomly quantized features for the same data point, in order to produce a distribution of predictions)?
-%\end{enumerate}
-%
-%I will now discuss a few ideas related to two aspects of this project: (1) computing the random features, and (2) training a model with these features.
-
 
 \section{Kernel Approximation Error for LP-RFF}
 \label{sec:kernel_approx}
-%\noindent\textbf{Definitions}: For $z \in [a,c]$, let $X_z^{a,c}$ be the random variable which with probability $\frac{z-a}{c-a}$ equals $c-z$, and with probability $\frac{c-z}{c-a}$ equals $a-z$. 
-%Furthermore, let $Q^{a,c}(z) = z + X_z^{a,c} \in \{a,c\}$ be the ``quantized'' version of $z$, corresponding to randomized rounding to $a$ or $c$.
 
 \subsection{Kernel Approximation Variance Analysis}
 \noindent\textbf{Definition}:  For $z \in [a,c]$, let $X_z^{a,c}$ be the random variable which with probability $\frac{z-a}{c-a}$ equals $c-z$, and with probability $\frac{c-z}{c-a}$ equals $a-z$.
 
 \begin{lemma}
 \label{lemma:qvar}
-$\expect{}{X_z^{a,c}} = 0$, and $\var{}{X_z^{a,c}} = (z-a)(c-z) \leq \frac{(c-a)^2}{4}$.
+$\expect{}{X_z^{a,c}} = 0$, and $\var{}{X_z^{a,c}} = (c-z)(z-a) \leq \frac{(c-a)^2}{4}$.
 \end{lemma}
 
 \begin{proof}
@@ -189,7 +103,7 @@ $\expect{}{X_z^{a,c}} = 0$, and $\var{}{X_z^{a,c}} = (z-a)(c-z) \leq \frac{(c-a)
 Now, setting the derivative to 0 gives $z^* = \frac{c+a}{2}$.  Thus, $\argmax_{z\in[a,c]} (c-z)(z-a) = \frac{c+a}{2}$, and $\max_{z\in[a,c]} (c-z)(z-a) = (c-\frac{c+a}{2})(\frac{c+a}{2}-a) = \frac{(c-a)^2}{4}$.
 \end{proof}
 
-% This theorem analyzes the variance of a single quantized random Fourier feature.
+% This lemma analyzes the variance of a single quantized random Fourier feature.
 \begin{lemma}
 \label{lemma:var1}
 For $x,y\in\cX$, assume we have random variables $Z_x,Z_y$ satisfying $\expect{}{Z_xZ_y} = k(x,y)$, and $\var{}{Z_x} = \var{}{Z_y} = \sigma^2$, and that $k(x,x) = k(y,y) = 1$.\footnote{For example, one specific instance of the random variables $Z_x,Z_y$ is given by random Fourier features, where $z_x = \sq\cos(w^Tx+b),z_y = \sq\cos(w^Ty+b)$, $z_x,z_y\in[-\sq,\sq]$, for random $w,b$.}  For any unbiased random quantization function $Q$ with bounded variance $\var{}{Q(z)} \leq \tsigma^2$ for any $z$, it follows that $\expect{}{Q(Z_x)Q(Z_y)} = k(x,y)$, and that $\var{}{Q(Z_x)Q(Z_y)} \leq 2\tsigma^2 + \tsigma^4 + \sigma^2$.
@@ -201,16 +115,14 @@ Let $Q(Z_x) = Z_x + \eps_x$, and $Q(Z_y) = Z_y + \eps_y$, where $\expect{}{\eps_
 \expect{}{Q(Z_x)Q(Z_y)} &=& \expect{}{(Z_x + \eps_x)(Z_y + \eps_y)} \\
 &=& \expect{}{Z_xZ_y + Z_y \eps_x + Z_x \eps_y + \eps_x \eps_y} \\
 &=& \expect{}{Z_xZ_y} \\
-&=& k(x,y).
-\end{eqnarray*}
-\begin{eqnarray*}
+&=& k(x,y).\\
 \var{}{Q(Z_x)Q(Z_y)} &=&  \expect{}{\Big(Q(Z_x)Q(Z_y) - k(x,y)\Big)^2} \\
 &=& \expect{}{\Big((Z_x + \eps_x)(Z_y + \eps_y) - k(x,y)\Big)^2} \\
 &=& \expect{}{\Big(Z_y \eps_x + Z_x\eps_y + \eps_x \eps_y +  Z_xZ_y - k(x,y)\Big)^2} \\
 &=& \expect{}{\Big(Z_y \eps_x + Z_x\eps_y + \eps_x \eps_y\Big)^2} +  \expect{}{\Big(Z_xZ_y - k(x,y)\Big)^2} \\
 &=& \expect{}{Z_y^2 \eps_x^2 + Z_x^2\eps_y^2 + \eps_x^2 \eps_y^2} +  \sigma^2 \\
 &\leq& k(y,y) \tsigma^2 + k(x,x) \tsigma^2 + \tsigma^4 +  \sigma^2 \\
-&\leq& 2\tsigma^2 + \tsigma^4 +  \sigma^2. 
+&=& 2\tsigma^2 + \tsigma^4 +  \sigma^2. 
 \end{eqnarray*}
 \end{proof}
 
@@ -227,21 +139,24 @@ $\var{}{\bS_n} = \frac{\sigma^2}{n}$, and $\var{}{\bT_n} \leq \frac{2\tsigma^2 +
 &=& n \cdot \frac{\sigma^2}{n^2} \\
 &=& \frac{\sigma^2}{n}
 \end{eqnarray*}
-The result for $\var{}{\bT_n}$ follows in the same way, using the result from Theorem \ref{lemma:var1}.
+The result for $\var{}{\bT_n}$ follows in the same way, using the result from Lemma \ref{lemma:var1}.
 \end{proof}
 
 I will now discuss a concentration bound for these low-precision random features:\\
 \begin{theorem}
-For a fixed $x,y\in\cX$, let $S$ be any random variable with the property that $\expect{}{S} = k(x,y)$, and $S \in [-2,2]$.  Let $(S_1,\ldots,S_n)$, be a random sequence of i.i.d. draws from $S$, and let $\bS_n = \frac{1}{n}\sum_{i=1}^n S_i$ be the empirical mean of this sequence.  Then, it follows directly from Hoeffding's inequality that $\Prob{\big[|\bS_n - k(x,y)| \geq \epsilon\big]} \leq 2\exp(-n\eps^2/8)$.
+For a fixed $x,y\in\cX$, let $T$ be any random variable with the property that $\expect{}{T} = k(x,y)$, and $T \in [-2,2]$.\footnote{Note that this holds for quantized random Fourier features, where $T = Q(Z_x)Q(Z_y)$, and $Z_x = \sqrt{2}\cos(w^Tx+b)$.}  Let $(T_1,\ldots,T_n)$, be a random sequence of i.i.d. draws from $T$, and let $\bT_n = \frac{1}{n}\sum_{i=1}^n T_i$ be the empirical mean of this sequence.  Then, for any $\eps > 0$, $$\Prob{\big[|\bT_n - k(x,y)| \geq \epsilon\big]} \leq 2\exp(-n\eps^2/8).$$
 \end{theorem}
+\begin{proof}
+	This follows directly from Hoeffding's inequality.
+\end{proof}
 
 \noindent\textbf{Open Question}: Can Claim 1 (uniform convergence) from Rahimi and Recht [5] be adapted to this low-precision setting?
 
 \subsubsection{Further analysis of variance}
-In this section, we dig deeper into the bounds proven in \ref{thm:varn}, to understand whether under a fixed memory budget, we can attain lower kernel approximation error by using LP-RFF.
+In this section, we dig deeper into the bounds proven in Theorem \ref{thm:varn}, to understand whether under a fixed memory budget, we can attain lower kernel approximation error by using LP-RFF.
 To do so, we will analyze the variance of using $\bS_n$ to approximate $k(x,y)$, relative to $\bT_{n*(32/b)}$.  This corresponds to comparing the variance of using $n$ ``full precision''  features (which we will assume are 32-bit), relative to using $n*(32/b)$ $b$-bit low-precision features. Note that both of these feature representations use the same total number of bits.  We will in this case assume we are using random Fourier features, and thus that
-$z_x,z_y \in [-\sq,\sq]$.  We will upper bound $\sigma^2$ in this context by $1$, given the results in $[3]$ for the RBF kernel.  Furthermore, it is important to note that the quantization noise $\tsigma^2$ is very much tied to the number of bits used to quantize the features $z_x$.  We will thus use $\tsigma_b^2$ to denote the variance introduced by quantizing into $b$-bits.  In this case, we divide the interval $[-\sq,\sq]$ into $2^b-1$ sub-intervals of equal size, and quantization is performed within each of these intervals; each interval is of size $r = \frac{2\sq}{2^b-1}$. 
-Thus, from Lemma \ref{lemma:qvar} the quantization error $\tsigma_b^2 \leq r^2/4 = \frac{2}{(2^b-1)^2}$.  This allows us to perform the comparison discussed above:
+$z_x,z_y \in [-\sq,\sq]$.  We will upper bound $\sigma^2$ in this context by $1$, given the results in $[3]$ for the RBF kernel.  Furthermore, it is important to note that the quantization noise $\tsigma^2$ is very much tied to the number of bits used to quantize the features $z_x$.  We will thus use $\tsigma_b^2$ to denote the variance introduced by quantizing into $b$-bits.  In this case, we divide the interval $[-\sq,\sq]$ into $2^b-1$ sub-intervals of equal size, and quantization is performed within each of these intervals; each interval is of size $\frac{2\sq}{2^b-1}$. 
+Thus, from Lemma \ref{lemma:qvar} the quantization error $\tsigma_b^2 \leq \frac{1}{4}\Big(\frac{2\sq}{2^b-1}\Big)^2 = \frac{2}{(2^b-1)^2}$.  This allows us to perform the comparison discussed above:
 
 \begin{eqnarray*}
 	\var{}{\bS_n} &=& \frac{\sigma^2}{n} \\
@@ -251,64 +166,71 @@ Thus, from Lemma \ref{lemma:qvar} the quantization error $\tsigma_b^2 \leq r^2/4
 	&\leq& \frac{\frac{4}{(2^b-1)^2} + \frac{4}{(2^b-1)^4} +  1}{n*(32/b)}\\
 \end{eqnarray*}
 
-We now plot these two upper bounds on a log-log plot, for various values of $b$ and $n$.\\
-**OUTDATED**\todo{should we remove this "OUTDATED" flag?}
-\begin{center}
-	\includegraphics[width=0.6\textwidth]{lprff_variance_figure.jpg}
-\end{center}
-As you can see, lowering the precision helps reduce the variance by approximately a full order of magnitude ($10\times$ smaller variance), with $b=2$ giving the lowest variance, and $b=32$ variance matching the full-precision line (they are overlapping in the figure).
+In Figure \ref{fig:kernel_approx_var}, we plot our upper bounds for the ``variance per feature'' (a), and ``variance per bit'' (b), on log-log plots, for various values of $b$ and $n$.
+In the left plot, we surprisingly see that for 4-bit precision and above, the ``variance per feature'' closely matches the full precision features.  In the right plot, we see that lowering the precision helps reduce the ``variance per bit'' by approximately a full order of magnitude, with $b=2$ giving the lowest variance, and full-precision giving the highest variance.  These results are validated empirically in Figure \ref{fig:kernel_and_l2} of Section \ref{sec:experiments}.
+
+\begin{figure}
+	\centering
+	\begin{tabular}{c c}
+		\includegraphics[width=0.4\textwidth]{figures/var_vs_numfeat.eps} &
+		\includegraphics[width=0.4\textwidth]{figures/var_vs_numbits.eps}  \\
+		(a) & (b) \\
+	\end{tabular}
+	\caption{Kernel Approximation Variance, as a function of the number of features used (a), and the amount of memory used (b).  Note that in the left plot, the 4-bit, 8-bit, 16-bit, and full-precision lines all overlap.}
+\label{fig:kernel_approx_var}
+\end{figure}
 
 \subsection{Spectrum of Low-Precision RFF}
 \label{sec:spectrum}
-In this section, we explain our empirical observation that the spectra of our kernel approximation matrices are much higher than the actual spectrum of the exact kernel matrix, in the case where we use 1, 2, or 4 bits to quantize our features.  If we consider the $n$ by $d$ RFF matrix $Z$, whose $i^{th}$ row is $z(x_i)$, and let $C$ denote the zero mean random quantization noise which is added to $Z$, it is easy to see that the kernel approximation matrix $(Z+C)(Z+C)^T$ has an elevated spetrum $\tlambda$, because:
-\begin{eqnarray*} 
-	\expect{}{\sum_i \tlambda_i} &=& \expect{}{trace[(Z+C)(Z+C)^T]} \\
-	&=& \expect{}{trace[ZZ^T] + trace[ZC^T] + trace[CZ^T] + trace[CC^T]}\\
-	&=& trace[ZZ^T] + \expect{}{trace[CC^T]} \\
-	&>& trace[ZZ^T] \\
-	&=& \expect{}{\sum_i \lambda_i}
-\end{eqnarray*}
+In this section, we analyze the effect that using low-precision has on the spectrum of the approximated kernel matrix.  We will be quantifying the size of the gap between the low-precision spectrum, and the full-precision spectrum.  We will now show that randomly quantizing an RFF matrix $Z$ with zero-mean noise ``elevates'' the spectrum of the quantized matrix (relative to the full precision matrix):
+\begin{proposition}
+	Let $Z$ be an $n$ by $d$ RFF matrix whose $i^{th}$ row is $z(x_i)$, and let $C$ denote the zero mean random quantization noise which is added to $Z$.  If $\lambda$ denotes the spectrum of $ZZ^T$, and $\tlambda$ denotes the spectrum of $(Z+C)(Z+C)^T$, it follows that $\expect{}{\sum_i \lambda_i} = n$, while $\expect{}{\sum_i \tlambda_i} \leq n + \frac{2n}{(2^b-1)^2}$.
+\end{proposition}
+\begin{proof}
+	\begin{eqnarray*}
+		\expect{}{\sum_i \lambda_i} &=& \expect{}{trace[ZZ^T]} \\
+		&=& \expect{}{\sum_i z(x_i)^Tz(x_i)}\\
+		&=& \sum_i k(x_i,x_i)\\
+		&=& n \\
+%		\expect{}{trace[ZZ^T]} &=& \expect{}{trace(USU^TUSU^T)}\\
+%		&=& \expect{}{trace(US^2U^T)}\\
+%		&=& \expect{}{\sum_i \lambda_i^2} \\
+		\expect{}{\sum_i \lambda_i} &=& \expect{}{trace((Z+C)(Z+C)^T)} \\
+		&=& 	\expect{}{trace(ZZ^T+CZ^T + ZC^T + CC^T)}  \\
+		&=& \expect{}{trace(ZZ^T)} + \expect{}{trace(CC^T)} \\
+		&=& n + \sum_i \expect{}{c_i^T c_i}, \;\;\text{where $c_i$ is the $i^{th}$ row of $C$}\\
+		&=& n + \sum_{i=1}^n \sum_{j=1}^d \expect{}{c_{ij}^2} \\
+		&\leq& n + nd\cdot \frac{2}{d(2^b-1)^2}\\
+		&=& n + \frac{2n}{(2^b-1)^2}
+	\end{eqnarray*}
+	Above, we use the fact that $\expect{}{c_{ij}^2} \leq \frac{1}{4}\bigg(\frac{2\sqrt{2/d}}{2^b-1}\bigg)^2 = \frac{2}{d(2^b-1)^2}$.
+\end{proof}
+
 Notice that the spectrum $\tlambda$ of $(Z+C)(Z+C)^T$ relates to the spectrum $\tsigma$ of $(Z+C)$ via $\tlambda_i = \tsigma_i^2$.  Thus, letting $\sigma$ denote the spectrum of $Z$, we have shown that
 $\expect{}{\sum_i \tsigma_i^2} > \sum_i \sigma_i^2$.  In other words, adding zero mean noise of any kind to a matrix elevates the $\ell_2$ norm of its spectrum.  This is intuitive because the noise will always increase the total weight on the diagonal of $ZZ^T$.
-More interestingly, however, we can also show that if we take two random draws $C$ and $D$ of the quantization noise, the spectrum of $(Z+C)(Z+D)^T$ is also elevated relative to $ZZ^T$, even though the expected value of the entries of the diagonal of this matrix are \textit{equal} to the entries of the $ZZ^T$ diagonal.  This is because we can write $(Z+C)(Z+D)^T = ZZ^T + CZ^T + ZD^T + CD^T = ZZ^T + N$, where $N = CZ^T + ZD^T + CD^T$ is zero mean noise.  Thus, just like the spectrum of $Z+C$ was higher than that of $Z$ because we added zero mean noise $C$ to it, the spectrum of $(Z+C)(Z+D)^T$ will be higher than that of $ZZ^T$ because we are adding zero mean noise $N$ to it.  We show this in more detail below:
 
+More interestingly, however, we can also show that if we take two random draws $C$ and $D$ of the quantization noise, the spectrum of $(Z+C)(Z+D)^T$ is also elevated relative to $ZZ^T$, even though the expected value of the entries of the diagonal of this matrix are \textit{equal} to the entries of the $ZZ^T$ diagonal.  This is because we can write $(Z+C)(Z+D)^T = ZZ^T + CZ^T + ZD^T + CD^T = ZZ^T + N$, where $N = CZ^T + ZD^T + CD^T$ is zero mean noise.  Thus, just like the spectrum of $Z+C$ was higher than that of $Z$ because we added zero mean noise $C$ to it, the spectrum of $(Z+C)(Z+D)^T$ will be higher than that of $ZZ^T$ because we are adding zero mean noise $N$ to it.  We show this in more detail in the proposition below:
+
+\begin{proposition}
+	Let $Z$ be an $n$ by $d$ RFF matrix whose $i^{th}$ row is $z(x_i)$, and let $C$, $D$ denote independent draws of zero mean random quantization noise of the same dimension as $Z$.  If $\lambda$ denotes the spectrum of $ZZ^T$, and $\tlambda$ denotes the spectrum of $(Z+C)(Z+D)^T$, it follows that 
+	$\expect{}{\sum_i \lambda_i^2} = n + \frac{n^2-n}{d}$, while 
+	$\expect{}{\sum_i \tlambda_i^2} \leq n + \frac{n^2-n}{d} +  \frac{4n^2}{d}\Big(\frac{1}{(2^b-1)^2} + \frac{1}{(2^b-1)^4}\Big)$.
+\end{proposition}
+\begin{proof}
+Letting $A = ZZ^T$ and $\tA = (Z+C)(Z+D)^T$, we derive the following:
 \begin{eqnarray*}
-	A &=& ZZ^T \\
-	&=& USU^T \\ %= \sum_i \lambda_i u_i u_i^T \\
-	trace(A^T A) &=& trace( USU^T U S U^T)\\
-	&=& trace( US^2 U^T) \\
-	&=& \sum_i{\lambda_i^2}\\
-	\tA &=& (Z+C)(Z+D)^T \\
-	%	    &=& VTV^T \\
-	\tA^T\tA &=& (Z+D)(Z+C)^T(Z+C)(Z+D)^T \\
-	&=& ZZ^TZZ^T + ZC^TCZ^T + DZ^TZD^T + DC^TCD^T + \text{zero-mean}\\ 
-	&=& A^TA + ZC^TCZ^T + DZ^TZD^T + DC^TCD^T + \text{zero-mean}\\ 
+	\expect{}{\sum_i{\lambda_i^2}} &=& 	\expect{}{trace(A^T A)} \\
+	&=& \expect{}{trace(ZZ^TZZ^T)}. \\
+	\expect{}{\sum_i{\tlambda_i^2}} &=& \expect{}{trace(\tA^T\tA)} \\
+	&=& \expect{}{trace((Z+D)(Z+C)^T(Z+C)(Z+D)^T)} \\
+	&=& \expect{}{trace(ZZ^TZZ^T + ZC^TCZ^T + DZ^TZD^T + DC^TCD^T + \text{zero-mean})}\\ 
+	&=& \expect{}{trace(ZZ^TZZ^T)} + \expect{}{trace(ZC^TCZ^T)} + \expect{}{trace(DZ^TZD^T)} + \expect{}{trace(DC^TCD^T)}\\
+	&=& \expect{}{trace(ZZ^TZZ^T)} + \expect{}{trace(ZC^TCZ^T)} + \expect{}{trace(ZD^TDZ^T)} + \expect{}{trace(DC^TCD^T)}\\
+	&=& \expect{}{trace(ZZ^TZZ^T)} + 2\expect{}{trace(ZC^TCZ^T)} + \expect{}{trace(DC^TCD^T)}.
 \end{eqnarray*}
-\begin{eqnarray*}
-	trace(\tA^T\tA) &=& trace(A^TA) + trace(ZC^TCZ^T) + trace(DZ^TZD^T) + trace(DC^TCD^T) + trace(\text{zero-mean})\\ 
-	&=& \sum_i \tilde{\lambda_i}^2\\
-	\expect{}{\sum_i \tilde{\lambda_i}^2} &=& \expect{}{trace(\tA^T\tA)} \\
-	&=& trace(A^TA) + \expect{}{trace(ZC^TCZ^T) + trace(DZ^TZD^T) + trace(DC^TCD^T)} + \expect{}{trace(\text{zero-mean})}\\
-	&=& trace(A^TA) + \expect{}{trace(ZC^TCZ^T) + trace(DZ^TZD^T) + trace(DC^TCD^T)}\\	
-	&\geq& trace(A^TA) \\
-	&=&  \sum_i{\lambda_i^2}. \\
-	%\expect{}{z^T \tA^T\tA z} &=& z^TA^TAz + \expect{}{z^T(ZC^TCZ^T + DZ^TZD^T + DC^TCD^T)z} + %\expect{}{z^T\text{zero-mean}z}\\ 
-	%&\geq& z^TA^TAz 
-\end{eqnarray*}
-%So taking $z = u_i$, we get $\|\tA u_i\|^2 \geq \|Au_i\|^2 = \lambda_i^2$.
-%Can we show $\tA-A$ is PSD?
-
-Now, we ask the following question: How large is the expected gap between $\expect{}{\sum_i \tilde{\lambda_i}^2}$ and $\sum_i{\lambda_i^2}$? To answer this, we consider the magnitude of 
-$\expect{}{trace(ZC^TCZ^T) + trace(DZ^TZD^T) + trace(DC^TCD^T)}$, relative to the magnitude of
-$\expect{}{trace[ZZ^TZZ^T]}$.  We begin by simply getting a simpler expression for $trace[AB^TBA^T]$ for
-arbitrary matrices $A$ and $B$.\\
-
-\noindent\textbf{Lemma}: $trace[AB^TBA^T] = \sum_{i,j=1}^n \sum_{k,\hk=1}^d a_{jk}a_{j\hk}b_{ik}b_{i\hk}$.\\
-
-\noindent \textbf{Proposition}:  $\expect{}{trace[ZZ^TZZ^T]} = n + \frac{n^2-n}{d}$, while 
-$\expect{}{trace(ZC^TCZ^T) + trace(DZ^TZD^T) + trace(DC^TCD^T)} = \frac{4n^2}{d(2^b-1)^2} + \frac{4n^2}{d(2^b-1)^4} = \frac{4n^2}{d}\Big(\frac{1}{(2^b-1)^2} + \frac{1}{(2^b-1)^4}\Big)$. \\
-
-\noindent \textit{Proof}:  We will use the above Lemma to compute expected values for $trace[ZZ^TZZ^T]$, $trace(ZC^TCZ^T)$, $trace(DZ^TZD^T)$, and $trace(DC^TCD^T)$.  This will directly prove the proposition.
+Now, we need to compute more precise values for the three terms in this expression.  For this purpose, we will repeatedly use the following fact, which applies to any matrices $A$, $B$ of equal dimensions:
+$$trace[AB^TBA^T] = \sum_{i,j=1}^n \sum_{k,\hk=1}^d a_{jk}a_{j\hk}b_{ik}b_{i\hk}.$$
+We will proceed one expression at a time:
 
 \begin{itemize}
 	\item Case 1: $A=B=Z$.
@@ -320,29 +242,28 @@ $\expect{}{trace(ZC^TCZ^T) + trace(DZ^TZD^T) + trace(DC^TCD^T)} = \frac{4n^2}{d(
 		&=& n + \frac{n^2-n}{d}.
 	\end{eqnarray*}
 	Above, we used the fact that $\expect{}{z_{ik}^2} = \expect{w_k,b_k}{\frac{2}{d}\cos(w_k^T x_i + b_k)^2} = \frac{k(x_i,x_i)}{d} = \frac{1}{d}$.
-	\item Case 2: $A=Z$, $B=C$ (or $A=D$ and $B=Z$).
+	\item Case 2: $A=Z$, $B=C$.
 	\begin{eqnarray*}
 		\expect{}{trace[ZC^TCZ^T]} &=& \sum_{i,j=1}^n \sum_{k,\hk=1}^d \expect{}{z_{jk}z_{j\hk}c_{ik}c_{i\hk}}\\	
 		&=& \sum_{i,j=1}^n \sum_{k=1}^d \expect{}{z_{jk}^2}\expect{}{c_{ik}^2}\\	
-		&\leq& \sum_{i,j=1}^n \sum_{k=1}^d \frac{1}{d}\cdot \frac{1}{4}\bigg(\frac{2\sqrt{2/d}}{2^b-1}\bigg)^2\\	
-		&=& n^2d \cdot \frac{1}{d}\cdot \frac{1}{4}\cdot \frac{8}{d(2^b-1)^2}\\	
-		&=& \frac{2n^2}{d(2^b-1)^2} \\
-		&=& O\Big(\frac{n^2}{d\cdot 2^{2b}}\Big).
-		%&\approx& \frac{2n^2}{d2^{2b}} \\
-		%&=& \frac{n^2}{d}\Big(2^{-2b+1}\Big) \\
+		&\leq& \sum_{i,j=1}^n \sum_{k=1}^d \frac{1}{d}\cdot \frac{2}{d(2^b-1)^2}\\	
+		&=& n^2d \cdot \frac{1}{d}\cdot \frac{2}{d(2^b-1)^2}\\	
+		&=& \frac{2n^2}{d(2^b-1)^2}.
 	\end{eqnarray*}
-	Above, we use the fact that $\expect{}{c_{ik}^2} \leq \frac{1}{4}\bigg(\frac{2\sqrt{2/d}}{2^b-1}\bigg)^2 = \frac{2}{d(2^b-1)^2}$, and that $\expect{}{z_{ik}^2} = \frac{1}{d}$.  Note that this bound also holds when $A=D$ and $B=Z$.
+	Above, we used the fact that $\expect{}{c_{ik}^2} \leq \frac{1}{4}\bigg(\frac{2\sqrt{2/d}}{2^b-1}\bigg)^2 = \frac{2}{d(2^b-1)^2}$, and that $\expect{}{z_{ik}^2} = \frac{1}{d}$.
 	\item Case 3: $A=C$, $B=D$.
 	\begin{eqnarray*}
 		\expect{}{trace[CD^TDC^T]} &=& \sum_{i,j=1}^n \sum_{k,\hk=1}^d \expect{}{c_{jk}c_{j\hk}d_{ik}d_{i\hk}}\\
 		&=& \sum_{i,j=1}^n \sum_{k=1}^d \expect{}{c_{jk}^2}\expect{}{d_{ik}^2}\\
-		&=& \sum_{i,j=1}^n \sum_{k=1}^d \bigg(\frac{2}{d(2^b-1)^2}\bigg)^2\\
+		&\leq& \sum_{i,j=1}^n \sum_{k=1}^d \bigg(\frac{2}{d(2^b-1)^2}\bigg)^2\\
 		&=& n^2d \cdot\frac{4}{d^2(2^b-1)^4}\\
-		&=& \frac{4n^2}{d(2^b-1)^4}\\
-		&=& O\Big(\frac{n^2}{d \cdot 2^{4b}}\Big).
+		&=& \frac{4n^2}{d(2^b-1)^4}.
 	\end{eqnarray*}
 \end{itemize}
-This concludes the proof.
+Combining these three results concludes the proof of the proposition.
+\end{proof}
+
+In Figures \ref{fig:spectrums} and \ref{fig:indep_quant} in Section \ref{sec:experiments} we validate these results empirically. We observe that the spectra of our kernel approximation matrices are much higher than the actual spectrum of the exact kernel matrix, in the case where we use 1, 2, or 4 bits to quantize our features.  We also observe that using $(Z+C)(Z+D)^T$ instead of $(Z+C)(Z+C)^T$ gives a smaller increase to the spectrum.
 
 \section{Generalization Performance of Low-Precision RFF}
 \label{sec:gen}
@@ -417,20 +338,49 @@ Let $z(x)$ denote the full precision RFF representation for $x$, and $Q(z(x)) = 
 	&=&  \expect{}{\Big(f_w(z(x)) - y\Big)^2}+ \sum_i w_i^2 \expect{}{\eps_{x,i}^2} \\
 	&=&  \expect{}{\Big(f_w(z(x)) - y\Big)^2}  + \|w\|^2\expect{}{\eps_{x,1}^2} \\
 	&\leq&  \expect{}{\Big(f_w(z(x)) - y\Big)^2} + \|w\|^2\tsigma^2.
-%	&\leq& \expect{}{(w^T z(x) - y)^2)} + \|w\|^2\cdot\frac{1}{4}\bigg(\frac{2\sqrt{2/d}}{2^b-1}\bigg)^2\\
-%	&=& \expect{}{(w^T z(x) - y)^2)} + \|w\|^2\cdot\frac{2}{d(2^b-1)^2}.
 \end{eqnarray*}
 \end{proof}
 This theorem shows that our expected error on a test point $(x,y)$, if we use quantized features at test time, is in expectation $\|w\|^2\tsigma^2$ larger than the expected error if we used the full precision features at test time.  In the case where $Q$ quantizes each feature into $b$ bits, $\tsigma^2= \frac{2}{m(2^b-1)^2}$.
 This suggests that it could be desirable, in certain contexts, to train using low precision (to speed up training), but use full precision features at test time.
 
-
 \subsection{Fixed Design Kernel Ridge Regression}
-Discuss results from other notes.
+``Fixed design'' linear regression is a particularly straightforward to analyze form of linear regression, in which the test points are the same as the training points; importantly, however, the training labels $y_i$, and test labels $y_i'$, are noisy, corresponding to zero-mean noise added to the unobserved ``true labels'' $y_i^*$. The noise values added to the labels are assumed to be uncorrelated with common variance $\sigma^2 > 0$.  In the case of kernel ridge regression, the learned classifier predicts regression values of $\hy = K(K+\lambda\id)^{-1}y = Ay$ on the training set, for $A=K(K+\lambda\id)^{-1}$.  Letting $K=U\Sigma U^T$, where $\sigma_i$ is the $i^{th}$ largest eigenvalue of $K$, and $U_i$ is the corresponding eigenvector, we have that $A = U\Gamma U^T$, with $\gamma_i = \frac{\sigma_i}{\sigma_i + \lambda}$.
 
-%We now discuss how to apply the result from Theorem 1 of Rahimi and Recht's 2008 paper to this low-precision setting [4].  That theorem assumes that there is a set of (deterministic) basis functions $\phi: \cX \times \Omega \rightarrow \RR$.  It then argues that if $\{w_1,\ldots,w_K\}$ are drawn independently from some distribution $p$ on $\Omega$, then the generalization performance of the model trained on the features $\phi(\;\cdot\;;w_i)$ is close to the best possible generalization performance of any model in the set $\cF_p = \{f(x) = \int_\Omega \alpha(w)\phi(x;w)dw | |\alpha(x)| \leq Cp(w)\}$.  Unfortunately, our randomly quantized features currently do not fit nicely into this framework, because the basis functions themselves are random, even for a fixed $x$ and $w$.  The purpose of the section below is to construct a parametrized set of basis functions $\phi(x;w,b,\theta)$ which quantize $\cos(w^Tx+b)$ in a deterministic way, given the parameters $\theta$.  
+In his course notes for Advanced Methods for Data Analysis [6], Ryan Tibshirani shows that the expected test error can be precisely calculated as a function of the training error, the variance $\sigma^2$ of the label noise, and the ``degrees of freedom'' of the classifier (which corresponds to the trace of $A$, when the classifier predicts $\hy = Ay$ on the training set).  The precise relation is as follows:
 
+\begin{eqnarray*}
+	\expect{}{\frac{1}{n}\sum_{i=1}^n (\hy_i - y_i')^2} &=& \expect{}{\frac{1}{n}\sum_{i=1}^n (\hy_i - y_i)^2} + \frac{2\sigma^2}{n}df(\hy)\\
+\end{eqnarray*}
 
+We now show that in the context of kernel ridge regression, the right hand side of this expression can be simplified to only depend on the eigenvalues and eigenvectors of $K$.
+
+\begin{proposition}
+	Letting $A=K(K+\lambda\id)^{-1}$, where $K=U\Sigma U^T$ is a kernel matrix with eigenvectors $U_i$ and eigenvalues $\sigma_i$, it holds that the expected test error in the context of fixed design linear regression can be expressed as follows:
+\begin{eqnarray*}
+	\expect{\epsilon,\epsilon'}{\frac{1}{n}\|A(y^*+\eps) - (y^*+\eps')\|^2} 
+	&=& \frac{1}{n}\sum_{i=1}^n \bigg(\frac{\sigma_i}{\sigma_i + \lambda}-1\bigg)^2 (U_i^T y^*)^2 + \frac{\sigma^2}{n}\sum_{i=1}^n \bigg(\frac{\sigma_i}{\sigma_i + \lambda}\bigg)^2 + \sigma^2,
+\end{eqnarray*}	
+\end{proposition}
+\begin{proof}
+We simplify the expression from Ryan Tibshirani's course notes, using the facts that $\hy = A(y^* + \eps)$, $y' = y + \eps'$, $A = U\Gamma U^T$ with $\gamma_i = \frac{\sigma_i}{\sigma_i + \lambda}$, and $df(\hy) = trace(A) = \sum_i \gamma_i = \sum_i \frac{\sigma_i}{\sigma_i + \lambda}$.
+
+\begin{eqnarray*}
+	\expect{\epsilon,\epsilon'}{\frac{1}{n}\|A(y^*+\eps) - (y^*+\eps')\|^2} 
+	&=& \expect{\epsilon}{\frac{1}{n}\|A(y^*+\eps) - (y^*+\eps)\|^2} + \frac{2\sigma^2}{n}df(\hy) \\
+	&=& \frac{1}{n}\expect{\epsilon}{\|(A-\id)(y^*+\eps)\|^2} + \frac{2\sigma^2}{n}Tr(A) \\
+	&=& \frac{1}{n}\expect{\epsilon}{\|U(\Gamma-\id)U^T(y^*+\eps)\|^2} + \frac{2\sigma^2}{n}Tr(A) \\
+	&=& \frac{1}{n}\expect{\epsilon}{(y^*+\eps)^TU(\Gamma-\id)U^TU(\Gamma-\id)U^T(y^*+\eps)} + \frac{2\sigma^2}{n}Tr(A) \\
+	&=& \frac{1}{n}\expect{\epsilon}{Tr\bigg((y^*+\eps)^TU(\Gamma-\id)^2 U^T(y^*+\eps)\bigg)} + \frac{2\sigma^2}{n}Tr(A) \\
+	&=& \frac{1}{n}\expect{\epsilon}{Tr\bigg(U(\Gamma-\id)^2 U^T(y^*+\eps)(y^*+\eps)^T\bigg)} + \frac{2\sigma^2}{n}Tr(A) \\
+	&=& \frac{1}{n}\expect{\epsilon}{Tr\bigg(U(\Gamma-\id)^2 U^T(y^* y^{*T} + \eps y^{*T} + y^*\eps^T + \eps \eps^T\bigg)} + \frac{2\sigma^2}{n}Tr(A) \\
+	&=& \frac{1}{n}Tr\bigg(U(\Gamma-\id)^2 U^T\Big(y^* y^{*T} + \expect{\epsilon}{ \eps \eps^T}\Big)\bigg) + \frac{2\sigma^2}{n}Tr(A) \\
+	&=& \frac{1}{n}Tr\bigg(U(\Gamma-\id)^2 U^T\Big(y^* y^{*T} + \sigma^2 \id \Big)\bigg) + \frac{2\sigma^2}{n}Tr(A) \\
+	&=& \frac{1}{n}Tr\bigg((\Gamma-\id)^2 U^T y^* (U^T y^*)^T\bigg)  + \frac{\sigma^2}{n}Tr\bigg((\Gamma-\id)^2\bigg) + \frac{2\sigma^2}{n}Tr(U\Gamma U^T) \\
+	&=& \frac{1}{n}\sum_{i=1}^n (\gamma_i-1)^2 (U_i^T y^*)^2 + \frac{\sigma^2}{n}\sum_{i=1}^n (\gamma_i-1)^2 + \frac{2\sigma^2}{n}\sum_{i=1}^n \gamma_i\\
+	&=& \frac{1}{n}\sum_{i=1}^n (\gamma_i-1)^2 (U_i^T y^*)^2 + \frac{\sigma^2}{n}\sum_{i=1}^n \Big(\gamma_i^2 -2\gamma_i + 1 + 2\gamma_i\Big) \\
+	&=& \frac{1}{n}\sum_{i=1}^n (\gamma_i-1)^2 (U_i^T y^*)^2 + \frac{\sigma^2}{n}\sum_{i=1}^n \gamma_i^2 + \sigma^2
+\end{eqnarray*}
+\end{proof}
 
 \section{Training a model using low-precision random features}
 \label{sec:train}
@@ -498,5 +448,6 @@ $[2]$ CoCoA: A General Framework for Communication-Efficient Distributed Optimiz
 Virginia Smith, Simone Forte, Chenxin Ma, Martin Takac, Michael I. Jordan, Martin Jaggi.  \url{https://arxiv.org/abs/1611.02189} \\
 $[3]$ On the Error of Random Fourier Features. Dougal J. Sutherland, Jeff Schneider. UAI 2015. \url{https://arxiv.org/abs/1506.02785}\\
 $[4]$ Weighted Sums of Random Kitchen Sinks: Replacing minimization with randomization in learning. Ali Rahimi, Ben Recht. NIPS 2008.\\
-$[5]$	Random Features for Large-Scale Kernel Machines. Ali Rahimi, Benjamin Recht. NIPS 2007:
+$[5]$	Random Features for Large-Scale Kernel Machines. Ali Rahimi, Benjamin Recht. NIPS 2007.\\
+$[6]$  Course Notes: Advanced Methods for Data Analysis, Carnegie Mellon University.  Ryan Tibshirani, Spring 2014. \url{http://www.stat.cmu.edu/~ryantibs/advmethods/notes/df.pdf}
 \end{document}
