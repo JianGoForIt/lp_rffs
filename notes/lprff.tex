@@ -344,6 +344,7 @@ This theorem shows that our expected error on a test point $(x,y)$, if we use qu
 This suggests that it could be desirable, in certain contexts, to train using low precision (to speed up training), but use full precision features at test time.
 
 \subsection{Fixed Design Kernel Ridge Regression}
+\label{sec:fixed_design}
 ``Fixed design'' linear regression is a particularly straightforward to analyze form of linear regression, in which the test points are the same as the training points; importantly, however, the training labels $y_i$, and test labels $y_i'$, are noisy, corresponding to zero-mean noise added to the unobserved ``true labels'' $y_i^*$. The noise values added to the labels are assumed to be uncorrelated with common variance $\sigma^2 > 0$.  In the case of kernel ridge regression, the learned classifier predicts regression values of $\hy = K(K+\lambda\id)^{-1}y = Ay$ on the training set, for $A=K(K+\lambda\id)^{-1}$.  Letting $K=U\Sigma U^T$, where $\sigma_i$ is the $i^{th}$ largest eigenvalue of $K$, and $U_i$ is the corresponding eigenvector, we have that $A = U\Gamma U^T$, with $\gamma_i = \frac{\sigma_i}{\sigma_i + \lambda}$.
 
 In his course notes for Advanced Methods for Data Analysis [6], Ryan Tibshirani shows that the expected test error can be precisely calculated as a function of the training error, the variance $\sigma^2$ of the label noise, and the ``degrees of freedom'' of the classifier (which corresponds to the trace of $A$, when the classifier predicts $\hy = Ay$ on the training set).  The precise relation is as follows:
