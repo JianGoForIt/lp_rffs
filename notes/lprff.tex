@@ -68,7 +68,8 @@ When using $b$-bits to represent values in the interval $[-\sqrt{2/m},\sqrt{2/m}
 	\item Section \ref{sec:kernel_approx}: Analysis of kernel approximation error.
 	\item Section \ref{sec:gen}: Analysis of generalization performance.
 	\item Section \ref{sec:train}: Training in low-precision.
-	\item Section \ref{sec:experiments}: Experiments
+	\item Section \ref{sec:experiments}: Experiments.
+	\item Section \ref{sec:future}: Future Directions.
 \end{itemize}
 
 \noindent \textbf{Main questions}:
@@ -77,6 +78,7 @@ When using $b$-bits to represent values in the interval $[-\sqrt{2/m},\sqrt{2/m}
 	\item Can we analyze the generalization performance of these features?
 	\item Is there an optimal level of precision, with regard to achieving the best kernel approximation performance, or generalization performance, under a fixed memory budget?
 	\item How should models be trained on top of these low-precision features? Can we train in low-precision, and if so, what would the effects of such a training scheme be on the performance of the model?
+	\item Can we achieve better performance per bit, if we use \textit{variable precision} to store the random Fourier features (by storing directions of highest variance with more bits)?
 \end{itemize}
 
 \section{Kernel Approximation Error for LP-RFF}
@@ -307,6 +309,7 @@ with probability at least $1-2\delta$ over the training dataset and the choice o
 \noindent \textbf{Open Question}: How does the family of functions $\cF_p$ defined in Proposition 3 compare to the one in $[4]$ (Rahimi and Recht, 2008)?	
 
 \subsection{``Deterministic'' Quantization Functions}
+\label{sec:deterministic}
 In Theorem \ref{thm:gen}, we defined a set of deterministic quantization functions
 $\{Q_{\theta}:\RR\rightarrow\RR \;|\; \theta\in\Theta \}$, parameterized by some parameter $\theta\in\Theta$.
 We now discuss how to construct these.  The idea is simple: For every quantization interval $[a,c]$, we choose a threshold value $t \in [a,c]$ uniformly at random.  Then if a certain unquantized feature $z$ falls in this interval, we will set $Q_t(z)= a$ if $z \leq t$, and $Q_t(z) = c$ if $z > t$.  It is easy to show that $\expect{t}{Q_t(z)} = z$:
@@ -345,6 +348,8 @@ This suggests that it could be desirable, in certain contexts, to train using lo
 
 \subsection{Fixed Design Kernel Ridge Regression}
 \label{sec:fixed_design}
+In this section, we will show, in the context of ``fixed design'' linear regression, that the generalization performance of the model depends deeply on the spectrum of the kernel matrix (or kernel approximation matrix) used to train the model.
+
 ``Fixed design'' linear regression is a particularly straightforward to analyze form of linear regression, in which the test points are the same as the training points; importantly, however, the training labels $y_i$, and test labels $y_i'$, are noisy, corresponding to zero-mean noise added to the unobserved ``true labels'' $y_i^*$. The noise values added to the labels are assumed to be uncorrelated with common variance $\sigma^2 > 0$.  In the case of kernel ridge regression, the learned classifier predicts regression values of $\hy = K(K+\lambda\id)^{-1}y = Ay$ on the training set, for $A=K(K+\lambda\id)^{-1}$.  Letting $K=U\Sigma U^T$, where $\sigma_i$ is the $i^{th}$ largest eigenvalue of $K$, and $U_i$ is the corresponding eigenvector, we have that $A = U\Gamma U^T$, with $\gamma_i = \frac{\sigma_i}{\sigma_i + \lambda}$.
 
 In his course notes for Advanced Methods for Data Analysis [6], Ryan Tibshirani shows that the expected test error can be precisely calculated as a function of the training error, the variance $\sigma^2$ of the label noise, and the ``degrees of freedom'' of the classifier (which corresponds to the trace of $A$, when the classifier predicts $\hy = Ay$ on the training set).  The precise relation is as follows:
@@ -383,51 +388,39 @@ We simplify the expression from Ryan Tibshirani's course notes, using the facts 
 \end{eqnarray*}
 \end{proof}
 
+This result shows the fundamental relationship between the spectrum of the kernel matrix, and the generalization performance of the regression model.
 \section{Training a model using low-precision random features}
 \label{sec:train}
-In this section, we address the question of how to train a model using low-precision random features as input.  Essentially, this comes down to training a linear model on top of random features $\tz$ such that $\expect{}{\tz} = z$.  One potentially
-great option is to use ``LM-HALP'', the version of HALP designed for learning linear models, presented as Algorithm 4 in the
-recent submission.  One potential down-side to this approach is that it would mean that the learned model would be
-full-precision, which may or may not be desirable (for example, computing the full-precision gradient over the entire dataset
-could be prohibitively expensive, and perhaps even impossible in the case where the full-precision model doesn't fit in
-memory).  Note that any of the options below which use low-precision for both train/test would be inherently limited in terms of
-how close to the global optimum they could get, as discussed in the HALP paper.  Perhaps, however, the error introduced by this
-quantization could be more than made-up for by the ability to learn a model in a higher-dimensional, more expressive, feature
-space.  We present some alternative options to LM-HALP below:
+In this section, we present several possible ways of training a model on top of low-precision random Fourier features.  Importantly, any of the options outlined below which uses low-precision for both train/test would be inherently limited in terms of how close to the global optimum they could get, as discussed in the recent High-Accuracy Low-Precision Training paper $[7]$.  Perhaps, however, the error introduced by this quantization could be more than made-up for by the ability to learn a model in a higher-dimensional, more expressive, feature space.
+
 \begin{itemize}
-	\item \textbf{Perceptron updates}: We could use the perceptron algorithm for model updates, 
-	which would ensure that all operations could be done in integer arithmetic.
-	\item\textbf{ Quantized SGD updates (``LP-SGD'')}: Consider the full-precision SGD update of
-	the form $w_{t+1} = w_t + g_t z_t$, where $z_t = z(x_t) \in \RR^m$ is the random
-	feature representation corresponding to the randomly chosen training point $x_t$ at
-	time $t$.  We could replace this update by updates of the form 
-	$w_{t+1} = w_t + \tg_t \tz_t$, where $\expect{}{\tg_t} = g_t$, and $\tg_t$ is stored in
-	low-precision format.  For example, in the case of logistic regression, 
-	$g_t = \eta \big(y_t - p_t\big)$, where $y_t\in\{0,1\}$ is the label for $x_t$, $\eta \in \RR$ is the learning
-	rate, and $p_t = p(Y_t=1|z_t,w_t) = (1+\exp(-w_t^Tz_t))^{-1}$.  So in the case where $y_t = 1$,
-	$\tg_t$ could be equal to $1$ with probably $1-p_t$, and 0 otherwise; and in the case
-	where $y_t = 0$, $\tg_t$ could be equal to $-1$ with probability $p_t$, and 0
-	otherwise.  Here, I am assuming that $\eta$ is stored in the scale factor $\delta$
-	of the low-precision format $(\delta,b)$ for $\tg_t$.	
-	If $\tg_t$ is in $(\delta,b)$ low-precision format, and $\tz_t$ is in
-	$(\delta',b')$ format, then $w_t$ would be in $(\delta\delta',b+b')$ format.
-	Note also that computing $p_t$ requires using the $\exp(\cdot)$
-	and $(\cdot)^{-1}$ operations, which would probably need to be done as floating point
-	operations.
-	\item \textbf{LP-SVRG}: We could directly use LP-SVRG.
-	\item \textbf{Update dual variables instead of primal}: In terms of the dual variables $\alpha_i$, the
-	model becomes $f(x) = \sum_{i=1}^n \alpha_i z(x_i)^T z(x)$. Letting 
-	$Z\in \RR^{n\times m}$ be the matrix whose $i^{th}$ row is $z(x_i)$, this can be
-	rewritten as $\alpha^T (Z z(x))$.  If the random features are binary, $Zz(x)$ 
-	can be implemented very efficiently, and its output is an integer vector (note that for huge $Z$,
-	this operation can be distributed across a cluster of machines).
-	If $\alpha$ is stored in low-precision format (as it would be if updates of the form described above
-	for perceptron or LP-SGD are used), this dot-product could be performed using low-precision
-	integer arithmetic, which can also be implemented fast.  As far as updating the values of
-	the dual parameters $\alpha_i$ during training, we can simply simulate the primal updates of the form 
-	$w_{t+1} = w_t + \tg_t z_t$ by using $\alpha_t = \alpha_t + \tg_t$, where here I am using 
-	$\alpha_t$ to denote the dual parameter corresponding to the random point $x_t$ chosen at time $t$.
-	\item \textbf{Distributed optimization}: We could also consider large-scale distribution optimization algorithms (\eg, $[1,2]$) in order to speed up training.
+\item \textbf{LM-HALM}: `LM-HALP'' is the version of HALP designed for learning linear models, presented as Algorithm 4 in $[7]$. One potential down-side to this approach is that it would mean that the learned model would be full-precision, which may or may not be desirable (for example, computing the full-precision gradient over the entire dataset could be prohibitively expensive, and perhaps even impossible in the case where the full-precision model wouldn't fit in memory).
+\item \textbf{Perceptron updates}: We could use the perceptron algorithm for model updates, 
+which would ensure that all operations could be done in integer arithmetic.
+\item\textbf{Quantized SGD updates (``LP-SGD'')}: Consider the full-precision SGD update of
+the form $w_{t+1} = w_t + g_t z_t$, where $z_t = z(x_t) \in \RR^m$ is the random
+feature representation corresponding to the randomly chosen training point $x_t$ at
+time $t$.  We could replace this update by updates of the form 
+$w_{t+1} = w_t + \tg_t \tz_t$, where $\expect{}{\tg_t} = g_t$, and $\tg_t$ is stored in
+low-precision format.  For example, in the case of logistic regression, 
+$g_t = \eta \big(y_t - p_t\big)$, where $y_t\in\{0,1\}$ is the label for $x_t$, $\eta \in \RR$ is the learning
+rate, and $p_t = p(Y_t=1|z_t,w_t) = (1+\exp(-w_t^Tz_t))^{-1}$. 
+If $\tg_t$ is in $(\delta,b)$ low-precision format, and $\tz_t$ is in
+$(\delta',b')$ format, then $w_t$ would be in $(\delta\delta',b+b')$ format.
+\item \textbf{LP-SVRG}: We could directly use LP-SVRG.
+\item \textbf{Update dual variables instead of primal}: In terms of the dual variables $\alpha_i$, the
+model becomes $f(x) = \sum_{i=1}^n \alpha_i z(x_i)^T z(x)$. Letting 
+$Z\in \RR^{n\times m}$ be the matrix whose $i^{th}$ row is $z(x_i)$, this can be
+rewritten as $\alpha^T (Z z(x))$.  If the random features are binary, $Zz(x)$ 
+can be implemented very efficiently, and its output is an integer vector (note that for huge $Z$,
+this operation can be distributed across a cluster of machines).
+If $\alpha$ is stored in low-precision format (as it would be if updates of the form described above
+for perceptron or LP-SGD are used), this dot-product could be performed using low-precision
+integer arithmetic, which can also be implemented fast.  As far as updating the values of
+the dual parameters $\alpha_i$ during training, we can simply simulate the primal updates of the form 
+$w_{t+1} = w_t + \tg_t z_t$ by using $\alpha_t = \alpha_t + \tg_t$, where here I am using 
+$\alpha_t$ to denote the dual parameter corresponding to the random point $x_t$ chosen at time $t$.
+\item \textbf{Distributed optimization}: We could also consider large-scale distribution optimization algorithms (\eg, $[1,2]$) in order to speed up training.
 \end{itemize}
 
 
@@ -440,6 +433,15 @@ One important thing to note is that quantizing $x$,$W$, and $b$ in such a way th
 
 \input{experiments}
 
+\section{Future Directions}
+\label{sec:future}
+The next directions we plan to explore are as follows:
+\begin{enumerate}
+\item \textbf{Variable Precision}:  Storing the higher variance directions in the RFF feature space with more bits.  We also want to think more deeply about how to integrate the matrix factorization results into the kernel approximation context, perhaps in the context of the Nystrom method.
+\item \textbf{Deterministic Rounding}: Testing the deterministic rounding ideas from Section \ref{sec:deterministic} empirically.
+\item \textbf{Fixed Design Linear Regression}: Running controlled experiments in the fixed design context, to more precisely understand the effect the different approximate spectra are having on generalization performance.
+\item \textbf{Training with LP-RFF}: Developing theoretically sound and fast algorithms for training using low-precision features.
+\end{enumerate}
 %(z_x+\teps_x)(z_y+\teps_y)$, where $\teps_x \sim X_{z_x}^{-\sq,\sq}$, and $\teps_y \sim X_{z_y}^{-\sq,\sq}$.
 %Then $\var{}{\tS} = 4 - z_x^2 z_y^2$.
 \section{References}
@@ -450,5 +452,7 @@ Virginia Smith, Simone Forte, Chenxin Ma, Martin Takac, Michael I. Jordan, Marti
 $[3]$ On the Error of Random Fourier Features. Dougal J. Sutherland, Jeff Schneider. UAI 2015. \url{https://arxiv.org/abs/1506.02785}\\
 $[4]$ Weighted Sums of Random Kitchen Sinks: Replacing minimization with randomization in learning. Ali Rahimi, Ben Recht. NIPS 2008.\\
 $[5]$	Random Features for Large-Scale Kernel Machines. Ali Rahimi, Benjamin Recht. NIPS 2007.\\
-$[6]$  Course Notes: Advanced Methods for Data Analysis, Carnegie Mellon University.  Ryan Tibshirani, Spring 2014. \url{http://www.stat.cmu.edu/~ryantibs/advmethods/notes/df.pdf}
+$[6]$  Course Notes: Advanced Methods for Data Analysis, Carnegie Mellon University.  Ryan Tibshirani, Spring 2014. \url{http://www.stat.cmu.edu/~ryantibs/advmethods/notes/df.pdf}\\
+$[7]$ High-Accuracy Low-Precision Training. Christopher De Sa, Megan Leszczynski, Jian Zhang, Alana Marzoev,
+Christopher Aberger, Kunle Olukotun, Christopher Re. \url{https://arxiv.org/pdf/1803.03383.pdf}
 \end{document}
