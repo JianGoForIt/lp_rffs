@@ -51,22 +51,38 @@ Furthermore, in~\ref{fig:kernel_and_l2} (b) and (d), we compare the performance 
 \label{subsubsec:bump_spectrum}
 \begin{figure}
 	\centering
-	\begin{tabular}{c c}
-		\includegraphics[width=.45\linewidth]{figures/spectrum_n_rff_8192.pdf} &
-		\includegraphics[width=.45\linewidth]{figures/different_spectrum_with_same_kernel_approx_error_log.pdf} \\
+	\begin{tabular}{c c c}
+		\includegraphics[width=.33\linewidth]{figures/spectrum_n_rff_8192.pdf} &
+		\includegraphics[width=.33\linewidth]{figures/different_spectrum_with_same_kernel_approx_error_log.pdf} &
+		\includegraphics[width=.33\linewidth]{figures/error_histogram.pdf} \\
 %		\includegraphics[width=.33\linewidth]{figures/different_spectrum_with_same_kernel_approx_error.pdf}\\
-		(a) & (b) %& (c)
+		(a) & (b) & (c)
 	\end{tabular}
-	\caption{Spectrum (eigen values) of the kernel matrix. (a) The spectrums from different precision representation is shown under 8192 random Fourier features. (b) Configurations with similar approximation errors can demonstrate very different spectrum; we compare the 1 bit representation to the full precision configurations giving 1) the highest approx. error that is lower than the 1 bit configuration 2) the lowest approx. error that is higher than the 1bit configuration.}
+	\caption{Spectrum (eigen values) of the kernel matrix. (a) The spectrums from different precision representation is shown under 8192 random Fourier features. (b) Configurations with similar approximation errors can demonstrate very different spectrum; we compare the 1 bit representation to the full precision configurations giving 1) the highest approx. error that is lower than the 1 bit configuration 2) the lowest approx. error that is higher than the 1bit configuration. (c) The histogram of per-entry kernel approximation error.}
 	\label{fig:spectrums}
 \end{figure}
+
+\begin{table}
+\centering
+	\begin{tabular}{c | c c}
+		& Relative kernel approx. error & Regression performance \\
+		\hline
+		exact kernel & $0$ & $2.86\times 10^{7}$ \\
+		1 bit RFF & $1.04\times 10^{-2}$ & $8.23\times 10^{7}$ \\
+		fp RFF upper bounded & $1.24\times 10^{-2}$ & $3.42\times 10^{7}$ \\
+		fp RFF lower bounded & $8.70\times 10^{-3}$ & $3.17\times 10^{7}$\\
+		\hline
+	\end{tabular}
+	\caption{The kernel approximation error and regression performance (validation L2 loss) from the 4 models in Figure~\ref{fig:spectrums} (b). Similar kernel approximation errors do not always imply similar regression performance.}
+\end{table}
+
 
 In our theory in Section~\ref{sec:spectrum}, we have been discussing how low precision introduce quantization variance, which results in bumping up the spectrum of kernel matrix. To empirically support our analysis on the spectrums, in Figure~\ref{fig:spectrums} (a), we demonstrate the kernel matrix spectrum from 8192 random Fourier features in different precision. 
 More specifically, we approximate the kernel matrix with $\bm{K}'=\tilde{\bm{Z}}\tilde{\bm{Z}}^T$ where $\tilde{\bm{Z}}=Q(\bm{Z})$ is the quantized version of random Fourier feature $\bm{Z}$. This quantization approach corresponds to the case where $\bm{K}'=(\bm{Z} + \bm{C})(\bm{Z} + \bm{C})^T$ in Section~\ref{sec:spectrum}; it imposes the same noise on the feature matrix $\bm{Z}$ and its transpose.
 %Note in this section, we discuss the case where the feature matrix and its transpose are quantized to the same value on the corresponding entries. 
 We can observe 8, 16 and 32 bits representation has spectrums close to the spectrum of full precision RFF kernel matrix. However, for 4, 2 and 1 bits representation has significantly higher spectrums than 8, 16 and 32 bits representation. Remember that in Figure~\ref{fig:kernel_and_l2}, we have seen 8, 16 and 32 bits representation demonstrates similar L2 loss, while 4, 2 and 1 bits can show observably worse performance. \emph{From these observations, we believe spectrum is closely correlated with the validation L2 loss. Indeed if the two RFF kernel matrices has the same spectrum, the RFF features matrices are only different up to rotation and flipping; the spectrum are at the heart of the generalization performance for the kernel ridge regression model. We refer to Section \ref{sec:fixed_design} for more detailed discussion on generalization performance and spectrum, in the context of ``fixed design'' kernel ridge regression.} 
 
-Additionally, we compare to the correlation between kernel approximation error and lO2 loss, to further emphasize the strong correlation between spectrum and L2 loss. In Figure~\ref{fig:spectrums} (b), we demonstrates the spectrums from 3 configurations with very similar kernel approximation error. Specifically, we compare 1 bit RFF with 131k features to two full precision RFF configuration with the closest kernel approximation error; these 2 full precision configurations respectively gives 1) the highest approx. error that is lower than the 1 bit configuration (8192 features) 2) the lowest approx. error that is higher than the 1bit configuration (4096 features). The 3 configurations shows close relative kernel approximation error around $1e^{-2}$, but can demonstrate very different spectrum in Figure~\ref{fig:spectrums} and very different validation L2 loss in Figure~\ref{fig:kernel_and_l2} (d).
+Additionally, we compare to the correlation between kernel approximation error and L2 loss, to further emphasize the strong correlation between spectrum and L2 loss. In Figure~\ref{fig:spectrums} (b), we demonstrates the spectrums from 3 configurations with very similar kernel approximation error. Specifically, we compare 1 bit RFF with 131k features to two full precision RFF configuration with the closest kernel approximation error; these 2 full precision configurations respectively gives 1) the highest approx. error that is lower than the 1 bit configuration (8192 features) 2) the lowest approx. error that is higher than the 1bit configuration (4096 features). The 3 configurations shows close relative kernel approximation error around $1e^{-2}$, but can demonstrate very different spectrum in Figure~\ref{fig:spectrums} and very different validation L2 loss in Figure~\ref{fig:kernel_and_l2} (d).
 
 \subsubsection{Effect of independent quantization of RFF matrix and its transpose}
 In Section~\ref{subsubsec:bump_spectrum}, we have validated the analysis in Section~\ref{sec:spectrum}, empirically showing low precision RFF bumps up the kernel matrix spectrum. The discussion in Section~\ref{sec:spectrum} also suggested a technique to reduce the height of the bump. Specifically, we can approximate the kernel matrix $\bm{K}'=\tilde{\bm{Z}}_1\tilde{\bm{Z}}_2^T$ where $\tilde{\bm{Z}}_1$ and $\tilde{\bm{Z}}_1$ are two independent instantiations of stochastic quantization (i.e. quantization noise matrices $\bm{C}\neq \bm{D}$ in Section~\ref{sec:spectrum}).
