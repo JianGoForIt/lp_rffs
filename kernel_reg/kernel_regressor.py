@@ -205,7 +205,7 @@ def test_kernel_ridge_regression2():
   w1 = torch.mm(torch.transpose(kernel.rff_x2, 0, 1), regressor.alpha)
   # print w1.size()
   # feature weight using alternative way of calculation
-  val = torch.inverse( (regressor.reg_lambda * torch.eye(n_rff_feat) \
+  val = torch.inverse( (regressor.reg_lambda * torch.eye(n_rff_feat).double() \
     + torch.mm(torch.transpose(kernel.rff_x1, 0, 1), kernel.rff_x1) ) )
   val = torch.mm(val, torch.transpose(kernel.rff_x2, 0, 1) )
   w2 = torch.mm(val, torch.DoubleTensor(Y_train) )
