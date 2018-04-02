@@ -12,6 +12,13 @@ class PCA_RFF(RFF):
   def __init__(self, n_feat, n_input_feat, kernel=None, rand_seed=1, mu=1.0):
     super(PCA_RFF, self).__init__(n_feat, n_input_feat, kernel, rand_seed)
     self.mu = mu # the value to deside the scale
+    self.mode = "train"
+
+  def train_mode(self):
+    self.mode = "train"
+
+  def test_mode(self):
+    self.mode = "test"
   
   def setup(self, input, n_fp_feat_budget, bits_upperbound=32):
     '''
@@ -34,7 +41,8 @@ class PCA_RFF(RFF):
     np.testing.assert_array_almost_equal(rff.cpu().numpy(), test_feat.cpu().numpy(), decimal=6)   
     # assign variant bits
     self.bit_assignment = binary_search_bits_assignment(self.mu * self.std, n_fp_feat_budget, upper_bound=bits_upperbound)
-  
+    self.train_mode()
+
   def transform_cos_feat(self, rff):
     '''
     the rff comes in the shape of [n_sample, n_dim]
@@ -66,9 +74,10 @@ class PCA_RFF(RFF):
 #                 print("quantizer 1 bits", quantizer.nbit)
 #                 print("quantizer 1 scale", quantizer.scale)
 #                 print torch.std(rff_x1[:, i] ), self.std[i]
-        np.testing.assert_array_almost_equal(torch.std(rff_x1[:, i] ) / self.std[i], 1.0, decimal=6)
+        if self.mode == "train":
+          np.testing.assert_array_almost_equal(torch.std(rff_x1[:, i] ) / self.std[i], 1.0, decimal=6)
         rff_x1[:, i] = quantizer.quantize(rff_x1[:, i], verbose=False)
-        print torch.min(rff_x1[:, i] - quantizer.min_val) / quantizer.scale, torch.max(rff_x1[:, i] - quantizer.min_val) / quantizer.scale
+        # print torch.min(rff_x1[:, i] - quantizer.min_val) / quantizer.scale, torch.max(rff_x1[:, i] - quantizer.min_val) / quantizer.scale
         assert np.abs( ( (rff_x1[-1, i] - quantizer.min_val) / quantizer.scale) \
                       - float(round( (rff_x1[-1, i] - quantizer.min_val) / quantizer.scale, 0) ) ) <= 1e-6
       if quantizer2 != None:
@@ -79,9 +88,10 @@ class PCA_RFF(RFF):
 #                 print("quantizer 2 bits", quantizer.nbit)
 #                 print("quantizer 2 scale", quantizer.scale)
 #                 print torch.std(rff_x2[:, i] ), self.std[i]
-        np.testing.assert_array_almost_equal(torch.std(rff_x2[:, i] ) / self.std[i], 1.0, decimal=6)
+        if self.mode == "train":
+          np.testing.assert_array_almost_equal(torch.std(rff_x2[:, i] ) / self.std[i], 1.0, decimal=6)
         rff_x2[:, i] = quantizer.quantize(rff_x2[:, i], verbose=False)
-        print torch.min( (rff_x2[:, i] - quantizer.min_val) / quantizer.scale), torch.max((rff_x2[:, i] - quantizer.min_val) / quantizer.scale)
+        # print torch.min( (rff_x2[:, i] - quantizer.min_val) / quantizer.scale), torch.max((rff_x2[:, i] - quantizer.min_val) / quantizer.scale)
         assert np.abs( ( (rff_x2[-1, i] - quantizer.min_val) / quantizer.scale) \
                       - float(round( (rff_x2[-1, i] - quantizer.min_val) / quantizer.scale, 0) ) ) <= 1e-6
     self.rff_x1, self.rff_x2 = rff_x1 + self.offset_rot, rff_x2 + self.offset_rot
