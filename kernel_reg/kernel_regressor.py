@@ -12,7 +12,7 @@ class Quantizer(object):
       self.scale = (max_val - min_val) / float(2**self.nbit - 1)
     self.rand_seed = rand_seed
 
-  def quantize_random(self, value):
+  def quantize_random(self, value, verbose=True):
     value = torch.clamp(value, self.min_val, self.max_val)
     floor_val = self.min_val + torch.floor( (value - self.min_val) / self.scale) * self.scale
     ceil_val = self.min_val + torch.ceil( (value - self.min_val) / self.scale) * self.scale
@@ -23,7 +23,8 @@ class Quantizer(object):
     # sanity check
     # np.testing.assert_array_almost_equal(floor_prob.cpu().numpy(), 
     #   1 - ceil_prob.cpu().numpy(), decimal=6)
-    print("quantizer using random seed", self.rand_seed)
+    if verbose:
+      print("quantizer using random seed", self.rand_seed)
     np.random.seed(self.rand_seed)
     sample = torch.DoubleTensor(np.random.uniform(size=list(value.size() ) ) )
     # quant_val = floor_val * (sample < floor_prob).float() \
@@ -32,9 +33,9 @@ class Quantizer(object):
       + ceil_val * (sample >= floor_prob).double()
     return quant_val
 
-  def quantize(self, value):
+  def quantize(self, value, verbose=True):
     # TODO update if we have other quantization schemes
-    return self.quantize_random(value)
+    return self.quantize_random(value, verbose)
 
 
 class KernelRidgeRegression(object):
