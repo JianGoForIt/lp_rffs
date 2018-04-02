@@ -19,7 +19,7 @@ class GaussianKernel(object):
     norms_X1 = np.linalg.norm(X1, axis=1).reshape(n_sample_X1, 1)
     norms_X2 = np.linalg.norm(X2, axis=1).reshape(n_sample_X2, 1)
     cross = np.dot(X1, X2.T)
-    print("using sigma ", self.sigma)
+    # print("using sigma ", self.sigma)
     kernel = np.exp(-0.5 / float(self.sigma)**2 \
       * (np.tile(norms_X1**2, (1, n_sample_X2) ) + np.tile( (norms_X2.T)**2, (n_sample_X1, 1) ) \
       -2 * cross) )
@@ -35,11 +35,11 @@ class RFF(object):
     self.get_gaussian_wb()
 
   def get_gaussian_wb(self):
-    print("using sigma ", 1.0/float(self.kernel.sigma), "using rand seed ", self.rand_seed)
+    # print("using sigma ", 1.0/float(self.kernel.sigma), "using rand seed ", self.rand_seed)
     np.random.seed(self.rand_seed)
     self.w = np.random.normal(scale=1.0/float(self.kernel.sigma), 
       size=(self.n_feat, self.n_input_feat) )
-    print("using n rff features ", self.w.shape[0] )
+    # print("using n rff features ", self.w.shape[0] )
     np.random.seed(self.rand_seed)
     self.b = np.random.uniform(low=0.0, high=2.0 * np.pi, size=(self.n_feat, 1) )
 
@@ -62,14 +62,14 @@ class RFF(object):
     rff_x1 = self.get_cos_feat(X1)
     rff_x2 = self.get_cos_feat(X2)
     if quantizer1 != None:
-      print("quantization 1 activated ", X1.shape)
-      print("quantizer 1 bits", quantizer1.nbit)
-      print("quantizer 1 scale", quantizer1.scale)
+      # print("quantization 1 activated ", X1.shape)
+      # print("quantizer 1 bits", quantizer1.nbit)
+      # print("quantizer 1 scale", quantizer1.scale)
       rff_x1 = quantizer1.quantize(rff_x1)
     if quantizer2 != None:
-      print("quantization 2 activated ", X2.shape)
-      print("quantizer 2 bits", quantizer2.nbit)
-      print("quantizer 2 scale", quantizer2.scale)
+      # print("quantization 2 activated ", X2.shape)
+      # print("quantizer 2 bits", quantizer2.nbit)
+      # print("quantizer 2 scale", quantizer2.scale)
       rff_x2 = quantizer2.quantize(rff_x2)
     self.rff_x1, self.rff_x2 = rff_x1, rff_x2
     return torch.mm(rff_x1, torch.transpose(rff_x2, 0, 1) )

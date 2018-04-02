@@ -23,8 +23,8 @@ class Quantizer(object):
     # sanity check
     # np.testing.assert_array_almost_equal(floor_prob.cpu().numpy(), 
     #   1 - ceil_prob.cpu().numpy(), decimal=6)
-    if verbose:
-      print("quantizer using random seed", self.rand_seed)
+    # if verbose:
+    #   print("quantizer using random seed", self.rand_seed)
     np.random.seed(self.rand_seed)
     sample = torch.DoubleTensor(np.random.uniform(size=list(value.size() ) ) )
     # quant_val = floor_val * (sample < floor_prob).float() \
