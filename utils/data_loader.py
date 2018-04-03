@@ -12,6 +12,13 @@ def load_census_data(path="../../data/census/"):
   # # DEBUG
   # X_train, Y_train, X_test, Y_test = \
   #   X_train[1:20, :], Y_train[1:20], X_test[1:10, :], Y_test[1:10]
+  # s = np.arange(X_train.shape[0] )
+  # np.random.seed(0)
+  # np.random.shuffle(s)
+  # X_train = X_train[s, :]
+  # Y_train = Y_train[s]
+  # X_train, Y_train, X_test, Y_test = \
+  # X_train[:(s.size * 1 / 5), :], Y_train[:(s.size * 1 / 5)], X_test[:(s.size * 1 / 5), :], Y_test[:(s.size * 2 / 3)]
   return X_train, X_test, Y_train, Y_test
 
 def load_census_data_part(path):
