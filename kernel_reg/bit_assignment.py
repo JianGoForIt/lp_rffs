@@ -5,7 +5,8 @@ def get_bits(spectrum, s, upper_bound=None):
   nbits = np.maximum(np.log2(spectrum) + s, np.zeros(spectrum.size) )
   if upper_bound != None:
     nbits = np.minimum(nbits, upper_bound * np.ones(spectrum.size) )
-  nbits[nbits!=0] = 2**(np.floor(np.log2(nbits[nbits!=0] ) ) )
+  nbits = np.floor(nbits) 
+  #nbits[nbits!=0] = 2**(np.floor(np.log2(nbits[nbits!=0] ) ) )
 #     return 2**(np.floor(np.log2(nbits) ) ).astype(np.int)
 #     return np.exp(np.log2(nbits) ).astype(np.int)
 #     return np.floor(nbits)
