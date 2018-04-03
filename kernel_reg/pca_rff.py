@@ -26,7 +26,9 @@ class PCA_RFF(RFF):
     n_fp_feat_budget the budget in the unit of fp feat
     bits_upperbound indicates whether we have a maximum bit limit for each number
     '''
-    rff = self.get_cos_feat(input)      
+    rff = self.get_cos_feat(input)  
+    if rff.size(0) < self.n_feat:
+      raise Exception("number of samples should be large than the number of rff features for setup")    
     self.offset = rff.mean(0).unsqueeze(0) 
     rff_center = rff - self.offset.expand(rff.size(0), rff.size(1) )
     U, S, _ = np.linalg.svd(torch.transpose(rff_center, 0, 1).cpu().numpy().astype(np.float64), full_matrices=True)
