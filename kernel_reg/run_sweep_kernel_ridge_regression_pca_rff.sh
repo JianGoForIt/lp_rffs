@@ -14,9 +14,9 @@ for n_fp_rff in 32 64 128 256 512 1024
     # run with pca rff
     for mu in 2.0 1.0 5.0 10.0 20.0 50.0
       do
-        if [ ! -f "${output}_n_fp_feat_${n_fp_rff}_lp_pca_rff_mu_${mu}_n_base_feat_1024/results.pkl" ]; then
-          echo "${output}_n_fp_feat_${n_fp_rff}_lp_pca_rff_mu_${mu}_n_base_feat_1024/results.pkl"
-          python rff_kernel_census.py --pca_rff --n_fp_rff=${n_fp_rff} --pca_rff_n_base_fp_feat=1024 --pca_rff_mu=${mu} --sigma=${sigma} --random_seed=${seed} --reg_lambda=${lambda} --output_folder="${output}_n_fp_feat_${n_fp_rff}_lp_pca_rff_mu_${mu}_n_base_feat_1024/results.pkl"
+        if [ ! -f "${output}_n_fp_feat_${n_fp_rff}_lp_pca_sqr_rff_mu_${mu}_n_base_feat_1024/results.pkl/results.pkl" ]; then
+          echo "${output}_n_fp_feat_${n_fp_rff}_lp_pca_sqr_rff_mu_${mu}_n_base_feat_1024/results.pkl/results.pkl"
+          python rff_kernel_census.py --pca_rff --n_fp_rff=${n_fp_rff} --pca_rff_n_base_fp_feat=1024 --pca_rff_mu=${mu} --sigma=${sigma} --random_seed=${seed} --reg_lambda=${lambda} --output_folder="${output}_n_fp_feat_${n_fp_rff}_lp_pca_sqr_rff_mu_${mu}_n_base_feat_1024/results.pkl"
         fi
       done
     # run fp rff kernel
@@ -36,7 +36,7 @@ for n_fp_rff in 32 64 128 256 512 1024
   done
 
 
-for n_fp_rff in 32 64 128 256 512 1024 2048 4096 8192
+for n_fp_rff in 32 64 128 256 512 1024 2048 4096 
   do 
     # run with pca rff
     for mu in 2.0 1.0 5.0 10.0 20.0 50.0

@@ -2,7 +2,7 @@ import numpy as np
 
 def get_bits(spectrum, s, upper_bound=None):
   assert type(upper_bound) == int
-  nbits = np.maximum(np.log2(spectrum) + s, np.zeros(spectrum.size) )
+  nbits = np.maximum(np.log2(spectrum**2) + s, np.zeros(spectrum.size) )
   if upper_bound != None:
     nbits = np.minimum(nbits, upper_bound * np.ones(spectrum.size) )
   nbits = np.floor(nbits) 
