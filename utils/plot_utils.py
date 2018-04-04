@@ -9,5 +9,6 @@ def get_colors():
   colors_dict["fp"] = colors[1]
   for idx, nbit in enumerate([1,2,4,8,16,32] ):
     colors_dict[str(nbit)] = colors[idx + 2]
+  colors_dict["pca"] = colors[len(colors_dict.keys() ) ]
   #print colors_dict
   return colors_dict
