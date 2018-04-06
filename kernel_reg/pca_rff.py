@@ -6,6 +6,7 @@ sys.path.append("../utils")
 from data_loader import load_census_data, load_census_data_part
 from rff import GaussianKernel, RFF
 from bit_assignment import binary_search_bits_assignment
+from kernel_regressor import Quantizer
 
 
 class PCA_RFF(RFF):
@@ -100,7 +101,6 @@ class PCA_RFF(RFF):
     return torch.mm(self.rff_x1, torch.transpose(self.rff_x2, 0, 1) )
 
 
-
 def pca_rff_fp_test():
   data_path = "../../data/census/"
   sigma = 30.0
@@ -130,7 +130,7 @@ def pca_rff_32bit_test():
   sigma = 30.0
   X_train, X_test, Y_train, Y_test = load_census_data_part(data_path)
   n_input_feat = X_train.shape[1]
-  
+  quantizer = Quantizer
   # get a full precision rff kernel
   kernel = GaussianKernel(sigma=sigma)
   kernel = RFF(1024, n_input_feat, kernel, rand_seed=1)
@@ -138,9 +138,9 @@ def pca_rff_32bit_test():
 
   # get a 32bit precision PCA RFF
   kernel = GaussianKernel(sigma=sigma)
-  kernel = PCA_RFF(1024, n_input_feat, kernel, rand_seed=1)
+  kernel = PCA_RFF(1024, n_input_feat, kernel, rand_seed=1, mu=100.0)
   kernel.setup(X_train, n_fp_feat_budget=1024)
-  kernel_mat_fp_pca_rff = kernel.get_kernel_matrix(X_train, X_train)
+  kernel_mat_fp_pca_rff = kernel.get_kernel_matrix(X_train, X_train, quantizer, quantizer)
 
   np.testing.assert_array_almost_equal(kernel_mat_fp_rff.cpu().numpy(), kernel_mat_fp_pca_rff.cpu().numpy(), decimal=6)
   print("pca rff 32 test passed!")
