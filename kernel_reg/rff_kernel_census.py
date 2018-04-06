@@ -8,7 +8,7 @@ sys.path.append("../utils")
 from data_loader import load_census_data
 from rff import GaussianKernel, RFF
 from pca_rff import PCA_RFF
-from kernel_regressor import Quantizer, KernelRidgeRegression
+from kernel_regressor import Quantizer, QuantizerAutoScale, KernelRidgeRegression
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--n_fp_rff", type=int, default=100)
@@ -26,6 +26,11 @@ parser.add_argument("--pca_rff_mu", type=float, default=10.0)
 parser.add_argument("--pca_rff_n_base_fp_feat", type=int, default=8192, 
   help="the number of rff feature for PCA RFF to setup;"\
   " the real memory budget is --n_fp_rff, it is the input to PCA_RFF setup function")
+parser.add_argument("--pca_rff_auto_scale", action="store_true", 
+  help="using percentile to auto decide the quantization dynamic range")
+parser.add_argument("--pca_rff_perc", type=float,
+  help="percentile to cut outliers in deciding the quantization dynamic range, \
+  the value is 0.1 if we cut at 10 and 90 percentile.", default=0)
 args = parser.parse_args()
 
 
@@ -60,7 +65,12 @@ if __name__=="__main__":
         + str(args.sigma) + "_n_fp_rff_" + str(args.n_fp_rff)
   else:
     if args.pca_rff:
-      quantizer_train = Quantizer
+      if args.pca_rff_auto_scale:
+        print("using auto scale quantizer")
+        quantizer_train = lambda nbit, min_val, max_val, rand_seed: \
+          QuantizerAutoScale(nbit, min_val, max_val, rand_seed, percentile=args.pca_rff_perc)
+      else:
+        quantizer_train = Quantizer
       if not args.test_var_reduce:
         quantizer_test = quantizer_train
       else:

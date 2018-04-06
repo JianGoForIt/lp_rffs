@@ -59,6 +59,8 @@ class QuantizerAutoScale(Quantizer):
     self.scale = torch.DoubleTensor(np.tile(scale.reshape(1, scale.size), (value.size(0), 1) ) )
     self.min_val = torch.DoubleTensor(np.tile(min_val.reshape(1, min_val.size), (value.size(0), 1) ) )
     self.max_val = torch.DoubleTensor(np.tile(max_val.reshape(1, max_val.size), (value.size(0), 1) ) )
+    if len(value_np.shape) == 1:
+      value_np = value_np.reshape(value_np.size, 1)
     value = torch.DoubleTensor(value_np)
     # print self.scale, self.min_val, self.max_val, np.min(value_np, axis=0), np.max(value_np, axis=0)
     return self.quantize_random(value, verbose)
