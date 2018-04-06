@@ -107,12 +107,14 @@ class PCA_RFF(RFF):
 
     # if is a auto scale quantizer, assert the max and min value matches the percentile
     if quantizer1 != None and isinstance(quantizer, QuantizerAutoScale):
+      print("quantizer 1 percentile", quantizer1.percentile)
       test_val = rff_x1.cpu().numpy()
       np.testing.assert_array_almost_equal(np.percentile(test_val, q=quantizer.percentile, axis=0),
         np.min(test_val, axis=0) )
       np.testing.assert_array_almost_equal(np.percentile(test_val, q=100.0-quantizer.percentile, axis=0),
         np.max(test_val, axis=0) )
     if quantizer2 != None and isinstance(quantizer, QuantizerAutoScale):
+      print("quantizer 2 percentile", quantizer2.percentile)
       test_val = rff_x2.cpu().numpy()
       np.testing.assert_array_almost_equal(np.percentile(test_val, q=quantizer.percentile, axis=0),
         np.min(test_val, axis=0) )
