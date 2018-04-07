@@ -6,6 +6,7 @@ sys.path.append("../utils")
 from data_loader import load_census_data, load_census_data_part
 from rff import GaussianKernel, RFF
 from bit_assignment import binary_search_bits_assignment
+from kernel_regressor import Quantizer, QuantizerAutoScale
 
 
 class PCA_RFF(RFF):
@@ -62,6 +63,11 @@ class PCA_RFF(RFF):
     rff_x1 = self.transform_cos_feat(rff_x1)
     rff_x2 = self.get_cos_feat(X2)
     rff_x2 = self.transform_cos_feat(rff_x2)
+
+    # # for test assertion
+    # fp_rff_x1 = rff_x1.clone()
+    # fp_rff_x2 = rff_x2.clone()
+
     for i, nbits in enumerate(self.bit_assignment):
       if nbits == 0:
         rff_x1[:, i] = 0.0
@@ -79,8 +85,12 @@ class PCA_RFF(RFF):
         if self.mode == "train":
           np.testing.assert_array_almost_equal(torch.std(rff_x1[:, i] ) / self.std[i], 1.0, decimal=6)
         rff_x1[:, i] = quantizer.quantize(rff_x1[:, i], verbose=False)
-        # print torch.min(rff_x1[:, i] - quantizer.min_val) / quantizer.scale, torch.max(rff_x1[:, i] - quantizer.min_val) / quantizer.scale
-        assert np.abs( ( (rff_x1[-1, i] - quantizer.min_val) / quantizer.scale) \
+        # assert quantization is carried out properly
+        if type(quantizer.min_val) is not float and type(quantizer.min_val) is not np.float64:
+          assert np.abs( ( (rff_x1[-1, i] - quantizer.min_val[-1, 0]) / quantizer.scale[-1, 0]) \
+                      - float(round( (rff_x1[-1, i] - quantizer.min_val[-1, 0] ) / quantizer.scale[-1, 0], 0) ) ) <= 1e-6
+        else:
+          assert np.abs( ( (rff_x1[-1, i] - quantizer.min_val) / quantizer.scale) \
                       - float(round( (rff_x1[-1, i] - quantizer.min_val) / quantizer.scale, 0) ) ) <= 1e-6
       if quantizer2 != None:
         min_val = -self.std[i] * self.mu
@@ -93,12 +103,31 @@ class PCA_RFF(RFF):
         if self.mode == "train":
           np.testing.assert_array_almost_equal(torch.std(rff_x2[:, i] ) / self.std[i], 1.0, decimal=6)
         rff_x2[:, i] = quantizer.quantize(rff_x2[:, i], verbose=False)
-        # print torch.min( (rff_x2[:, i] - quantizer.min_val) / quantizer.scale), torch.max((rff_x2[:, i] - quantizer.min_val) / quantizer.scale)
-        assert np.abs( ( (rff_x2[-1, i] - quantizer.min_val) / quantizer.scale) \
+        if type(quantizer.min_val) is not float and type(quantizer.min_val) is not np.float64:
+          assert np.abs( ( (rff_x2[-1, i] - quantizer.min_val[-1, 0]) / quantizer.scale[-1, 0]) \
+                      - float(round( (rff_x2[-1, i] - quantizer.min_val[-1, 0]) / quantizer.scale[-1, 0], 0) ) ) <= 1e-6
+        else:
+          assert np.abs( ( (rff_x2[-1, i] - quantizer.min_val) / quantizer.scale) \
                       - float(round( (rff_x2[-1, i] - quantizer.min_val) / quantizer.scale, 0) ) ) <= 1e-6
+
+    # # if is a auto scale quantizer, assert the max and min value matches the percentile
+    # if quantizer1 != None and isinstance(quantizer, QuantizerAutoScale):
+    #   print("quantizer 1 percentile", quantizer.percentile)
+    #   test_val = rff_x1.cpu().numpy()
+    #   np.testing.assert_array_almost_equal(np.percentile(fp_rff_x1.cpu().numpy(), q=quantizer.percentile, axis=0),
+    #     np.min(test_val, axis=0) )
+    #   np.testing.assert_array_almost_equal(np.percentile(fp_rff_x1.cpu().numpy(), q=100.0-quantizer.percentile, axis=0),
+    #     np.max(test_val, axis=0) )
+    # if quantizer2 != None and isinstance(quantizer, QuantizerAutoScale):
+    #   print("quantizer 2 percentile", quantizer.percentile)
+    #   test_val = rff_x2.cpu().numpy()
+    #   np.testing.assert_array_almost_equal(np.percentile(fp_rff_x2.cpu().numpy(), q=quantizer.percentile, axis=0),
+    #     np.min(test_val, axis=0) )
+    #   np.testing.assert_array_almost_equal(np.percentile(fp_rff_x2.cpu().numpy(), q=100.0-quantizer.percentile, axis=0),
+    #     np.max(test_val, axis=0) )
+
     self.rff_x1, self.rff_x2 = rff_x1 + self.offset_rot, rff_x2 + self.offset_rot
     return torch.mm(self.rff_x1, torch.transpose(self.rff_x2, 0, 1) )
-
 
 
 def pca_rff_fp_test():
@@ -130,7 +159,7 @@ def pca_rff_32bit_test():
   sigma = 30.0
   X_train, X_test, Y_train, Y_test = load_census_data_part(data_path)
   n_input_feat = X_train.shape[1]
-  
+  quantizer = Quantizer
   # get a full precision rff kernel
   kernel = GaussianKernel(sigma=sigma)
   kernel = RFF(1024, n_input_feat, kernel, rand_seed=1)
@@ -138,9 +167,9 @@ def pca_rff_32bit_test():
 
   # get a 32bit precision PCA RFF
   kernel = GaussianKernel(sigma=sigma)
-  kernel = PCA_RFF(1024, n_input_feat, kernel, rand_seed=1)
+  kernel = PCA_RFF(1024, n_input_feat, kernel, rand_seed=1, mu=100.0)
   kernel.setup(X_train, n_fp_feat_budget=1024)
-  kernel_mat_fp_pca_rff = kernel.get_kernel_matrix(X_train, X_train)
+  kernel_mat_fp_pca_rff = kernel.get_kernel_matrix(X_train, X_train, quantizer, quantizer)
 
   np.testing.assert_array_almost_equal(kernel_mat_fp_rff.cpu().numpy(), kernel_mat_fp_pca_rff.cpu().numpy(), decimal=6)
   print("pca rff 32 test passed!")
