@@ -63,6 +63,11 @@ class PCA_RFF(RFF):
     rff_x1 = self.transform_cos_feat(rff_x1)
     rff_x2 = self.get_cos_feat(X2)
     rff_x2 = self.transform_cos_feat(rff_x2)
+
+    # # for test assertion
+    # fp_rff_x1 = rff_x1.clone()
+    # fp_rff_x2 = rff_x2.clone()
+
     for i, nbits in enumerate(self.bit_assignment):
       if nbits == 0:
         rff_x1[:, i] = 0.0
@@ -105,21 +110,21 @@ class PCA_RFF(RFF):
           assert np.abs( ( (rff_x2[-1, i] - quantizer.min_val) / quantizer.scale) \
                       - float(round( (rff_x2[-1, i] - quantizer.min_val) / quantizer.scale, 0) ) ) <= 1e-6
 
-    # if is a auto scale quantizer, assert the max and min value matches the percentile
-    if quantizer1 != None and isinstance(quantizer, QuantizerAutoScale):
-      print("quantizer 1 percentile", quantizer1.percentile)
-      test_val = rff_x1.cpu().numpy()
-      np.testing.assert_array_almost_equal(np.percentile(test_val, q=quantizer.percentile, axis=0),
-        np.min(test_val, axis=0) )
-      np.testing.assert_array_almost_equal(np.percentile(test_val, q=100.0-quantizer.percentile, axis=0),
-        np.max(test_val, axis=0) )
-    if quantizer2 != None and isinstance(quantizer, QuantizerAutoScale):
-      print("quantizer 2 percentile", quantizer2.percentile)
-      test_val = rff_x2.cpu().numpy()
-      np.testing.assert_array_almost_equal(np.percentile(test_val, q=quantizer.percentile, axis=0),
-        np.min(test_val, axis=0) )
-      np.testing.assert_array_almost_equal(np.percentile(test_val, q=100.0-quantizer.percentile, axis=0),
-        np.max(test_val, axis=0) )
+    # # if is a auto scale quantizer, assert the max and min value matches the percentile
+    # if quantizer1 != None and isinstance(quantizer, QuantizerAutoScale):
+    #   print("quantizer 1 percentile", quantizer.percentile)
+    #   test_val = rff_x1.cpu().numpy()
+    #   np.testing.assert_array_almost_equal(np.percentile(fp_rff_x1.cpu().numpy(), q=quantizer.percentile, axis=0),
+    #     np.min(test_val, axis=0) )
+    #   np.testing.assert_array_almost_equal(np.percentile(fp_rff_x1.cpu().numpy(), q=100.0-quantizer.percentile, axis=0),
+    #     np.max(test_val, axis=0) )
+    # if quantizer2 != None and isinstance(quantizer, QuantizerAutoScale):
+    #   print("quantizer 2 percentile", quantizer.percentile)
+    #   test_val = rff_x2.cpu().numpy()
+    #   np.testing.assert_array_almost_equal(np.percentile(fp_rff_x2.cpu().numpy(), q=quantizer.percentile, axis=0),
+    #     np.min(test_val, axis=0) )
+    #   np.testing.assert_array_almost_equal(np.percentile(fp_rff_x2.cpu().numpy(), q=100.0-quantizer.percentile, axis=0),
+    #     np.max(test_val, axis=0) )
 
     self.rff_x1, self.rff_x2 = rff_x1 + self.offset_rot, rff_x2 + self.offset_rot
     return torch.mm(self.rff_x1, torch.transpose(self.rff_x2, 0, 1) )
