@@ -68,7 +68,8 @@ if __name__=="__main__":
       if args.pca_rff_auto_scale:
         print("using auto scale quantizer")
         quantizer_train = lambda nbit, min_val, max_val, rand_seed: \
-          QuantizerAutoScale(nbit, min_val, max_val, rand_seed, percentile=args.pca_rff_perc)
+          QuantizerAutoScale(nbit, min_val, max_val, 
+          rand_seed=args.random_seed, percentile=args.pca_rff_perc)
       else:
         quantizer_train = Quantizer
       if not args.test_var_reduce:
