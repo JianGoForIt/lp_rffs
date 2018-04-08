@@ -31,11 +31,29 @@ parser.add_argument("--pca_rff_auto_scale", action="store_true",
 parser.add_argument("--pca_rff_perc", type=float,
   help="percentile to cut outliers in deciding the quantization dynamic range, \
   the value is 0.1 if we cut at 10 and 90 percentile.", default=0)
+parser.add_argument("--fixed_design", action="store_true", 
+  help="indicate doing fixed design runs on training data")
+parser.add_argument("--fixed_design_data_sample_int", type=int, default=1,
+  help="indicate the interval to sample train data to use for the fixed design run")
+parser.add_argument("--fixed_design_rel_noise_level", type=float, default=0.0,
+  help="sigma / |y| ratio in fixed design experiments")
 args = parser.parse_args()
 
 
 if __name__=="__main__":
   X_train, X_test, Y_train, Y_test = load_census_data(args.data_path)
+  if args.fixed_design:
+    print("fixed design mode")
+    X_train = X_train[::args.fixed_design_data_sample_int, :]
+    Y_train = Y_train[::args.fixed_design_data_sample_int]
+    X_test = X_train
+    Y_test = Y_train.copy()
+    if args.fixed_design_rel_noise_level != 0.0:
+      fixed_design_noise_level = \
+        np.linalg.norm(Y_train) / np.sqrt(float(Y_train.size) ) * args.fixed_design_rel_noise_level
+      Y_train += np.random.normal(scale=fixed_design_noise_level, size=Y_train.shape)
+      Y_test += np.random.normal(scale=fixed_design_noise_level, size=Y_train.shape)
+
   kernel = GaussianKernel(sigma=args.sigma)
   kernel_mat_exact_train = kernel.get_kernel_matrix(X_train, X_train)
   kernel_mat_exact_test = kernel.get_kernel_matrix(X_test, X_train)
@@ -47,7 +65,9 @@ if __name__=="__main__":
     quantizer_test = None
     config_name = "exact_kernel_lambda_" + str(args.reg_lambda) + "_sigma_" + str(args.sigma)
   elif args.do_fp:
+    print("fp mode")
     if args.pca_rff:
+      print("pca rff model")
       kernel = PCA_RFF(args.pca_rff_n_base_fp_feat, n_input_feat, kernel, 
         rand_seed=args.random_seed, mu=args.pca_rff_mu)
       # pca rff need to do additional setup 
@@ -65,6 +85,7 @@ if __name__=="__main__":
         + str(args.sigma) + "_n_fp_rff_" + str(args.n_fp_rff)
   else:
     if args.pca_rff:
+      print("pca rff model")
       if args.pca_rff_auto_scale:
         print("using auto scale quantizer")
         quantizer_train = lambda nbit, min_val, max_val, rand_seed: \
