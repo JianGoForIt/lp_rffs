@@ -35,8 +35,8 @@ parser.add_argument("--fixed_design", action="store_true",
   help="indicate doing fixed design runs on training data")
 parser.add_argument("--fixed_design_data_sample_int", type=int, default=1,
   help="indicate the interval to sample train data to use for the fixed design run")
-parser.add_argument("--fixed_design_rel_noise_level", type=float, default=0.0,
-  help="sigma / |y| ratio in fixed design experiments")
+parser.add_argument("--fixed_design_noise_level", type=float, default=0.0,
+  help="noise sigma in fixed design experiments")
 args = parser.parse_args()
 
 
@@ -48,11 +48,11 @@ if __name__=="__main__":
     Y_train = Y_train[::args.fixed_design_data_sample_int]
     X_test = X_train
     Y_test = Y_train.copy()
-    if args.fixed_design_rel_noise_level != 0.0:
-      fixed_design_noise_level = \
-        np.linalg.norm(Y_train) / np.sqrt(float(Y_train.size) ) * args.fixed_design_rel_noise_level
-      Y_train += np.random.normal(scale=fixed_design_noise_level, size=Y_train.shape)
-      Y_test += np.random.normal(scale=fixed_design_noise_level, size=Y_train.shape)
+    if args.fixed_design_noise_level != 0.0:
+      # fixed_design_noise_level = \
+      #   np.linalg.norm(Y_train) / np.sqrt(float(Y_train.size) ) * args.fixed_design_rel_noise_level
+      Y_train += np.random.normal(scale=args.fixed_design_noise_level, size=Y_train.shape)
+      Y_test += np.random.normal(scale=args.fixed_design_noise_level, size=Y_train.shape)
 
   kernel = GaussianKernel(sigma=args.sigma)
   kernel_mat_exact_train = kernel.get_kernel_matrix(X_train, X_train)
