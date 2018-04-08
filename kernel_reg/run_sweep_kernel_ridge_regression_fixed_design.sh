@@ -4,10 +4,10 @@ output=${3}
 sigma=30.0
 
 
-for n_fp_rff in 128 1024 8192
+for n_fp_rff in 1024 8192
   do 
     # run with pca rff
-    for noise in 1e-3 1e-2 1e-1 1e0 1e1 1e2 1e3 1e4 1e5 1e6
+    for noise in 1e-2 1e-1 1e0 1e1 1e2 1e3 1e4 1e5
       do
         if [ ! -f "${output}_n_fp_feat_${n_fp_rff}_fp_rff_noise_sigma_${noise}/results.pkl" ]; then
           echo "${output}_n_fp_feat_${n_fp_rff}_fp_rff_noise_sigma_${noise}/results.pkl"
