@@ -4,7 +4,7 @@ output=${3}
 sigma=30.0
 
 
-for n_fp_rff in 1024 8192
+for n_fp_rff in 8192
   do 
     # run with pca rff
     for noise in 1e-2 1e-1 1e0 1e1 1e2 1e3 1e4 1e5
