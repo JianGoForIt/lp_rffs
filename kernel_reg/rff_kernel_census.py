@@ -122,6 +122,16 @@ if __name__=="__main__":
   # print("test quantizer", quantizer)
   regressor.fit(X_train, Y_train, quantizer=quantizer_train)
   print("finish regression!")
+  if args.fixed_design and args.reg_lambda == 1e-6:
+    print("saving eigen value and vectors")
+    U, S, _ = np.linalg.svd(regressor.kernel.rff_x1.cpu().numpy(), full_matrices=False)
+    assert U.shape[0] == X_train.shape[0]
+    if not os.path.isdir(args.output_folder):
+      os.makedirs(args.output_folder)
+    with open(args.output_folder + "/kernel_eigen_vector.npy", "w") as f:
+      np.save(f, U)
+    with open(args.output_folder + "/kernel_eigen_value.npy", "w") as f:
+      np.save(f, S**2)
   train_error = regressor.get_train_error()
   if args.pca_rff:
     regressor.kernel.test_mode()
