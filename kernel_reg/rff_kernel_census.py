@@ -144,7 +144,8 @@ if __name__=="__main__":
   if args.fixed_design and (args.reg_lambda == 1e-6 or args.fixed_design_opt_reg): 
     # avoid save duplicated matrix to save disk, and use this branch when we want to auto get the opt_reg for fixed design
     print("saving eigen value and vectors")
-    S, U = np.linalg.eigh(regressor.kernel_mat.cpu().numpy())
+    if not args.fixed_design_opt_reg:
+      S, U = np.linalg.eigh(regressor.kernel_mat.cpu().numpy())
     assert U.shape[0] == X_train.shape[0]
     assert U.shape[1] == X_train.shape[0]
     assert S.size == X_train.shape[0]
