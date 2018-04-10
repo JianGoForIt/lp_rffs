@@ -1,10 +1,13 @@
 import numpy as np
 from scipy.optimize import minimize
 
+# for numerical protection
+EPS = 1e-20
+
 def expected_loss(lam, U, S, Y, noise):
     m = float(Y.size)
     uty2 = ( (np.dot(U.T, Y.reshape(Y.size, 1) ) )**2).reshape(int(m))
-    gamma = (S/(S + lam) ).reshape(int(m))
+    gamma = (S/(S + lam + EPS) ).reshape(int(m))
     return (1/m) * np.sum(((1.0-gamma)**2) * uty2) + (1/m)*noise**2 * np.sum(gamma**2) + noise**2
     # define U,S,Y,noise
     # f = lambda lam: expectedLoss(lam,U,S,Y,noise)
