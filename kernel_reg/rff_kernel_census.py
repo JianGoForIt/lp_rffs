@@ -49,6 +49,7 @@ if __name__=="__main__":
     X_test = X_train
     Y_test = Y_train.copy()
     if args.fixed_design_noise_level != 0.0:
+      Y_train_orig = Y_train.copy()
       # fixed_design_noise_level = \
       #   np.linalg.norm(Y_train) / np.sqrt(float(Y_train.size) ) * args.fixed_design_rel_noise_level
       Y_train += np.random.normal(scale=args.fixed_design_noise_level, size=Y_train.shape)
@@ -124,8 +125,9 @@ if __name__=="__main__":
   print("finish regression!")
   if args.fixed_design and args.reg_lambda == 1e-6: # avoid save duplicated matrix to save disk
     print("saving eigen value and vectors")
-    # U, S, _ = np.linalg.svd(regressor.kernel.rff_x1.cpu().numpy(), full_matrices=False)
-    S, U = np.linalg.eig(regressor.kernel_mat.cpu().numpy())
+    S, U = np.linalg.eigh(regressor.kernel_mat.cpu().numpy())
+    # assert np.testing.assert_array_almost_equal(U, V.T)
+    # S, U = np.linalg.eig(regressor.kernel_mat.cpu().numpy())
     assert U.shape[0] == X_train.shape[0]
     assert U.shape[1] == X_train.shape[0]
     assert S.size == X_train.shape[0]
@@ -135,6 +137,16 @@ if __name__=="__main__":
       np.save(f, U)
     with open(args.output_folder + "/kernel_eigen_value.npy", "w") as f:
       np.save(f, S)
+    eigen_val = S
+    eigen_vec = U
+    reg_lambda = args.reg_lambda
+    y_gt = Y_train_orig
+    noise_sigma = args.fixed_design_noise_level
+    gamma = eigen_val / (eigen_val + float(reg_lambda) )
+    theory_test_error = (np.sum( (gamma - 1.0)**2 * (np.dot(eigen_vec.T, y_gt.reshape(y_gt.size, 1) ) ).reshape(gamma.size)**2) \
+       + np.sum(float(noise_sigma)**2 * gamma**2) + y_gt.size * float(noise_sigma)**2) / float(y_gt.size)
+    print("fixed design theory test l2 loss", theory_test_error)
+    
   train_error = regressor.get_train_error()
   if args.pca_rff:
     regressor.kernel.test_mode()
@@ -164,6 +176,9 @@ if __name__=="__main__":
   dict_res = {"train_l2_error": train_error,
     "test_l2_error": test_error, "train_approx_error": kernel_mat_approx_error_train,
     "test_approx_error": kernel_mat_approx_error_test}
+  if 'theory_test_error' in locals():
+    print("saving theory test l2 loss")
+    dict_res["theory_test_l2_error"] = theory_test_error
   with open(args.output_folder + "/results.pkl", "w") as f:
     cp.dump(dict_res, f)
 
