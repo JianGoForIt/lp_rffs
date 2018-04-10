@@ -2,10 +2,10 @@ import numpy as np
 from scipy.optimize import minimize
 
 def expected_loss(lam, U, S, Y, noise):
-    m = np.ndarray.size(Y)
-    uty2 = (np.dot(U.T, Y.reshape(Y.size, 1) ) )**2
-    gamma = S/(S + lam)
-    return (1/m) * np.sum(((1-gamma)**2) * uty2) + (1/m)*noise**2 * np.sum(gamma**2);
+    m = float(Y.size)
+    uty2 = ( (np.dot(U.T, Y.reshape(Y.size, 1) ) )**2).reshape(int(m))
+    gamma = (S/(S + lam) ).reshape(int(m))
+    return (1/m) * np.sum(((1.0-gamma)**2) * uty2) + (1/m)*noise**2 * np.sum(gamma**2) + noise**2
     # define U,S,Y,noise
     # f = lambda lam: expectedLoss(lam,U,S,Y,noise)
     # x0 = 10
