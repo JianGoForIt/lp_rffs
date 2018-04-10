@@ -12,6 +12,8 @@ from kernel_regressor import Quantizer, QuantizerAutoScale, KernelRidgeRegressio
 from misc_utils import expected_loss
 from scipy.optimize import minimize
 
+# epsilon for numerical protection
+EPS=1e-9
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--n_fp_rff", type=int, default=100)
@@ -134,7 +136,7 @@ if __name__=="__main__":
     res = minimize(f, x0, bounds=[(0.0, None)], options={'xtol': 1e-6, 'disp': True})
     loss = f(res.x)
     print("fixed design opt reg and loss", res.x, loss)
-    args.reg_lambda = res.x[0] 
+    args.reg_lambda = res.x[0] + EPS 
 
   regressor = KernelRidgeRegression(kernel, reg_lambda=args.reg_lambda)
   print("start to do regression!")
@@ -149,12 +151,12 @@ if __name__=="__main__":
     assert U.shape[0] == X_train.shape[0]
     assert U.shape[1] == X_train.shape[0]
     assert S.size == X_train.shape[0]
-    if not os.path.isdir(args.output_folder):
-      os.makedirs(args.output_folder)
-    with open(args.output_folder + "/kernel_eigen_vector.npy", "w") as f:
-      np.save(f, U)
-    with open(args.output_folder + "/kernel_eigen_value.npy", "w") as f:
-      np.save(f, S)
+    #if not os.path.isdir(args.output_folder):
+    #  os.makedirs(args.output_folder)
+    #with open(args.output_folder + "/kernel_eigen_vector.npy", "w") as f:
+    #  np.save(f, U)
+    #with open(args.output_folder + "/kernel_eigen_value.npy", "w") as f:
+    #  np.save(f, S)
     theory_test_error = expected_loss(args.reg_lambda, U, S, Y_train_orig, args.fixed_design_noise_level)
     print("fixed design theory test l2 loss", theory_test_error)
     
