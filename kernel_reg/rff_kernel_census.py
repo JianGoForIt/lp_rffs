@@ -9,6 +9,9 @@ from data_loader import load_census_data
 from rff import GaussianKernel, RFF
 from pca_rff import PCA_RFF
 from kernel_regressor import Quantizer, QuantizerAutoScale, KernelRidgeRegression
+from misc_utils import expected_loss
+from scipy.optimize import minimize
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--n_fp_rff", type=int, default=100)
@@ -37,6 +40,8 @@ parser.add_argument("--fixed_design_data_sample_int", type=int, default=1,
   help="indicate the interval to sample train data to use for the fixed design run")
 parser.add_argument("--fixed_design_noise_level", type=float, default=0.0,
   help="noise sigma in fixed design experiments")
+parser.add_argument("--fixed_design_opt_reg", action="store_true", 
+  help="use numerical optimization to find the optimal lambda given kernel matrix")
 args = parser.parse_args()
 
 
@@ -117,6 +122,19 @@ if __name__=="__main__":
       kernel = RFF(n_quantized_rff, n_input_feat, kernel, rand_seed=args.random_seed)
       config_name = "lp_rff_lambda_" + str(args.reg_lambda) + "_sigma_" \
         + str(args.sigma) + "_n_fp_rff_" + str(args.n_fp_rff) + "_nbit_" + str(args.n_bit) 
+
+  # if use auto opt lambda for fixed, we need to predecide the opt value
+  if args.fixed_design and args.fixed_design_opt_reg:
+    # get kernel matrix and get the decomposition
+    kernel_mat = kernel.get_kernel_matrix(X_train, X_train, quantizer_train, quantizer_train)
+    S, U = np.linalg.eigh(kernel_mat.cpu().numpy() )
+    # numerically figure out the best lambda in the fixed design setting
+    x0 = 0.0
+    f = lambda lam: expectedLoss(lam,U,S,Y_train_orig,args.fixed_design_noise_level)
+    res = minimize(f, x0, method='nelder-mead', options={'xtol': 1e-10, 'disp': True})
+    loss = f(res.x)
+    print(loss)
+    exit(0)
 
   regressor = KernelRidgeRegression(kernel, reg_lambda=args.reg_lambda)
   print("start to do regression!")
