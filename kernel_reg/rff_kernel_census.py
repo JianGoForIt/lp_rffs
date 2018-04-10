@@ -129,23 +129,22 @@ if __name__=="__main__":
     kernel_mat = kernel.get_kernel_matrix(X_train, X_train, quantizer_train, quantizer_train)
     S, U = np.linalg.eigh(kernel_mat.cpu().numpy() )
     # numerically figure out the best lambda in the fixed design setting
-    x0 = 0.0
-    f = lambda lam: expectedLoss(lam,U,S,Y_train_orig,args.fixed_design_noise_level)
-    res = minimize(f, x0, method='nelder-mead', options={'xtol': 1e-10, 'disp': True})
+    x0 = 1.0 
+    f = lambda lam: expected_loss(lam,U,S,Y_train_orig,args.fixed_design_noise_level)
+    res = minimize(f, x0, bounds=[(0.0, None)], options={'xtol': 1e-6, 'disp': True})
     loss = f(res.x)
-    print(loss)
-    exit(0)
+    print("fixed design opt reg and loss", res.x, loss)
+    args.reg_lambda = res.x[0] 
 
   regressor = KernelRidgeRegression(kernel, reg_lambda=args.reg_lambda)
   print("start to do regression!")
   # print("test quantizer", quantizer)
   regressor.fit(X_train, Y_train, quantizer=quantizer_train)
   print("finish regression!")
-  if args.fixed_design and args.reg_lambda == 1e-6: # avoid save duplicated matrix to save disk
+  if args.fixed_design and (args.reg_lambda == 1e-6 or args.fixed_design_opt_reg): 
+    # avoid save duplicated matrix to save disk, and use this branch when we want to auto get the opt_reg for fixed design
     print("saving eigen value and vectors")
     S, U = np.linalg.eigh(regressor.kernel_mat.cpu().numpy())
-    # assert np.testing.assert_array_almost_equal(U, V.T)
-    # S, U = np.linalg.eig(regressor.kernel_mat.cpu().numpy())
     assert U.shape[0] == X_train.shape[0]
     assert U.shape[1] == X_train.shape[0]
     assert S.size == X_train.shape[0]
@@ -155,14 +154,7 @@ if __name__=="__main__":
       np.save(f, U)
     with open(args.output_folder + "/kernel_eigen_value.npy", "w") as f:
       np.save(f, S)
-    eigen_val = S
-    eigen_vec = U
-    reg_lambda = args.reg_lambda
-    y_gt = Y_train_orig
-    noise_sigma = args.fixed_design_noise_level
-    gamma = eigen_val / (eigen_val + float(reg_lambda) )
-    theory_test_error = (np.sum( (gamma - 1.0)**2 * (np.dot(eigen_vec.T, y_gt.reshape(y_gt.size, 1) ) ).reshape(gamma.size)**2) \
-       + np.sum(float(noise_sigma)**2 * gamma**2) + y_gt.size * float(noise_sigma)**2) / float(y_gt.size)
+    theory_test_error = expected_loss(args.reg_lambda, U, S, Y_train_orig, args.fixed_design_noise_level)
     print("fixed design theory test l2 loss", theory_test_error)
     
   train_error = regressor.get_train_error()

@@ -34,3 +34,18 @@ python rff_kernel_census.py --fixed_design --fixed_design_data_sample_int=1 --fi
 #   --n_fp_rff=128 --pca_rff_n_base_fp_feat=1024 --sigma=30.0 --random_seed=1 --reg_lambda=1e-6
 # python rff_kernel_census_bak_04_07.py --pca_rff --pca_rff_auto_scale --pca_rff_perc=0.0\
 #   --n_fp_rff=128 --pca_rff_n_base_fp_feat=1024 --sigma=30.0 --random_seed=1 --reg_lambda=1e-6
+
+# test auto pca quantizer
+#python rff_kernel_census.py --pca_rff --pca_rff_auto_scale --pca_rff_perc=0.0\
+#  --n_fp_rff=1024 --pca_rff_n_base_fp_feat=1024 --sigma=30.0 --random_seed=1 --reg_lambda=1e-6
+#
+#python rff_kernel_census.py --pca_rff --pca_rff_auto_scale --pca_rff_perc=1.0\
+#  --n_fp_rff=1024 --pca_rff_n_base_fp_feat=1024 --sigma=30.0 --random_seed=1 --reg_lambda=1e-6
+#
+#python rff_kernel_census.py --pca_rff --pca_rff_auto_scale --pca_rff_perc=10.0\
+#  --n_fp_rff=1024 --pca_rff_n_base_fp_feat=1024 --sigma=30.0 --random_seed=1 --reg_lambda=1e-6
+
+python rff_kernel_census.py --fixed_design --fixed_design_opt_reg --fixed_design_data_sample_int=1 --fixed_design_noise_level=1e5 --n_fp_rff=1024 --sigma=30.0 --random_seed=1 --n_bit=4 --output_folder="test/lp"
+
+#python rff_kernel_census.py --fixed_design --fixed_design_opt_reg --fixed_design_data_sample_int=1 --fixed_design_noise_level=1e5 --n_fp_rff=1024 --sigma=30.0 --random_seed=1 --do_fp --output_folder="test/fp"
+
