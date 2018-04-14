@@ -1,6 +1,9 @@
 import numpy as np
 
 def get_bits(spectrum, s, upper_bound=None):
+  '''
+  spectrum is the singular values of RFF matrix, not of the kernel matrix
+  '''
   assert type(upper_bound) == int
   nbits = np.maximum(np.log2(spectrum**2) + s, np.zeros(spectrum.size) )
   if upper_bound != None:
