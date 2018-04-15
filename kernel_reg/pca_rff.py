@@ -125,7 +125,7 @@ class PCA_RFF(RFF):
     #     np.min(test_val, axis=0) )
     #   np.testing.assert_array_almost_equal(np.percentile(fp_rff_x2.cpu().numpy(), q=100.0-quantizer.percentile, axis=0),
     #     np.max(test_val, axis=0) )
-
+    self.comp_coor1, self.comp_coor2 = rff_x1, rff_x2
     self.rff_x1, self.rff_x2 = rff_x1 + self.offset_rot, rff_x2 + self.offset_rot
     return torch.mm(self.rff_x1, torch.transpose(self.rff_x2, 0, 1) )
 
