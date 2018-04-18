@@ -4,9 +4,9 @@
 # In[1]:
 
 
-get_ipython().magic(u'load_ext autoreload')
-get_ipython().magic(u'autoreload 2')
-get_ipython().magic(u'matplotlib inline')
+# %load_ext autoreload
+# %autoreload 2
+# %matplotlib inline
 import matplotlib.pyplot as plt
 import argparse
 import numpy as np
