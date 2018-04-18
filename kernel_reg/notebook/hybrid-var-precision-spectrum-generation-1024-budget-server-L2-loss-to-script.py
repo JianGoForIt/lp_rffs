@@ -181,13 +181,13 @@ for seed in [1, 2, 3]:
         #         plt.ylim([1e-7, 1e3] )
         #         plt.legend(framealpha=0.3)
         #         plt.show()
-                with open("./tmp/fix_var_comp_l2_1024_memory_budget_0416_part2.1.pkl", "w") as f:
+                with open("/dfs/scratch0/zjian/lp_kernel/census_results_64_bit_fix_var_comp/fix_var_comp_l2_1024_memory_budget_0416_part2.1.pkl", "w") as f:
                     cp.dump(spectrum_dict, f)
 
 
 # In[ ]:
 
 
-with open("./tmp/fix_var_comp_l2_1024_memory_budget_0416_part2.1.pkl", "w") as f:
+with open("/dfs/scratch0/zjian/lp_kernel/census_results_64_bit_fix_var_comp/fix_var_comp_l2_1024_memory_budget_0416_part2.1.pkl", "w") as f:
     cp.dump(spectrum_dict, f)
 
