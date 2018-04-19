@@ -155,7 +155,7 @@ memory_budget = 1024.0
 
 # for baseline_bit in [4, 8, 2, 16]:
 for seed in [1, 2, 3]:
-    for baseline_bit in [2, 8]:
+    for baseline_bit in [2,]:
         for residual_bit in [8, 4, 2, 1]:
             for reg_lambda in [1e-6, 1e-5, 1e-4]:
                 if residual_bit >= baseline_bit:
@@ -167,7 +167,7 @@ for seed in [1, 2, 3]:
                     if average_bit_top_comp < residual_bit:
                         continue
                     for percentile in [0.0, 0.1, 1.0, 10.0]:
-                        label = "mem_budget_" + str(int(memory_budget) )                               + "_baseline_bit_" + str(int(baseline_bit) )                               + "_average_bit_top_comp_" + str(int(average_bit_top_comp) )                               + "_residual_bit_" + str(int(residual_bit) )                               + "_percentile_" + str(percentile)                               + "_seed_" + str(seed)
+                        label = "mem_budget_" + str(int(memory_budget) )                               + "_baseline_bit_" + str(int(baseline_bit) )                               + "_average_bit_top_comp_" + str(int(average_bit_top_comp) )                               + "_residual_bit_" + str(int(residual_bit) )                               + "_percentile_" + str(percentile)                               + "_lambda_" + str(reg_lambda)                               + "_seed_" + str(seed)
                         print label
                         spectrum = run_single_config(memory_budget=memory_budget, 
                                              baseline_bit=baseline_bit, 
@@ -181,13 +181,13 @@ for seed in [1, 2, 3]:
         #         plt.ylim([1e-7, 1e3] )
         #         plt.legend(framealpha=0.3)
         #         plt.show()
-                with open("./tmp/fix_var_comp_l2_1024_memory_budget_0416_part2.1.pkl", "w") as f:
+                with open("/dfs/scratch0/zjian/lp_kernel/census_results_64_bit_fix_var_comp/fix_var_comp_l2_1024_memory_budget_0416_part2.1.pkl", "w") as f:
                     cp.dump(spectrum_dict, f)
 
 
 # In[ ]:
 
 
-with open("./tmp/fix_var_comp_l2_1024_memory_budget_0416_part2.1.pkl", "w") as f:
+with open("/dfs/scratch0/zjian/lp_kernel/census_results_64_bit_fix_var_comp/fix_var_comp_l2_1024_memory_budget_0416_part2.1.pkl", "w") as f:
     cp.dump(spectrum_dict, f)
 

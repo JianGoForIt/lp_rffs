@@ -20,8 +20,8 @@ class PCA_RFFTopK(PCA_RFF):
     self.n_top_comp = n_top_comp
     self.residual_bit = residual_bit 
     rff = self.get_cos_feat(input)  
-    if rff.size(0) < self.n_feat:
-      raise Exception("number of samples should be large than the number of rff features for setup")    
+    # if rff.size(0) < self.n_feat:
+    #  raise Exception("number of samples should be large than the number of rff features for setup")    
     self.offset = rff.mean(0).unsqueeze(0) 
     rff_center = rff - self.offset.expand(rff.size(0), rff.size(1) )
     U, S, _ = np.linalg.svd(torch.transpose(rff_center, 0, 1).cpu().numpy().astype(np.float64), full_matrices=True)
@@ -32,6 +32,7 @@ class PCA_RFFTopK(PCA_RFF):
     self.bit_assignment_top_k = \
       binary_search_bits_assignment(np.abs(S[:self.n_top_comp] ), 
       self.top_k_mem_budget, upper_bound=bits_upperbound)
+    print("budget for top K", self.top_k_mem_budget, "top K", len(self.bit_assignment_top_k), "total rff", rff.size(1) )
     self.train_mode()
 
   def transform_cos_feat(self, rff):
