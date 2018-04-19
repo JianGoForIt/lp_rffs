@@ -32,6 +32,11 @@ args = parser.parse_args()
 
 if __name__ == "__main__":
 	use_cuda = torch.cuda.is_available() and args.cuda
+	torch.manual_seed(args.seed)
+	if use_cuda:
+    	torch.cuda.manual_seed(args.seed)
+		# torch.cuda.manual_seed_all(args.seed)
+
 	# load dataset
 	X_train, X_val, Y_train, Y_val = load_data(args.data_path)
 	X_train = torch.FloatTensor(X_train)
@@ -112,7 +117,7 @@ if __name__ == "__main__":
 				pred = model.predict(X)
 				correct_cnt += np.sum(pred == Y.data.cpu().numpy() )
 				sample_cnt += pred.size
-			eval_acc.append(correct_cnt / sample_cnt)
+			eval_acc.append(correct_cnt / float(sample_cnt) )
 			print("eval_acc at epoch ", epoch, "step", i, " iterations ", " acc ", eval_acc[-1] )
 		else:
 			l2_accum = 0.0
@@ -124,8 +129,8 @@ if __name__ == "__main__":
 				pred = model.predict(X)
 				l2_accum += np.sum( (pred - Y.data.cpu().numpy() )**2)
 				sample_cnt += pred.size
-			eval_l2.append(l2_accum / sample_cnt)
-			print("eval_l2 at epoch ", epoch, "step", i, i, " iterations ", " acc ", eval_l2[-1] )
+			eval_l2.append(l2_accum / float(sample_cnt) )
+			print("eval_l2 at epoch ", epoch, "step", i, i, " iterations ", " loss ", np.sqrt(eval_l2[-1] ) )
 
 
 		raw_input("waiting for")
