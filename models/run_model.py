@@ -31,6 +31,7 @@ args = parser.parse_args()
 
 
 if __name__ == "__main__":
+	use_cuda = torch.cuda.is_available() and args.cuda
 	# load dataset
 	X_train, X_val, Y_train, Y_val = load_data(args.data_path)
 	X_train = torch.FloatTensor(X_train)
@@ -63,14 +64,15 @@ if __name__ == "__main__":
 	if args.do_fp == False:
 		print("lp feature mode")
 		assert args.n_bit_feat >= 1
-		n_quantized_rff = int(np.floor(args.n_fp_rff / float(args.n_bit) * 32.0) )
+		n_quantized_rff = int(np.floor(args.n_fp_rff / float(args.n_bit_feat) * 32.0) )
 		kernel = RFF(n_quantized_rff, n_input_feat, kernel, rand_seed=args.random_seed)
 		min_val = -np.sqrt(2.0/float(n_quantized_rff) )
 		max_val = np.sqrt(2.0/float(n_quantized_rff) )
-		quantizer = Quantizer(args.n_bit, min_val, max_val, rand_seed=args.random_seed)
+		quantizer = Quantizer(args.n_bit_feat, min_val, max_val, rand_seed=args.random_seed)
 	else:
 		print("fp feature mode")
 		kernel = RFF(args.n_fp_rff, n_input_feat, kernel, rand_seed=args.random_seed)
+	kernel.torch(cuda=use_cuda)
 
 	if args.model == "logistic_regression":
 		model = LogisticRegression(input_dim=kernel.n_feat, 
@@ -90,7 +92,7 @@ if __name__ == "__main__":
 	for epoch in range(args.epoch):
 		for i, data in enumerate(train_loader):
 			X, Y = data
-			X = kernel.get_cos_feat(X.cpu().numpy(), dtype="float")
+			X = kernel.get_cos_feat(X, dtype="float")
 			X = Variable(X)
 			Y = Variable(Y)
 			loss = model.forward(X, Y)
@@ -104,7 +106,7 @@ if __name__ == "__main__":
 			correct_cnt = 0
 			for i, data in enumerate(val_loader):
 				X, Y = data
-				X = kernel.get_cos_feat(X.cpu().numpy(), dtype="float")
+				X = kernel.get_cos_feat(X, dtype="float")
 				X = Variable(X)
 				Y = Variable(Y)
 				pred = model.predict(X)
@@ -116,7 +118,7 @@ if __name__ == "__main__":
 			l2_accum = 0.0
 			for i, data in enumerate(val_loader):
 				X, Y = data
-				X = kernel.get_cos_feat(X.cpu().numpy(), dtype="float")
+				X = kernel.get_cos_feat(X, dtype="float")
 				X = Variable(X)
 				Y = Variable(Y)
 				pred = model.predict(X)
@@ -124,3 +126,6 @@ if __name__ == "__main__":
 				sample_cnt += pred.size
 			eval_l2.append(l2_accum / sample_cnt)
 			print("eval_l2 at epoch ", epoch, "step", i, i, " iterations ", " acc ", eval_l2[-1] )
+
+
+		raw_input("waiting for")
