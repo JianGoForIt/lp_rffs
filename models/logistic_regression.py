@@ -23,6 +23,11 @@ class LogisticRegression(torch.nn.Module):
       self.loss += self.reg_lambda * w.norm(2)**2
     return self.loss
 
+  def predict(self, x):
+    output = self.linear(x)
+    pred = output.data.cpu().numpy().argmax(axis=1)
+    return pred
+
 
 def logistic_regression_grad_test():
   n_sample = 4
