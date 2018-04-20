@@ -1,4 +1,45 @@
 import numpy as np
+import scipy.io as sio
+
+
+def load_data(path="../../data/census/census"):
+  X_train = sio.loadmat(path + "_train_feat.mat")
+  Y_train = sio.loadmat(path + "_train_lab.mat")
+  X_test = sio.loadmat(path + "_heldout_feat.mat")
+  Y_test = sio.loadmat(path + "_heldout_lab.mat")
+
+  if 'X_ho' in X_test.keys():
+    X_test = X_test['X_ho']
+  else:
+    X_test = X_test["fea"]
+  if "X_tr" in X_train.keys():
+    X_train = X_train['X_tr']
+  else:
+    X_train = X_train['fea']
+  if "Y_ho" in Y_test.keys():
+    Y_test = Y_test['Y_ho']
+  else:
+    Y_test = Y_test['lab']
+  if "Y_tr" in Y_train.keys():
+    Y_train = Y_train['Y_tr']
+  else:
+    Y_train = Y_train['lab']
+
+  # # DEBUG
+  # X_train, Y_train, X_test, Y_test = \
+  #   X_train[1:20, :], Y_train[1:20], X_test[1:10, :], Y_test[1:10]
+  # s = np.arange(X_train.shape[0] )
+  # np.random.seed(0)
+  # np.random.shuffle(s)
+  # X_train = X_train[s, :]
+  # Y_train = Y_train[s]
+  # X_train, Y_train, X_test, Y_test = \
+  # X_train[:(s.size * 1 / 5), :], Y_train[:(s.size * 1 / 5)], X_test[:(s.size * 1 / 5), :], Y_test[:(s.size * 2 / 3)]
+  assert X_train.shape[0] == Y_train.shape[0]
+  assert X_test.shape[0] == Y_test.shape[0]
+  assert X_train.shape[0] != X_test.shape[0]
+  return X_train, X_test, Y_train, Y_test
+
 
 def load_census_data(path="../../data/census/"):
   X_test = np.load(path + "X_ho.npy")
