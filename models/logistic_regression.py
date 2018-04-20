@@ -18,6 +18,8 @@ class LogisticRegression(torch.nn.Module):
 
   def forward(self, x, y):
     self.output = self.linear(x)
+    if len(list(y.size() ) ) == 2:
+        y = y.squeeze()
     self.loss = self.criterion(self.output, y)
     for w in self.parameters():
       self.loss += self.reg_lambda * w.norm(2)**2

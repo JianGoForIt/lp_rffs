@@ -36,24 +36,26 @@ if __name__ == "__main__":
     if use_cuda:
         torch.cuda.manual_seed(args.random_seed)
         # torch.cuda.manual_seed_all(args.seed)
-
     # load dataset
     X_train, X_val, Y_train, Y_val = load_data(args.data_path)
-    X_train = torch.FloatTensor(X_train)
-    X_val = torch.FloatTensor(X_val)
+    X_train = torch.FloatTensor(X_train.astype(np.float32) )
+    X_val = torch.FloatTensor(X_val.astype(np.float32) )
     if args.model == "ridge_regression":
-        Y_train = torch.FloatTensor(Y_train)        
-        Y_val = torch.FloatTensor(Y_val)
+        Y_train = torch.FloatTensor(Y_train.astype(np.float32) )        
+        Y_val = torch.FloatTensor(Y_val.astype(np.float32) )
     elif args.model == "logistic_regression":
         Y_train = Y_train.reshape( (Y_train.size) )
         Y_val = Y_val.reshape( (Y_val.size) )
         n_class = np.unique(np.hstack( (Y_train, Y_val) ) ).size
-        Y_train = torch.LongTensor(Y_train)
-        Y_val = torch.LongTensor(Y_val)
+        Y_train = torch.LongTensor(np.array(Y_train.tolist() ).reshape(Y_train.size, 1) )
+        Y_val = torch.LongTensor(np.array(Y_val.tolist() ).reshape(Y_val.size, 1) )
     else:
         raise Exception("model not supported")
-
-    print "before ", type(X_train), type(Y_train)
+    if use_cuda:
+        X_train = X_train.cuda()
+        Y_train = Y_train.cuda()
+        X_val = X_val.cuda()
+        Y_val = Y_val.cuda()
 
     # setup dataloader 
     train_data = \
@@ -84,6 +86,8 @@ if __name__ == "__main__":
             n_class=n_class, reg_lambda=args.l2_reg)
     elif args.model == "ridge_regression":
         model = RidgeRegression(input_dim=kernel.n_feat, reg_lambda=args.l2_reg)
+    if use_cuda:
+        model.cuda()    
 
     # set up optimizer
     optimizer = optim.SGD(model.parameters(), lr=args.learning_rate)
@@ -92,7 +96,7 @@ if __name__ == "__main__":
     train_loss = []
     if args.model == "logistic_regression":
         eval_acc = []
-    else:
+    else: 
         eval_l2 = []
     for epoch in range(args.epoch):
         for i, data in enumerate(train_loader):
@@ -100,6 +104,9 @@ if __name__ == "__main__":
             X = kernel.get_cos_feat(X, dtype="float")
             X = Variable(X)
             Y = Variable(Y)
+		
+            print "outside ", type(X.data), type(Y.data)
+
             loss = model.forward(X, Y)
             train_loss.append(loss[0] )
             loss.backward()

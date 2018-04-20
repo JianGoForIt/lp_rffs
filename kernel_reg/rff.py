@@ -47,8 +47,8 @@ class RFF(object):
     self.w = torch.FloatTensor(self.w)
     self.b = torch.FloatTensor(self.b)
     if cuda:
-      self.w.cuda()
-      self.b.cuda()
+      self.w = self.w.cuda()
+      self.b = self.b.cuda()
 
   def get_cos_feat(self, input_val, dtype="double"):
     # input are original representaiton with the shape [n_sample, n_dim]
