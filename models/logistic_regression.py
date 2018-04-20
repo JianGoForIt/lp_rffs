@@ -25,6 +25,15 @@ class LogisticRegression(torch.nn.Module):
       self.loss += self.reg_lambda * w.norm(2)**2
     return self.loss
 
+  # def forward(self, x, y):
+  #   self.output = self.linear(x)
+  #   if len(list(y.size() ) ) == 2:
+  #       y = y.squeeze()
+  #   # self.loss = self.criterion(self.output, y)
+  #   # for w in self.parameters():
+  #   #   self.loss += self.reg_lambda * w.norm(2)**2
+  #   return self.output
+
   def predict(self, x):
     output = self.linear(x)
     pred = output.data.cpu().numpy().argmax(axis=1)
