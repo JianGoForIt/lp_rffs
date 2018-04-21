@@ -251,7 +251,8 @@ if __name__ == "__main__":
             data_loader=train_loader, mu=args.halp_mu, bits=args.n_bit_model)
         print("model quantization, interval, mu, bit", optimizer.T, optimizer._mu, 
             optimizer._bits, optimizer._biased)
-
+    else:
+        raise Exception("optimizer not supported")
     # setup sgd training process
     train_loss = []
     if args.model == "logistic_regression":
