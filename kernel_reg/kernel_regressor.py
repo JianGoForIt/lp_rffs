@@ -2,17 +2,41 @@ import numpy as np
 import torch
 from rff import GaussianKernel, RFF
 from time import time
+import math
 
 class Quantizer(object):
-  def __init__(self, nbit, min_val, max_val, scale=None, rand_seed=1):
+  def __init__(self, nbit, min_val, max_val, scale=None, rand_seed=1, use_cuda=False):
     self.nbit = nbit
     self.min_val = min_val
     self.max_val = max_val
     if scale == None:
       self.scale = (max_val - min_val) / float(2**self.nbit - 1)
     self.rand_seed = rand_seed
+    self.use_cuda = use_cuda
 
-  def quantize_random(self, value, verbose=True):
+  def quantize_random(self, value, verbose=True, test=False):
+    bound = math.pow(2.0, self.nbit) - 1
+    min_val = 0.0
+    max_val = bound
+    # Generate tensor of random values from [0,1]
+    # np.random.seed(self.rand_seed)
+    if self.use_cuda:
+      if test:
+        adj_val = torch.cuda.Tensor(np.random.uniform(size=list(value.size() ) ) ).type(value.type() )
+      else:
+        adj_val = torch.cuda.Tensor(value.size()).type(value.type()).uniform_()
+    else:
+      if test:
+        adj_val = torch.Tensor(np.random.uniform(size=list(value.size() ) ) ).type(value.type() )
+      else:
+        adj_val = torch.Tensor(value.size()).type(value.type()).uniform_()
+    rounded = (value - self.min_val).div_(self.scale).add_(adj_val).floor_()
+    clipped_value = rounded.clamp_(min_val, max_val)
+    clipped_value *= self.scale 
+    quant_val = clipped_value + self.min_val
+    return quant_val
+
+  def quantize_random_old(self, value, verbose=True):
     floor_val = self.min_val + torch.floor( (value - self.min_val) / self.scale) * self.scale
     ceil_val = self.min_val + torch.ceil( (value - self.min_val) / self.scale) * self.scale
     # print("test in the middle ", torch.min(floor_val), torch.max(ceil_val), self.min_val, self.max_val)
@@ -32,10 +56,15 @@ class Quantizer(object):
       + ceil_val * (sample >= floor_prob).double()
     return quant_val
 
-  def quantize(self, value, verbose=True):
+  def quantize(self, value, verbose=True, test=False):
     # TODO update if we have other quantization schemes
     value = torch.clamp(value, self.min_val, self.max_val)
-    return self.quantize_random(value, verbose)
+    return self.quantize_random(value, verbose, test)
+
+  def quantize_old(self, value, verbose=True):
+    # TODO update if we have other quantization schemes
+    value = torch.clamp(value, self.min_val, self.max_val)
+    return self.quantize_random_old(value, verbose)
 
 
 class QuantizerAutoScale(Quantizer):
@@ -46,7 +75,7 @@ class QuantizerAutoScale(Quantizer):
     super(QuantizerAutoScale, self).__init__(nbit, min_val, max_val, scale=scale, rand_seed=rand_seed)
     self.percentile = percentile
 
-  def quantize(self, value, verbose=True):
+  def quantize(self, value, verbose=True, test=True):
     '''
     values come in the shape of [n_sample, n_feature]
     '''
@@ -63,7 +92,7 @@ class QuantizerAutoScale(Quantizer):
       value_np = value_np.reshape(value_np.size, 1)
     value = torch.DoubleTensor(value_np)
     # print self.scale, self.min_val, self.max_val, np.min(value_np, axis=0), np.max(value_np, axis=0)
-    return self.quantize_random(value, verbose)
+    return self.quantize_random(value, verbose, test)
 
 
 
@@ -133,7 +162,7 @@ def test_random_quantizer():
   shift = 1/3.0
   value = np.ones( (1000, 1000) ) * (lower + shift)
   value = torch.DoubleTensor(value)
-  quant_val = quantizer.quantize(value)
+  quant_val = quantizer.quantize(value, test=True)
   quant_val = quant_val.cpu().numpy()
   assert np.unique(quant_val).size == 2
   assert np.min(np.unique(quant_val) ) == lower
@@ -146,7 +175,7 @@ def test_random_quantizer():
   shift = 2/3.0
   value = np.ones( (1000, 1000) ) * (lower + shift)
   value = torch.DoubleTensor(value)
-  quant_val = quantizer.quantize(value)
+  quant_val = quantizer.quantize(value, test=True)
   quant_val = quant_val.cpu().numpy()
   assert np.unique(quant_val).size == 2
   assert np.min(np.unique(quant_val) ) == lower
@@ -159,7 +188,7 @@ def test_random_quantizer():
   shift = 0.5
   value = np.ones( (1000, 1000) ) * (lower + shift)
   value = torch.DoubleTensor(value)
-  quant_val = quantizer.quantize(value)
+  quant_val = quantizer.quantize(value, test=True)
   quant_val = quant_val.cpu().numpy()
   assert np.unique(quant_val).size == 2
   assert np.min(np.unique(quant_val) ) == lower
@@ -170,6 +199,23 @@ def test_random_quantizer():
   print("quantizer test passed!")
 
 
+def test_random_quantizer_fast_impl():
+  # this only works when use numpy setted seed in new fast random quantize implementation
+  quantizer = Quantizer(nbit=15, min_val=-2**14+1, max_val=2**14)
+  # test middle values
+  lower = 0.0
+  shift = 0.5
+  # value = np.ones( (1000, 1000) ) * (lower + shift)
+  value = np.random.uniform((1000, 1000)) * 2**14
+  value = torch.DoubleTensor(value)
+  quant_val = quantizer.quantize(value, test=True)
+  quant_val_old = quantizer.quantize_old(value)
+  quant_val = quant_val.cpu().numpy()
+  quant_val_old = quant_val_old.cpu().numpy()
+  np.testing.assert_array_almost_equal(quant_val, quant_val_old, decimal=9)
+  print("fast impl quantizer test passed!")
+
+
 def test_auto_scale_random_quantizer():
   quantizer = Quantizer(nbit=15, min_val=-1.0, max_val=1.0, rand_seed=1)
   quantizer_auto = QuantizerAutoScale(nbit=15, percentile=0, rand_seed=quantizer.rand_seed)
@@ -178,9 +224,11 @@ def test_auto_scale_random_quantizer():
   value[0, :] = -1.0  # make the two quanizer has the same scale
   value[-1, :] = 1.0
   value = torch.DoubleTensor(value)
-  quant_val = quantizer.quantize(value)
+  np.random.seed(quantizer.rand_seed)
+  quant_val = quantizer.quantize(value, test=True)
   quant_val = quant_val.cpu().numpy()
-  auto_quant_val = quantizer_auto.quantize(value)
+  np.random.seed(quantizer.rand_seed)
+  auto_quant_val = quantizer_auto.quantize(value, test=True)
   auto_quant_val = auto_quant_val.cpu().numpy()
   np.testing.assert_array_almost_equal(auto_quant_val, quant_val, decimal=7)
 
@@ -190,7 +238,8 @@ def test_auto_scale_random_quantizer():
   value[0, :] = -1.0  # make the two quanizer has the same scale
   value[-1, :] = 1.0
   value = torch.DoubleTensor(value)
-  auto_quant_val = quantizer_auto.quantize(value)
+  # np.random.seed(quantizer.rand_seed)
+  auto_quant_val = quantizer_auto.quantize(value, test=True)
   auto_quant_val = auto_quant_val.cpu().numpy()
   np.testing.assert_array_almost_equal(np.max(auto_quant_val, axis=0), 
     np.percentile(value.cpu().numpy(), q=90, axis=0) )
@@ -274,6 +323,7 @@ def test_kernel_ridge_regression2():
 
 
 if __name__ == "__main__":
+  test_random_quantizer_fast_impl()
   test_random_quantizer()
   test_auto_scale_random_quantizer()
   test_kernel_ridge_regression1()
