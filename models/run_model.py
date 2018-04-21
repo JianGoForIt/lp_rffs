@@ -10,12 +10,16 @@ import sys
 from copy import deepcopy
 sys.path.append("../kernel_reg")
 sys.path.append("../utils")
-sys.path.append("../../halp/optim")
-sys.path.append("../../halp")
+sys.path.append("../..")
 from rff import RFF, GaussianKernel
 from kernel_regressor import Quantizer
 from data_loader import load_data
-from halp import HALP
+import halp
+import halp.optim
+import halp.quantize
+# import halp.optim
+# from halp import LPSGD
+# from halp import HALP
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--model", type=str, default="logistic_regression")
@@ -26,16 +30,22 @@ parser.add_argument("--kernel_sigma", type=float, default=30.0)
 parser.add_argument("--n_fp_rff", type=int, default=32)
 parser.add_argument("--random_seed", type=int, default=1)
 parser.add_argument("--n_bit_feat", type=int, default=32)
-parser.add_argument("--do_fp", action="store_true")
+parser.add_argument("--n_bit_model", type=int, default=32)
+parser.add_argument("--scale_model", type=float, default=0.00001)
+parser.add_argument("--do_fp_model", action="store_true")
+parser.add_argument("--do_fp_feat", action="store_true")
 parser.add_argument("--learning_rate", type=float, default=0.1)
 parser.add_argument("--data_path", type=str, default="../data/census/")
 parser.add_argument("--epoch", type=int, default=40)
 parser.add_argument("--cuda", action="store_true")
 parser.add_argument("--opt", type=str, default="sgd")
+parser.add_argument("--halp_mu", type=float, default=10.0)
+parser.add_argument("--halp_epoch_T", type=float, default=1.0, 
+    help="The # of epochs as interval of full gradient calculation")
 args = parser.parse_args()
 
 
-def train(args, model, epoch, train_loader, val_loader):
+def train(args, model, epoch, train_loader, val_loader, optimizer, quantizer):
     for i, minibatch in enumerate(train_loader):
         X, Y = minibatch
         optimizer.zero_grad()
@@ -44,6 +54,9 @@ def train(args, model, epoch, train_loader, val_loader):
             def closure(data=X, target=Y):
                 # print "test 123", type(data), type(target)
                 data = kernel.get_cos_feat(data, dtype="float")
+                if quantizer != None:
+                    # print("halp use quantizer")
+                    data = quantizer.quantize(data)
                 if data.size(0) != target.size(0):
                     raise Exception("minibatch on data and target does not agree in closure")
                 if not isinstance(data, torch.autograd.variable.Variable):
@@ -59,6 +72,9 @@ def train(args, model, epoch, train_loader, val_loader):
             loss = optimizer.step(closure)
         else:
             X = kernel.get_cos_feat(X, dtype="float")
+            if quantizer != None:
+                # print("train use quantizer")
+                X = quantizer.quantize(X)
             X = Variable(X, requires_grad=False)
             Y = Variable(Y, requires_grad=False)
             loss = model.forward(X, Y)
@@ -74,6 +90,9 @@ def train(args, model, epoch, train_loader, val_loader):
         for i, minibatch in enumerate(val_loader):
             X, Y = minibatch
             X = kernel.get_cos_feat(X, dtype="float")
+            if quantizer != None:
+                # print("test use quantizer")
+                X = quantizer.quantize(X)
             X = Variable(X, requires_grad=False)
             Y = Variable(Y, requires_grad=False)
             pred = model.predict(X)
@@ -89,6 +108,9 @@ def train(args, model, epoch, train_loader, val_loader):
         for i, minibatch in enumerate(val_loader):
             X, Y = minibatch
             X = kernel.get_cos_feat(X, dtype="float")
+            if quantizer != None:
+                # print("test use quantizer")
+                X = quantizer.quantize(X)
             X = Variable(X, requires_grad=False)
             Y = Variable(Y, requires_grad=False)
             pred = model.predict(X)
@@ -147,7 +169,6 @@ class ProgressMonitor(object):
             return False
 
 
-
 if __name__ == "__main__":
     use_cuda = torch.cuda.is_available() and args.cuda
     torch.manual_seed(args.random_seed)
@@ -186,17 +207,20 @@ if __name__ == "__main__":
     # setup gaussian kernel
     n_input_feat = X_train.shape[1]
     kernel = GaussianKernel(sigma=args.kernel_sigma)    
-    if args.do_fp == False:
+    if args.do_fp_feat == False:
         print("lp feature mode")
         assert args.n_bit_feat >= 1
         n_quantized_rff = int(np.floor(args.n_fp_rff / float(args.n_bit_feat) * 32.0) )
         kernel = RFF(n_quantized_rff, n_input_feat, kernel, rand_seed=args.random_seed)
         min_val = -np.sqrt(2.0/float(n_quantized_rff) )
         max_val = np.sqrt(2.0/float(n_quantized_rff) )
-        quantizer = Quantizer(args.n_bit_feat, min_val, max_val, rand_seed=args.random_seed)
+        quantizer = Quantizer(args.n_bit_feat, min_val, max_val, 
+            rand_seed=args.random_seed, use_cuda=use_cuda)
+        print("feature quantization scale, bit ", quantizer.scale, quantizer.nbit)
     else:
         print("fp feature mode")
         kernel = RFF(args.n_fp_rff, n_input_feat, kernel, rand_seed=args.random_seed)
+        quantizer = None
     kernel.torch(cuda=use_cuda)
 
     if args.model == "logistic_regression":
@@ -213,9 +237,18 @@ if __name__ == "__main__":
     if args.opt == "sgd":
         print("using sgd optimizer")
         optimizer = optim.SGD(model.parameters(), lr=args.learning_rate)
+    elif args.opt == "lpsgd":
+        print("using lp sgd optimizer")
+        optimizer = halp.optim.LPSGD(model.parameters(), lr=args.learning_rate, 
+            scale_factor=args.scale_model, bits=args.n_bit_model)
+        print("model quantization scale and bit ", optimizer._scale_factor, optimizer._bits)
     elif args.opt == "halp":
         print("using halp optimizer")
-        optimizer = HALP(model.parameters(), lr=args.learning_rate, data_loader=train_loader)
+        optimizer = halp.optim.HALP(model.parameters(), lr=args.learning_rate, 
+            T=int(args.halp_epoch_T * X_train.size(0) / float(args.minibatch) ), 
+            data_loader=train_loader, mu=args.halp_mu, bits=args.n_bit_model)
+        print("model quantization, interval, mu, bit", optimizer.T, optimizer._mu, 
+            optimizer._bits, optimizer._biased)
 
     # setup sgd training process
     train_loss = []
@@ -231,44 +264,10 @@ if __name__ == "__main__":
         raise Exception("model not supported!")
     for epoch in range(args.epoch):  
         # change learning rate
-        metric = train(args, model, epoch, train_loader, val_loader)
+        metric = train(args, model, epoch, train_loader, val_loader, optimizer, quantizer)
+
+        # for param in optimizer._z:
+        #     print param
         # early_stop = monitor.end_of_epoch(metric, model, optimizer, epoch)
         # if early_stop:
         #     break
-
-        # # sanity check
-        # # perform evaluation
-        # sample_cnt = 0
-        # if args.model == "logistic_regression":
-        #     correct_cnt = 0
-        #     for i, minibatch in enumerate(val_loader):
-        #         X, Y = minibatch
-        #         X = kernel.get_cos_feat(X, dtype="float")
-        #         X = Variable(X, requires_grad=False)
-        #         Y = Variable(Y, requires_grad=False)
-        #         pred = model.predict(X)
-        #         correct_cnt += np.sum(pred.reshape(pred.size, 1) == Y.data.cpu().numpy() )
-        #         sample_cnt += pred.size
-        #         # print correct_cnt, sample_cnt
-        #     # print eval_acc
-        #     eval_acc.append(correct_cnt / float(sample_cnt) )
-        #     print("eval_acc at epoch ", epoch, "step", i, " iterations ", " acc ", eval_acc[-1] )
-        #     # return correct_cnt / float(sample_cnt)
-        # else:
-        #     l2_accum = 0.0
-        #     for i, minibatch in enumerate(val_loader):
-        #         X, Y = minibatch
-        #         X = kernel.get_cos_feat(X, dtype="float")
-        #         X = Variable(X, requires_grad=False)
-        #         Y = Variable(Y, requires_grad=False)
-        #         pred = model.predict(X)
-        #         l2_accum += np.sum( (pred.reshape(pred.size, 1) \
-        #             - Y.data.cpu().numpy().reshape(pred.size, 1) )**2)
-        #         sample_cnt += pred.size
-        #     eval_l2.append(l2_accum / float(sample_cnt) )
-        #     # print("eval_l2 at epoch ", epoch, "step", i, i, " iterations ", " loss ", np.sqrt(eval_l2[-1] ) )
-        #     # return np.sqrt(l2_accum / float(sample_cnt) )
-
-
-
-
