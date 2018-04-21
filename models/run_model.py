@@ -6,7 +6,7 @@ import numpy as np
 from logistic_regression import LogisticRegression
 from ridge_regression import RidgeRegression
 import argparse
-import sys
+import sys, os
 from copy import deepcopy
 sys.path.append("../kernel_reg")
 sys.path.append("../utils")
@@ -42,6 +42,7 @@ parser.add_argument("--opt", type=str, default="sgd")
 parser.add_argument("--halp_mu", type=float, default=10.0)
 parser.add_argument("--halp_epoch_T", type=float, default=1.0, 
     help="The # of epochs as interval of full gradient calculation")
+parser.add_argument("--save_path", type=str, default="./test")
 args = parser.parse_args()
 
 
@@ -70,6 +71,7 @@ def train(args, model, epoch, train_loader, val_loader, optimizer, quantizer):
                 cost.backward()
                 return cost
             loss = optimizer.step(closure)
+            train_loss.append(loss[0].data.cpu().numpy() )
         else:
             X = kernel.get_cos_feat(X, dtype="float")
             if quantizer != None:
@@ -78,7 +80,7 @@ def train(args, model, epoch, train_loader, val_loader, optimizer, quantizer):
             X = Variable(X, requires_grad=False)
             Y = Variable(Y, requires_grad=False)
             loss = model.forward(X, Y)
-            train_loss.append(loss[0] )
+            train_loss.append(loss[0].data.cpu().numpy() )
             loss.backward()
             optimizer.step()
         # print("epoch ", epoch, "step", i, "loss", loss[0] )
@@ -265,6 +267,16 @@ if __name__ == "__main__":
     for epoch in range(args.epoch):  
         # change learning rate
         metric = train(args, model, epoch, train_loader, val_loader, optimizer, quantizer)
+
+        if not os.path.isdir(args.save_path):
+            os.makedirs(args.save_path)
+        np.savetxt(args.save_path + "/train_loss.txt", train_loss)
+        if args.model == "logistic_regression":
+            np.savetxt(args.save_path + "/eval_metric.txt", eval_acc)
+        elif args.model == "ridge_regression":
+            np.savetxt(args.save_path + "/eval_metric.txt", eval_l2)
+        else:
+            raise Exception("model not supported!")
 
         # for param in optimizer._z:
         #     print param
