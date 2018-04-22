@@ -14,19 +14,21 @@ class Quantizer(object):
     self.rand_seed = rand_seed
     self.use_cuda = use_cuda
 
-  def quantize_random(self, value, verbose=True, test=False):
+  def quantize_random(self, value, verbose=True, fixed_seed=False):
     bound = math.pow(2.0, self.nbit) - 1
     min_val = 0.0
     max_val = bound
     # Generate tensor of random values from [0,1]
     # np.random.seed(self.rand_seed)
     if self.use_cuda:
-      if test:
+      if fixed_seed:
+        np.random.seed(self.rand_seed)
         adj_val = torch.cuda.FloatTensor(np.random.uniform(size=list(value.size() ) ) ).type(value.type() )
       else:
         adj_val = torch.cuda.FloatTensor(value.size()).type(value.type()).uniform_()
     else:
-      if test:
+      if fixed_seed:
+        np.random.seed(self.rand_seed)
         adj_val = torch.Tensor(np.random.uniform(size=list(value.size() ) ) ).type(value.type() )
       else:
         adj_val = torch.Tensor(value.size()).type(value.type()).uniform_()
@@ -56,10 +58,10 @@ class Quantizer(object):
       + ceil_val * (sample >= floor_prob).double()
     return quant_val
 
-  def quantize(self, value, verbose=True, test=False):
+  def quantize(self, value, verbose=True, fixed_seed=False):
     # TODO update if we have other quantization schemes
     value = torch.clamp(value, self.min_val, self.max_val)
-    return self.quantize_random(value, verbose, test)
+    return self.quantize_random(value, verbose, fixed_seed)
 
   def quantize_old(self, value, verbose=True):
     # TODO update if we have other quantization schemes

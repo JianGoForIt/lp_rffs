@@ -71,13 +71,17 @@ class PCA_RFF(RFF):
     for i, nbits in enumerate(self.bit_assignment):
       if nbits == 0:
         rff_x1[:, i] = 0.0
-        rff_x2[:, i] = 0.0
+#        rff_x2[:, i] = 0.0
         continue
       if quantizer1 != None:
         # abs(eigen value) / sqrt(n_sample) is the std on the corresponding dimension
         min_val = -self.std[i] * self.mu
         max_val = self.std[i] * self.mu
         quantizer = quantizer1(nbits, min_val, max_val, rand_seed=self.rand_seed)
+        if i == 0:
+          # we only set seed once to make sure x1 and x2 are consistent and each feature colu
+          # is independent
+          np.random.seed(self.rand_seed)
 #                 print("quantization 1 activated ", X1.shape)
 #                 print("quantizer 1 bits", quantizer.nbit)
 #                 print("quantizer 1 scale", quantizer.scale)
@@ -92,10 +96,17 @@ class PCA_RFF(RFF):
         else:
           assert np.abs( ( (rff_x1[-1, i] - quantizer.min_val) / quantizer.scale) \
                       - float(round( (rff_x1[-1, i] - quantizer.min_val) / quantizer.scale, 0) ) ) <= 1e-6
+ 
+    for i, nbits in enumerate(self.bit_assignment):
+      if nbits == 0:
+        rff_x2[:, i] = 0.0
+        continue
       if quantizer2 != None:
         min_val = -self.std[i] * self.mu
         max_val = self.std[i] * self.mu
         quantizer = quantizer2(nbits, min_val, max_val, rand_seed=self.rand_seed)
+        if i == 0:
+          np.random.seed(self.rand_seed)
 #                 print("quantization 2 activated ", X2.shape)
 #                 print("quantizer 2 bits", quantizer.nbit)
 #                 print("quantizer 2 scale", quantizer.scale)

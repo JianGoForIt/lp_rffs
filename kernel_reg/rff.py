@@ -90,11 +90,13 @@ class RFF(object):
     rff_x1 = self.get_cos_feat(X1)
     rff_x2 = self.get_cos_feat(X2)
     if quantizer1 != None:
+      np.random.seed(quantizer1.rand_seed)
       # print("quantization 1 activated ", X1.shape)
       # print("quantizer 1 bits", quantizer1.nbit)
       # print("quantizer 1 scale", quantizer1.scale)
       rff_x1 = quantizer1.quantize(rff_x1)
     if quantizer2 != None:
+      np.random.seed(quantizer2.rand_seed)
       # print("quantization 2 activated ", X2.shape)
       # print("quantizer 2 bits", quantizer2.nbit)
       # print("quantizer 2 scale", quantizer2.scale)

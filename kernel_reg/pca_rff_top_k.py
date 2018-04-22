@@ -99,10 +99,12 @@ class PCA_RFFTopK(PCA_RFF):
     rff_x2 = self.get_cos_feat(X2)
     rff_x2_top_k, rff_x2_residual = self.transform_cos_feat(rff_x2)
     self.rff_x1_residual_raw, self.rff_x2_residual_raw = rff_x1_residual.clone(), rff_x2_residual.clone()
-
+    
+    np.random.seed(self.rand_seed)
     rff_x1_top_k = self.apply_quantization(rff_x1_top_k, quantizer1, self.bit_assignment_top_k)
-    rff_x2_top_k = self.apply_quantization(rff_x2_top_k, quantizer2, self.bit_assignment_top_k)
     rff_x1_residual = self.apply_quantization(rff_x1_residual, quantizer1, [self.residual_bit]*self.n_feat)
+    np.random.seed(self.rand_seed)
+    rff_x2_top_k = self.apply_quantization(rff_x2_top_k, quantizer2, self.bit_assignment_top_k)
     rff_x2_residual = self.apply_quantization(rff_x2_residual, quantizer2, [self.residual_bit]*self.n_feat)    
     self.rff_x1_top_k, self.rff_x2_top_k = rff_x1_top_k, rff_x2_top_k
     self.rff_x1_residual, self.rff_x2_residual = rff_x1_residual, rff_x2_residual
