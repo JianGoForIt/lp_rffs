@@ -32,8 +32,9 @@ from misc_utils import Args
 # In[17]:
 
 
-top_comp_perc_list = [5]
-reg_lambda_list = [1e-5, 1e-4, 1e-3]
+top_comp_perc_list = [5, 1, 10]
+reg_lambda_list = [1e-5, 1e-4]
+save_suffix = "part1.1"
 
 
 # In[18]:
@@ -171,13 +172,13 @@ for seed in [1, 2, 3]:
                                              reg_lambda=reg_lambda, seed=seed)
                         spectrum_dict[label] = spectrum
                         cnt += 1
-                    with open("/dfs/scratch0/zjian/lp_kernel/census_results_64_bit_fix_var_comp_top_comp_perc/fix_var_comp_l2_1024_memory_budget_0421_part1.1.pkl", "w") as f:
+                    with open("/dfs/scratch0/zjian/lp_kernel/census_results_64_bit_fix_var_comp_top_comp_perc/fix_var_comp_l2_1024_memory_budget_0421_" + save_suffix + ".pkl", "w") as f:
                         cp.dump(spectrum_dict, f)
 
 
 # In[ ]:
 
 
-# with open("/dfs/scratch0/zjian/lp_kernel/census_results_64_bit_fix_var_comp_top_comp_perc/fix_var_comp_l2_1024_memory_budget_0421_part1.1.pkl", "w") as f:
-#     cp.dump(spectrum_dict, f)
+with open("/dfs/scratch0/zjian/lp_kernel/census_results_64_bit_fix_var_comp_top_comp_perc/fix_var_comp_l2_1024_memory_budget_0421_" + save_suffix + ".pkl", "w") as f:
+    cp.dump(spectrum_dict, f)
 
