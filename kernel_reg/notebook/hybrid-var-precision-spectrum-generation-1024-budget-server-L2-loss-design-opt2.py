@@ -33,8 +33,8 @@ from misc_utils import Args
 
 
 top_comp_perc_list = [5, 1, 10]
-reg_lambda_list = [1e-5, 1e-4]
-save_suffix = "part1.1"
+reg_lambda_list = [1e-1, 1e0]
+save_suffix = "part1.3"
 
 
 # In[18]:
