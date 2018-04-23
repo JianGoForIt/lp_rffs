@@ -18,7 +18,7 @@ for seed in 1 2 3
         for lr in ${lr_in} #0.5 0.1
           do
           # run lp sgd
-            for scale in 1e-6 1e-5 1e-4 1e-3 1e-2 1e-1 1e0 1e1
+            for scale in 1e0 1e1 1e2 1e3 1e4 1e-6 1e-5 1e-4 1e-3 1e-2 1e-1 #1e0 1e1 1e2 1e3 1e4
               do
                 python run_model.py --model=ridge_regression --minibatch=250 --l2_reg=0.0 \
                   --kernel_sigma=30.0 --n_fp_rff=${budget_rff_number} --random_seed=${seed} --learning_rate=${lr} \
@@ -26,25 +26,25 @@ for seed in 1 2 3
                   --n_bit_model=${model_bit} --scale_model=${scale} --cuda --n_bit_feat=${feat_bit_in} \
                   --save_path=/dfs/scratch0/zjian/lp_kernel/census_results_sgd_lp_model_lp_feat/lpsgd_lr_${lr}_model_bits_${model_bit}_scale_${scale}_seed_${seed}
               done 
-            # run halp 
-            for mu in 1e-3 1e-2 1e-1 1e0 1e1 1e2 1e3 1e4
-              do
-                python run_model.py --model=ridge_regression --minibatch=250 --l2_reg=0.0 \
-                  --kernel_sigma=30.0 --n_fp_rff=${budget_rff_number} --random_seed=${seed} --learning_rate=${lr} \
-                  --data_path=/dfs/scratch0/zjian/data/lp_kernel_data/census --opt=halp --epoch=250 \
-                  --halp_mu=${mu} --halp_epoch_T=2.0 --cuda --n_bit_model=${model_bit} --n_bit_feat=${feat_bit_in} \
-                  --save_path=/dfs/scratch0/zjian/lp_kernel/census_results_sgd_lp_model_lp_feat/halp_lr_${lr}_model_bits_${model_bit}_mu_${mu}_epoch_T_2.0_seed_${seed}
-              done
+#            # run halp 
+#            for mu in 1e-3 1e-2 1e-1 1e0 1e1 1e2 1e3 1e4
+#              do
+#                python run_model.py --model=ridge_regression --minibatch=250 --l2_reg=0.0 \
+#                  --kernel_sigma=30.0 --n_fp_rff=${budget_rff_number} --random_seed=${seed} --learning_rate=${lr} \
+#                  --data_path=/dfs/scratch0/zjian/data/lp_kernel_data/census --opt=halp --epoch=250 \
+#                  --halp_mu=${mu} --halp_epoch_T=2.0 --cuda --n_bit_model=${model_bit} --n_bit_feat=${feat_bit_in} \
+#                  --save_path=/dfs/scratch0/zjian/lp_kernel/census_results_sgd_lp_model_lp_feat/halp_lr_${lr}_model_bits_${model_bit}_mu_${mu}_epoch_T_2.0_seed_${seed}
+#              done
 
-            # run bit centering
-            for mu in 1e-3 1e-2 1e-1 1e0 1e1 1e2 1e3 1e4
-              do
-                python run_model_bit_center.py --model=ridge_regression --minibatch=250 --l2_reg=0.0 \
-                  --kernel_sigma=30.0 --n_fp_rff=${budget_rff_number} --random_seed=${seed} --learning_rate=${lr} \
-                  --data_path=/dfs/scratch0/zjian/data/lp_kernel_data/census --opt=halp --epoch=100 \
-                  --halp_mu=${mu} --halp_epoch_T=2.0 --cuda --n_bit_model=${model_bit} --n_bit_feat=${feat_bit_in} \
-                  --save_path=/dfs/scratch0/zjian/lp_kernel/census_results_sgd_lp_model_lp_feat/bit_center_lr_${lr}_model_bits_${model_bit}_mu_${mu}_epoch_T_2.0_seed_${seed}
-              done
+#            # run bit centering
+#            for mu in 1e-3 1e-2 1e-1 1e0 1e1 1e2 1e3 1e4
+#              do
+#                python run_model_bit_center.py --model=ridge_regression --minibatch=250 --l2_reg=0.0 \
+#                  --kernel_sigma=30.0 --n_fp_rff=${budget_rff_number} --random_seed=${seed} --learning_rate=${lr} \
+#                  --data_path=/dfs/scratch0/zjian/data/lp_kernel_data/census --opt=halp --epoch=100 \
+#                  --halp_mu=${mu} --halp_epoch_T=2.0 --cuda --n_bit_model=${model_bit} --n_bit_feat=${feat_bit_in} \
+#                  --save_path=/dfs/scratch0/zjian/lp_kernel/census_results_sgd_lp_model_lp_feat/bit_center_lr_${lr}_model_bits_${model_bit}_mu_${mu}_epoch_T_2.0_seed_${seed}
+#              done
           done
       done
   done

@@ -238,17 +238,17 @@ if __name__ == "__main__":
     # set up optimizer
     if args.opt == "sgd":
         print("using sgd optimizer")
-        optimizer = optim.SGD(model.parameters(), lr=args.learning_rate)
+        optimizer = optim.SGD(model.parameters(), lr=args.learning_rate, weight_decay=args.l2_reg)
     elif args.opt == "lpsgd":
         print("using lp sgd optimizer")
         optimizer = halp.optim.LPSGD(model.parameters(), lr=args.learning_rate, 
-            scale_factor=args.scale_model, bits=args.n_bit_model)
+            scale_factor=args.scale_model, bits=args.n_bit_model, weight_decay=args.l2_reg)
         print("model quantization scale and bit ", optimizer._scale_factor, optimizer._bits)
     elif args.opt == "halp":
         print("using halp optimizer")
         optimizer = halp.optim.HALP(model.parameters(), lr=args.learning_rate, 
             T=int(args.halp_epoch_T * X_train.size(0) / float(args.minibatch) ), 
-            data_loader=train_loader, mu=args.halp_mu, bits=args.n_bit_model)
+            data_loader=train_loader, mu=args.halp_mu, bits=args.n_bit_model, weight_decay=args.l2_reg)
         print("model quantization, interval, mu, bit", optimizer.T, optimizer._mu, 
             optimizer._bits, optimizer._biased)
     else:

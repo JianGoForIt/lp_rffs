@@ -19,8 +19,8 @@ class RidgeRegression(torch.nn.Module):
 	def forward(self, x, y):
 		self.output = self.linear(x)
 		self.loss = self.criterion(self.output, y)
-		for w in self.parameters():
-			self.loss += self.reg_lambda * w.norm(2)**2
+		#for w in self.parameters():
+		#	self.loss += self.reg_lambda * w.norm(2)**2
 		return self.loss
 
 	def predict(self, x):
