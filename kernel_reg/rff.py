@@ -43,14 +43,42 @@ class RFF(object):
     np.random.seed(self.rand_seed)
     self.b = np.random.uniform(low=0.0, high=2.0 * np.pi, size=(self.n_feat, 1) )
 
-  def get_cos_feat(self, input_val):
+  def torch(self, cuda=False):
+    self.w = torch.FloatTensor(self.w)
+    self.b = torch.FloatTensor(self.b)
+    if cuda:
+      self.w = self.w.cuda()
+      self.b = self.b.cuda()
+
+  def get_cos_feat(self, input_val, dtype="double"):
     # input are original representaiton with the shape [n_sample, n_dim]
-    self.input = input_val.T
     if isinstance(self.kernel, GaussianKernel):
-      self.feat = np.sqrt(2/float(self.n_feat) ) * np.cos(np.dot(self.w, self.input) + self.b)
+      if isinstance(input_val, np.ndarray):
+        self.input = input_val.T
+        self.feat = np.sqrt(2/float(self.n_feat) ) * np.cos(np.dot(self.w, self.input) + self.b)
+        if dtype=="double":
+          return torch.DoubleTensor(self.feat.T)
+        else:
+          return torch.FloatTensor(self.feat.T)
+      else:
+        self.input = torch.transpose(input_val, 0, 1)
+        self.feat = float(np.sqrt(2/float(self.n_feat) ) ) * torch.cos(torch.mm(self.w, self.input) + self.b)
+        return torch.transpose(self.feat, 0, 1)
     else:
       raise Exception("the kernel type is not supported yet")
-    return torch.DoubleTensor(self.feat.T)
+
+
+  # def get_cos_feat_backup(self, input_val, dtype="double"):
+  #   # input are original representaiton with the shape [n_sample, n_dim]
+  #   self.input = input_val.T
+  #   if isinstance(self.kernel, GaussianKernel):
+  #     self.feat = np.sqrt(2/float(self.n_feat) ) * np.cos(np.dot(self.w, self.input) + self.b)
+  #   else:
+  #     raise Exception("the kernel type is not supported yet")
+  #   if dtype=="double":
+  #     return torch.DoubleTensor(self.feat.T)
+  #   else:
+  #     return torch.FloatTensor(self.feat.T)
 
   def get_sin_cos_feat(self, input_val):
     pass
@@ -62,11 +90,13 @@ class RFF(object):
     rff_x1 = self.get_cos_feat(X1)
     rff_x2 = self.get_cos_feat(X2)
     if quantizer1 != None:
+      np.random.seed(quantizer1.rand_seed)
       # print("quantization 1 activated ", X1.shape)
       # print("quantizer 1 bits", quantizer1.nbit)
       # print("quantizer 1 scale", quantizer1.scale)
       rff_x1 = quantizer1.quantize(rff_x1)
     if quantizer2 != None:
+      np.random.seed(quantizer2.rand_seed)
       # print("quantization 2 activated ", X2.shape)
       # print("quantizer 2 bits", quantizer2.nbit)
       # print("quantizer 2 scale", quantizer2.scale)
@@ -91,7 +121,27 @@ def test_rff_generation():
   np.testing.assert_array_almost_equal(approx_kernel_mat.cpu().numpy(), kernel_mat.cpu().numpy(), decimal=3)
   print("rff generation test passed!")
 
+def test_rff_generation2():
+  n_feat = 10
+  n_rff_feat = 1000000
+  input_val  = np.ones( [2, n_feat] )
+  input_val[0, :] *= 1
+  input_val[0, :] *= 2
+  # get exact gaussian kernel
+  kernel = GaussianKernel(sigma=2.0)
+  # kernel_mat = kernel.get_kernel_matrix(input_val, input_val)
+  # get RFF approximate kernel matrix
+  rff = RFF(n_rff_feat, n_feat, kernel=kernel)
+  rff.get_gaussian_wb()
+  approx_kernel_mat = rff.get_kernel_matrix(input_val, input_val)
+  rff.torch(cuda=False)
+  approx_kernel_mat2 = rff.get_kernel_matrix(torch.FloatTensor(input_val), torch.FloatTensor(input_val) )
+  np.testing.assert_array_almost_equal(approx_kernel_mat.cpu().numpy(), approx_kernel_mat2.cpu().numpy(), decimal=6)
+  print("rff generation test 2 passed!")
+
+
 if __name__ == "__main__":
   test_rff_generation()
+  test_rff_generation2()
 
 

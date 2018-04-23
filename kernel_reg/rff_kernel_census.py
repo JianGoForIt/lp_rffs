@@ -9,6 +9,11 @@ from data_loader import load_census_data
 from rff import GaussianKernel, RFF
 from pca_rff import PCA_RFF
 from kernel_regressor import Quantizer, QuantizerAutoScale, KernelRidgeRegression
+from misc_utils import expected_loss
+from scipy.optimize import minimize
+
+# epsilon for numerical protection
+EPS=1e-9
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--n_fp_rff", type=int, default=100)
@@ -37,6 +42,8 @@ parser.add_argument("--fixed_design_data_sample_int", type=int, default=1,
   help="indicate the interval to sample train data to use for the fixed design run")
 parser.add_argument("--fixed_design_noise_level", type=float, default=0.0,
   help="noise sigma in fixed design experiments")
+parser.add_argument("--fixed_design_opt_reg", action="store_true", 
+  help="use numerical optimization to find the optimal lambda given kernel matrix")
 args = parser.parse_args()
 
 
@@ -49,6 +56,7 @@ if __name__=="__main__":
     X_test = X_train
     Y_test = Y_train.copy()
     if args.fixed_design_noise_level != 0.0:
+      Y_train_orig = Y_train.copy()
       # fixed_design_noise_level = \
       #   np.linalg.norm(Y_train) / np.sqrt(float(Y_train.size) ) * args.fixed_design_rel_noise_level
       Y_train += np.random.normal(scale=args.fixed_design_noise_level, size=Y_train.shape)
@@ -117,24 +125,41 @@ if __name__=="__main__":
       config_name = "lp_rff_lambda_" + str(args.reg_lambda) + "_sigma_" \
         + str(args.sigma) + "_n_fp_rff_" + str(args.n_fp_rff) + "_nbit_" + str(args.n_bit) 
 
+  # if use auto opt lambda for fixed, we need to predecide the opt value
+  if args.fixed_design and args.fixed_design_opt_reg:
+    # get kernel matrix and get the decomposition
+    kernel_mat = kernel.get_kernel_matrix(X_train, X_train, quantizer_train, quantizer_train)
+    S, U = np.linalg.eigh(kernel_mat.cpu().numpy() )
+    # numerically figure out the best lambda in the fixed design setting
+    x0 = 1.0 
+    f = lambda lam: expected_loss(lam,U,S,Y_train_orig,args.fixed_design_noise_level)
+    res = minimize(f, x0, bounds=[(0.0, None)], options={'xtol': 1e-6, 'disp': True})
+    loss = f(res.x)
+    print("fixed design opt reg and loss", res.x, loss)
+    args.reg_lambda = res.x[0] + EPS 
+
   regressor = KernelRidgeRegression(kernel, reg_lambda=args.reg_lambda)
   print("start to do regression!")
   # print("test quantizer", quantizer)
   regressor.fit(X_train, Y_train, quantizer=quantizer_train)
   print("finish regression!")
-  if args.fixed_design and args.reg_lambda == 1e-6: # avoid save duplicated matrix to save disk
+  if args.fixed_design and (args.reg_lambda == 1e-6 or args.fixed_design_opt_reg): 
+    # avoid save duplicated matrix to save disk, and use this branch when we want to auto get the opt_reg for fixed design
     print("saving eigen value and vectors")
-    # U, S, _ = np.linalg.svd(regressor.kernel.rff_x1.cpu().numpy(), full_matrices=False)
-    S, U = np.linalg.eig(regressor.kernel_mat.cpu().numpy())
+    if not args.fixed_design_opt_reg:
+      S, U = np.linalg.eigh(regressor.kernel_mat.cpu().numpy())
     assert U.shape[0] == X_train.shape[0]
     assert U.shape[1] == X_train.shape[0]
     assert S.size == X_train.shape[0]
-    if not os.path.isdir(args.output_folder):
-      os.makedirs(args.output_folder)
-    with open(args.output_folder + "/kernel_eigen_vector.npy", "w") as f:
-      np.save(f, U)
-    with open(args.output_folder + "/kernel_eigen_value.npy", "w") as f:
-      np.save(f, S)
+    #if not os.path.isdir(args.output_folder):
+    #  os.makedirs(args.output_folder)
+    #with open(args.output_folder + "/kernel_eigen_vector.npy", "w") as f:
+    #  np.save(f, U)
+    #with open(args.output_folder + "/kernel_eigen_value.npy", "w") as f:
+    #  np.save(f, S)
+    theory_test_error = expected_loss(args.reg_lambda, U, S, Y_train_orig, args.fixed_design_noise_level)
+    print("fixed design theory test l2 loss", theory_test_error)
+    
   train_error = regressor.get_train_error()
   if args.pca_rff:
     regressor.kernel.test_mode()
@@ -164,6 +189,9 @@ if __name__=="__main__":
   dict_res = {"train_l2_error": train_error,
     "test_l2_error": test_error, "train_approx_error": kernel_mat_approx_error_train,
     "test_approx_error": kernel_mat_approx_error_test}
+  if 'theory_test_error' in locals():
+    print("saving theory test l2 loss")
+    dict_res["theory_test_l2_error"] = theory_test_error
   with open(args.output_folder + "/results.pkl", "w") as f:
     cp.dump(dict_res, f)
 

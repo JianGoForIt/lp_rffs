@@ -1,6 +1,9 @@
 import numpy as np
 
 def get_bits(spectrum, s, upper_bound=None):
+  '''
+  spectrum is the singular values of RFF matrix, not of the kernel matrix
+  '''
   assert type(upper_bound) == int
   nbits = np.maximum(np.log2(spectrum**2) + s, np.zeros(spectrum.size) )
   if upper_bound != None:
@@ -26,7 +29,7 @@ def binary_search_bits_assignment(spectrum, n_fp_feat_budget, left=-2000.0, righ
     middle = (left + right) / 2.0
     n_fp_feat, nbits = get_n_fp_feat(spectrum, middle, upper_bound)
     if n_fp_feat == n_fp_feat_budget:
-      print("found exact assignment plan", nbits)
+      print("found exact assignment plan")#, nbits)
       best_sol = nbits
       best_n_fp_feat = n_fp_feat
       break
