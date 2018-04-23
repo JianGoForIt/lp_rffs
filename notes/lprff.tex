@@ -186,6 +186,7 @@ In the left plot, we surprisingly see that for 4-bit precision and above, the ``
 \label{sec:spectrum}
 In this section, we analyze the effect that using low-precision has on the spectrum of the approximated kernel matrix.  We will be quantifying the size of the gap between the low-precision spectrum, and the full-precision spectrum.  We will now show that randomly quantizing an RFF matrix $Z$ with zero-mean noise ``elevates'' the spectrum of the quantized matrix (relative to the full precision matrix):
 \begin{proposition}
+	\label{prop:traceNoise}
 	Let $Z$ be an $n$ by $d$ RFF matrix whose $i^{th}$ row is $z(x_i)$, and let $C$ denote the zero mean random quantization noise which is added to $Z$.  If $\lambda$ denotes the spectrum of $ZZ^T$, and $\tlambda$ denotes the spectrum of $(Z+C)(Z+C)^T$, it follows that $\expect{}{\sum_i \lambda_i} = n$, while $\expect{}{\sum_i \tlambda_i} \leq n + \frac{2n}{(2^b-1)^2}$.
 \end{proposition}
 \begin{proof}
@@ -389,6 +390,30 @@ We simplify the expression from Ryan Tibshirani's course notes, using the facts 
 \end{proof}
 
 This result shows the fundamental relationship between the spectrum of the kernel matrix, and the generalization performance of the regression model.
+
+\subsection{When is it safe to use low precision?}
+Basic idea: If the optimal choice of $\lambda$ is much larger than the average amount of noise added to each element of the diagonal when using $b$ bits of precision, then it is safe to use $b$ bits.  In particular, if we assume that $c = \frac{2n}{d(2^b -1)^2}$ (see Proposition \ref{prop:traceNoise}) is added to each of the first $d$ eigenvalues of the kernel approximation matrix when using $b$ bits, we get the following bound on the loss:
+
+$$L(\tilde{\gamma}) \leq L(\gamma) + \frac{\|y\|^2}{n}\bigg(\frac{c}{c+\lambda}\bigg)^2 + 3\sigma^2\frac{c}{c+\lambda}.$$
+
+Thus, if $\lambda >> c$, then the expected generalization performance of the model trained on full-precision RFFs will be similar to one trained on $b$ bit RFFs.  If this is true at $\lambda^*$ (best regularizer for full-precision features), then we know that the best performing full precision model won't be much better than the low-precision model using the same regularization constant.
+
+Thus, we turn our attention to understanding in what cases $\lambda^* >> c = \frac{2n}{d(2^b -1)^2}$.  This boils down to studying factors result in high values of $\lambda^*$, and which result in low-values.
+
+We are interested in the value of $\lambda$ that minimizes the expression:
+$$L(\lambda) = \frac{1}{n}\sum_{i=1}^n \bigg(\frac{\lambda}{\sigma_i + \lambda}\bigg)^2 (U_i^T y^*)^2 + \frac{\sigma^2}{n}\sum_{i=1}^n \bigg(\frac{\sigma_i}{\sigma_i + \lambda}\bigg)^2.$$
+
+We consider several simplified scenarios:
+\begin{enumerate}
+	\item \textbf{Case 1}: High noise regime ($\sigma^2 >> \|y^*\|^2$).  In this case, the second term is the only one that matters, and thus $\lambda \rightarrow \infty$ is optimal.
+	\item \textbf{Case 2}: Low noise regime ($\sigma^2 >> \|y^*\|^2$).  In this case, the first term is the only one that matters, and $\lambda \rightarrow 0$ is optimal.
+	\item \textbf{Case 3}: $\sigma_1 \neq 0, \sigma_j = 0 \;\forall j \neq 1$. In this case, $\lambda^* = \frac{\sigma_1 \sigma^2}{(U_1^T y^*)^2}$.  Thus, the ``signal to noise ratio'' $\frac{\sigma^2}{(U_1^T y^*)^2}$ is central to determining the optimal $\lambda$.
+	\item \textbf{Case 4}: $(U_i^T y^*)^2 = \frac{1}{n}\|y^*\|^2\;\; \forall i$.  In this case, $\gamma_i^*= \frac{(U_i^T y^*)^2}{(U_i^T y^*)^2 + \sigma^2} = \frac{\|y^*\|^2/n}{\|y^*\|^2/n + \sigma^2} = \frac{\sigma_i}{\sigma_i + \lambda^*}$.  So if all the $\sigma_i$ are equal, this says that $\lambda^* \propto \sigma^2$.
+	\item \textbf{Case 5}: Flat spectrum ($\sigma_i = c \; \; \forall i$).  In this case, $\lambda^* = \frac{n\sigma^2 c}{\|y\|^2}$.  We derive this because the gradient of the loss with respect to $\lambda$ is:
+	$$ \frac{dL}{d\lambda} = 2\sum_{i=1}^n \frac{(U_i^T y^*)^2 \sigma_i \lambda - \sigma^2 \sigma_i}{(\sigma_i + \lambda)^3}.$$
+	Letting $\sigma_i = c$, setting this derivate to 0, and solving, gives the desired result.
+\end{enumerate}
+
 \section{Training a model using low-precision random features}
 \label{sec:train}
 In this section, we present several possible ways of training a model on top of low-precision random Fourier features.  Importantly, any of the options outlined below which uses low-precision for both train/test would be inherently limited in terms of how close to the global optimum they could get, as discussed in the recent High-Accuracy Low-Precision Training paper $[7]$.  Perhaps, however, the error introduced by this quantization could be more than made-up for by the ability to learn a model in a higher-dimensional, more expressive, feature space.
