@@ -11,12 +11,23 @@ def get_value_from_folder(folder_name, file_name):
         res = np.loadtxt(f)
     return res
 
-def get_ave_value_from_multiple_seed(folder_name_template, file_name, general_folder, preprocessor):
-    subdirs = [x[0] for x in os.walk(general_folder)] 
+def get_ave_value_from_multiple_seed(folder_name_template, exclude_template, file_name, general_folder, preprocessor):
+    # exclude template is used to exclude certain patterns
+    subdirs = [x[0] for x in os.walk(general_folder)]
     results = []
     for subdir in subdirs:
-        if folder_name_template in subdir:
+        is_target = True
+        for temp in folder_name_template:
+            if temp not in subdir:
+                is_target = False
+                break
 #             print subdir
+        for temp in exclude_template:
+            if temp in subdir:
+                is_target = False
+                break
+        if is_target:
+            print subdir
             results.append(get_value_from_folder(subdir, file_name) )
             if preprocessor is not None:
                 results[-1] = preprocessor(results[-1] )
@@ -32,6 +43,28 @@ def get_ave_value_from_multiple_seed(folder_name_template, file_name, general_fo
     ave /= float(cnt)
 #     print len(results)
     return ave
+
+#def get_ave_value_from_multiple_seed(folder_name_template, file_name, general_folder, preprocessor):
+#    subdirs = [x[0] for x in os.walk(general_folder)] 
+#    results = []
+#    for subdir in subdirs:
+#        if folder_name_template in subdir:
+##             print subdir
+#            results.append(get_value_from_folder(subdir, file_name) )
+#            if preprocessor is not None:
+#                results[-1] = preprocessor(results[-1] )
+#    ave = results[0]
+#    cnt = 1
+#    for res in results[1:]:
+#        try:
+#            ave += res
+#            cnt += 1
+#        except:
+#            pass
+##         print res
+#    ave /= float(cnt)
+##     print len(results)
+#    return ave
 
 def running_mean(x, N):
     cumsum = np.cumsum(np.insert(x, 0, 0)) 
