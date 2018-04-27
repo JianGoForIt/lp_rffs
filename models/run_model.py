@@ -12,6 +12,7 @@ sys.path.append("../kernel_reg")
 sys.path.append("../utils")
 sys.path.append("../..")
 from rff import RFF, GaussianKernel
+from nystrom import Nystrom
 from kernel_regressor import Quantizer
 from data_loader import load_data
 import halp
@@ -43,6 +44,7 @@ parser.add_argument("--halp_mu", type=float, default=10.0)
 parser.add_argument("--halp_epoch_T", type=float, default=1.0, 
     help="The # of epochs as interval of full gradient calculation")
 parser.add_argument("--save_path", type=str, default="./test")
+parser.add_argument("--approx_type", type=str, default="rff", help="specify using exact, rff or nystrom")
 args = parser.parse_args()
 
 
@@ -54,7 +56,12 @@ def train(args, model, epoch, train_loader, val_loader, optimizer, quantizer):
             # We need to add this function to models when we want to use SVRG
             def closure(data=X, target=Y):
                 # print "test 123", type(data), type(target)
-                data = kernel.get_cos_feat(data, dtype="float")
+                if args.approx_type == "rff":
+                    data = kernel.get_cos_feat(data, dtype="float")
+                elif args.approx_type == "nystrom":
+                    data = kernel.get_feat(data)
+                else:
+                    raise Exception("kernel approximation type not supported!")
                 if quantizer != None:
                     # print("halp use quantizer")
                     data = quantizer.quantize(data)
@@ -73,7 +80,12 @@ def train(args, model, epoch, train_loader, val_loader, optimizer, quantizer):
             loss = optimizer.step(closure)
             train_loss.append(loss[0].data.cpu().numpy() )
         else:
-            X = kernel.get_cos_feat(X, dtype="float")
+            if args.approx_type == "rff":
+                X = kernel.get_cos_feat(X, dtype="float")
+            elif args.approx_type == "nystrom":
+                X = kernel.get_feat(X)
+            else:
+                raise Exception("kernel approximation type not supported!")
             if quantizer != None:
                 # print("train use quantizer")
                 X = quantizer.quantize(X)
@@ -91,7 +103,12 @@ def train(args, model, epoch, train_loader, val_loader, optimizer, quantizer):
         correct_cnt = 0
         for i, minibatch in enumerate(val_loader):
             X, Y = minibatch
-            X = kernel.get_cos_feat(X, dtype="float")
+            if args.approx_type == "rff":
+                X = kernel.get_cos_feat(X, dtype="float")
+            elif args.approx_type == "nystrom":
+                X = kernel.get_feat(X)
+            else:
+                raise Exception("kernel approximation type not supported!")
             if quantizer != None:
                 # print("test use quantizer")
                 X = quantizer.quantize(X)
@@ -109,7 +126,12 @@ def train(args, model, epoch, train_loader, val_loader, optimizer, quantizer):
         l2_accum = 0.0
         for i, minibatch in enumerate(val_loader):
             X, Y = minibatch
-            X = kernel.get_cos_feat(X, dtype="float")
+            if args.approx_type == "rff":
+                X = kernel.get_cos_feat(X, dtype="float")
+            elif args.approx_type == "nystrom":
+                X = kernel.get_feat(X)
+            else:
+                raise Exception("kernel approximation type not supported!")
             if quantizer != None:
                 # print("test use quantizer")
                 X = quantizer.quantize(X)
@@ -208,9 +230,18 @@ if __name__ == "__main__":
 
     # setup gaussian kernel
     n_input_feat = X_train.shape[1]
-    kernel = GaussianKernel(sigma=args.kernel_sigma)    
-    if args.do_fp_feat == False:
-        print("lp feature mode")
+    kernel = GaussianKernel(sigma=args.kernel_sigma)  
+    if args.approx_type == "exact":
+        print("exact kernel mode")
+        # raise Exception("SGD based exact kernel is not implemented yet!")
+        quantizer = None
+    elif args.approx_type == "nystrom":
+        print("fp nystrom mode")
+        kernel = Nystrom(args.n_fp_rff, kernel=kernel, rand_seed=args.random_seed) 
+        kernel.setup(X_train) 
+        quantizer = None
+    elif args.approx_type == "rff" and args.do_fp_feat == False:
+        print("lp rff feature mode")
         assert args.n_bit_feat >= 1
         n_quantized_rff = int(np.floor(args.n_fp_rff / float(args.n_bit_feat) * 32.0) )
         kernel = RFF(n_quantized_rff, n_input_feat, kernel, rand_seed=args.random_seed)
@@ -219,12 +250,16 @@ if __name__ == "__main__":
         quantizer = Quantizer(args.n_bit_feat, min_val, max_val, 
             rand_seed=args.random_seed, use_cuda=use_cuda)
         print("feature quantization scale, bit ", quantizer.scale, quantizer.nbit)
-    else:
-        print("fp feature mode")
+    elif args.approx_type == "rff" and args.do_fp_feat == True:
+        print("fp rff feature mode")
         kernel = RFF(args.n_fp_rff, n_input_feat, kernel, rand_seed=args.random_seed)
         quantizer = None
+    else:
+        raise Exception("kernel approximation type not specified!")
     kernel.torch(cuda=use_cuda)
 
+
+    # construct model
     if args.model == "logistic_regression":
         model = LogisticRegression(input_dim=kernel.n_feat, 
             n_class=n_class, reg_lambda=args.l2_reg)

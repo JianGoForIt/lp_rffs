@@ -8,22 +8,55 @@ class GaussianKernelSpec(object):
 class GaussianKernel(object):
   def __init__(self, sigma):
     self.sigma = sigma
+    self.dist_func = torch.nn.PairwiseDistance(p=2)
 
+  # def get_kernel_matrix(self, X1, X2, quantizer1=None, quantizer2=None):
+  #   '''
+  #   the input value has shape [n_sample, n_dim]
+  #   quantizer is dummy here
+  #   '''
+  #   n_sample_X1 = X1.shape[0]
+  #   n_sample_X2 = X2.shape[0]
+  #   norms_X1 = np.linalg.norm(X1, axis=1).reshape(n_sample_X1, 1)
+  #   norms_X2 = np.linalg.norm(X2, axis=1).reshape(n_sample_X2, 1)
+  #   cross = np.dot(X1, X2.T)
+  #   # print("using sigma ", self.sigma)
+  #   kernel = np.exp(-0.5 / float(self.sigma)**2 \
+  #     * (np.tile(norms_X1**2, (1, n_sample_X2) ) + np.tile( (norms_X2.T)**2, (n_sample_X1, 1) ) \
+  #     -2 * cross) )
+  #   return torch.DoubleTensor(kernel)
+  
   def get_kernel_matrix(self, X1, X2, quantizer1=None, quantizer2=None):
     '''
     the input value has shape [n_sample, n_dim]
     quantizer is dummy here
     '''
-    n_sample_X1 = X1.shape[0]
-    n_sample_X2 = X2.shape[0]
-    norms_X1 = np.linalg.norm(X1, axis=1).reshape(n_sample_X1, 1)
-    norms_X2 = np.linalg.norm(X2, axis=1).reshape(n_sample_X2, 1)
-    cross = np.dot(X1, X2.T)
-    # print("using sigma ", self.sigma)
-    kernel = np.exp(-0.5 / float(self.sigma)**2 \
-      * (np.tile(norms_X1**2, (1, n_sample_X2) ) + np.tile( (norms_X2.T)**2, (n_sample_X1, 1) ) \
-      -2 * cross) )
-    return torch.DoubleTensor(kernel)
+    if isinstance(X1, np.ndarray) and isinstance(X2, np.ndarray):
+      n_sample_X1 = X1.shape[0]
+      norms_X1 = np.linalg.norm(X1, axis=1).reshape(n_sample_X1, 1)
+      n_sample_X2 = X2.shape[0]
+      norms_X2 = np.linalg.norm(X2, axis=1).reshape(n_sample_X2, 1)
+      cross = np.dot(X1, X2.T)
+      # print("using sigma ", self.sigma)
+      kernel = np.exp(-0.5 / float(self.sigma)**2 \
+        * (np.tile(norms_X1**2, (1, n_sample_X2) ) + np.tile( (norms_X2.T)**2, (n_sample_X1, 1) ) \
+        -2 * cross) )
+      return torch.DoubleTensor(kernel)
+    else:
+      norms_X1 = (X1**2).sum(1).view(-1, 1)
+      norms_X2 = (X2**2).sum(1).view(-1, 1)
+      norms_X1 = norms_X1.repeat(1, int(X2.size(0) ) )
+      norms_X2 = torch.transpose(norms_X2.repeat(1, int(X1.size(0) ) ), 0, 1)
+      cross = torch.mm(X1, torch.transpose(X2, 0, 1) )
+      kernel = torch.exp(-0.5 / float(self.sigma)**2 * (norms_X1 + norms_X2 - 2* cross) )
+      return kernel
+
+  def torch(self, use_cuda=False):
+    '''
+    adapt the interface to the model launching wrapper
+    '''
+    pass
+
 
 
 class RFF(object):
@@ -105,6 +138,19 @@ class RFF(object):
     return torch.mm(rff_x1, torch.transpose(rff_x2, 0, 1) )
 
 
+def test_pytorch_gaussian_kernel():
+  n_feat = 10
+  input_val  = np.ones( [2, n_feat] )
+  input_val[0, :] *= 1
+  input_val[0, :] *= 2
+  # get exact gaussian kernel
+  kernel = GaussianKernel(sigma=2.0)
+  kernel_mat = kernel.get_kernel_matrix(input_val, input_val)
+  kernel_mat_torch = kernel.get_kernel_matrix(torch.Tensor(input_val), torch.Tensor(input_val) )
+  np.testing.assert_array_almost_equal(kernel_mat.cpu().numpy(), kernel_mat_torch.cpu().numpy() )
+  print("gaussian kernel pytorch version test passed!")
+
+
 def test_rff_generation():
   n_feat = 10
   n_rff_feat = 1000000
@@ -141,6 +187,7 @@ def test_rff_generation2():
 
 
 if __name__ == "__main__":
+  test_pytorch_gaussian_kernel()
   test_rff_generation()
   test_rff_generation2()
 
