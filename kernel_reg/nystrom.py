@@ -18,7 +18,9 @@ class Nystrom(object):
 		'''
 		if isinstance(X, np.ndarray):
 			X = torch.FloatTensor(X)
-		perm = torch.randperm(X.size(0) )
+                np.random.seed(self.rand_seed)
+		perm = np.random.permutation(np.arange(X.size(0) ) )
+		#perm = torch.randperm(X.size(0) )
 		# using the standard way to select n_feat landmark points
 		if n_landmark is None:
 			n_landmark = self.n_feat
