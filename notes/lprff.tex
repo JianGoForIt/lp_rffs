@@ -36,8 +36,10 @@
 \newcommand{\eps}{\epsilon}
 \newcommand{\teps}{\tilde{\epsilon}}
 \newcommand{\tS}{\tilde{S}}
+\newcommand{\tK}{\tilde{K}}
 \newcommand{\tA}{\tilde{A}}
 \newcommand{\tsigma}{\tilde{\sigma}}
+\newcommand{\tgamma}{\tilde{\gamma}}
 \newcommand{\tlambda}{\tilde{\lambda}}
 \newcommand{\ulq}{\underline{q}}
 \newcommand{\olq}{\overline{q}}
@@ -413,6 +415,53 @@ We consider several simplified scenarios:
 	$$ \frac{dL}{d\lambda} = 2\sum_{i=1}^n \frac{(U_i^T y^*)^2 \sigma_i \lambda - \sigma^2 \sigma_i}{(\sigma_i + \lambda)^3}.$$
 	Letting $\sigma_i = c$, setting this derivate to 0, and solving, gives the desired result.
 \end{enumerate}
+
+\subsection{Generalizatio bound using $\eps$-log-spectral distance}
+
+\textbf{$\eps$-log-spectral distance (Definition)}:  Given $\eps \geq 0$, and two element-wise non-negative vectors $\sigma,\tsigma \in \RR^n$,  we define the $\eps$-log-spectral distance between $\sigma$ and $\tsigma$ as $D_{\eps}(\sigma,\tsigma) = \max_i (\log(\sigma_i) - \log(\tsigma_i))^2$.
+\begin{theorem}
+	Let $K = USU^T$ and $\tK = U\tS U^T$, be two kernel matrices with the same eigenvectors, but different eigenvalues, where $S = diag(\sigma)$, and $\tS = diag(\tsigma)$.  Then, for any $\lambda \geq \eps \geq 0$, if $L(K; \lambda, \alpha^2)$ and $L(\tK; \lambda, \alpha^2)$ denote the expected losses under fixed design linear regression model (with noise variance $\alpha^2$, and regularizing constant $\lambda$), then the following holds:
+	$$L(\tK; \lambda, \alpha^2) \leq L(K; \lambda, \alpha^2) + \Big(2\sqrt{D_{\eps}(\sigma,\tsigma)} + D_{\eps}(\sigma,\tsigma)\Big)\Big(\frac{1}{n}\|y\|^2 + \alpha^2\Big)$$
+\end{theorem}
+\begin{proof}
+	Assume without loss of generality that $\tsigma_i \leq$, and let $\gamma_i=\frac{\sigma_i}{\sigma_i + \lambda}$, and $\tgamma_i=\frac{\tsigma_i}{\tsigma_i + \lambda}$, $z_i = \frac{\tgamma_i - \gamma_i}{1-\tgamma}$.  We will use that inequality that for $z \leq 0$, $\log(1+z)^2 \geq z^2$.
+\begin{eqnarray*}
+	\bigg(\log
+	\Big(\sigma_i + \eps\Big) - \log\Big(\tsigma_i + \eps\Big)\bigg)^2 &\geq& 
+	\bigg(\log
+	\Big(\sigma_i + \lambda\Big) - \log\Big(\tsigma_i + \lambda\Big)\bigg)^2\\
+	 &=& \bigg(\log\Big(\frac{\sigma_i + \lambda}{\lambda}\Big) - \log\Big(\frac{\tsigma_i + \lambda}{\lambda}\Big)\bigg)^2 \\
+	&=& \bigg(\log\Big(\frac{\lambda}{\sigma_i + \lambda}\Big) - \log\Big(\frac{\lambda}{\tsigma_i + \lambda}\Big)\bigg)^2 \\
+	&=& \bigg(\log\Big(1 - \frac{\sigma_i}{\sigma_i + \lambda}\Big) - \log\Big(1-\frac{\tsigma}{\tsigma_i + \lambda}\Big)\bigg)^2 \\
+	&=& \bigg(\log\Big(1 - \gamma_i\Big) - \log\Big(1-\tgamma_i\Big)\bigg)^2 \\
+	&=& \bigg(\log\Big(\frac{1-\gamma_i}{1-\tgamma_i}\Big)\bigg)^2 \\
+	&=& \bigg(\log\Big(1 + \frac{\tgamma_i-\gamma_i}{1-\tgamma_i}\Big)\bigg)^2 \\
+	&=& \bigg(\log\Big(1 + z_i\Big)\bigg)^2 \\
+	&\geq& z_i^2 \\
+	&=&  \bigg(\frac{\tgamma_i-\gamma_i}{1-\tgamma_i}\bigg)^2 \\
+	&\geq&  \big(\tgamma_i-\gamma_i\big)^2.
+\end{eqnarray*}	
+
+I will now show that $(\tgamma_i - \gamma_i)^2 \leq R$ implies $\tgamma_i^2 \leq \gamma_i^2 + 2\sqrt{R}+R$, and $(\tgamma_i-1)^2 \leq (\gamma_i-1)^2 + 2\sqrt{R}+R$:
+
+\begin{eqnarray*}
+	\tgamma_i^2 &=& \big(\gamma_i +(\tgamma_i - \gamma_i)\big)^2 \\
+	&=& \gamma_i^2 + 2\gamma_i(\tgamma_i - \gamma_i) + (\tgamma_i - \gamma_i)^2 \\
+	&\leq& \gamma_i^2 + 2\sqrt{R}+R.\\
+	(\tgamma_i-1)^2 &=& \big(\gamma_i-1 +(\tgamma_i - \gamma_i)\big)^2 \\
+	&=& (\gamma_i-1)^2 + 2(\gamma_i-1)(\tgamma_i - \gamma_i) + (\tgamma_i - \gamma_i)^2 \\
+	&\leq& \gamma_i^2 + 2\sqrt{R}+R.
+\end{eqnarray*}
+Now, we can combine all the above results to give us our desired result.
+\begin{eqnarray*}
+	L(\tK; \lambda, \alpha^2) &=& \frac{1}{n}\sum_{i=1}^n(\tgamma_i-1)^2 (U_i^Ty)^2 + \frac{\alpha^2}{n}\sum_{i=1}^n \tgamma_i^2 \\
+	&\leq& \frac{1}{n}\sum_{i=1}^n\bigg((\gamma_i-1)^2 + 2\sqrt{R} + R\bigg) (U_i^Ty)^2 + \frac{\alpha^2}{n}\sum_{i=1}^n \bigg(\gamma_i^2 + 2\sqrt{R} + R\bigg) \\
+	&\leq& L(K; \lambda, \alpha^2) + \frac{1}{n}\sum_{i=1}^n\bigg(2\sqrt{R} + R\bigg) (U_i^Ty)^2 + \frac{\alpha^2}{n}\sum_{i=1}^n \bigg(2\sqrt{R} + R\bigg) \\
+	&=& L(K; \lambda, \alpha^2) + \bigg(2\sqrt{R} + R\bigg)\bigg(\frac{1}{n}\|y\|^2 + \alpha^2 \bigg).
+\end{eqnarray*}
+This completes the proof.
+\end{proof}
+
 
 \section{Training a model using low-precision random features}
 \label{sec:train}
