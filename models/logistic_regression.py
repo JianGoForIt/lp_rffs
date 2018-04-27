@@ -37,7 +37,7 @@ class LogisticRegression(torch.nn.Module):
   def predict(self, x):
     output = self.linear(x)
     pred = output.data.cpu().numpy().argmax(axis=1)
-    return pred
+    return pred, output
 
 
 def logistic_regression_grad_test():
