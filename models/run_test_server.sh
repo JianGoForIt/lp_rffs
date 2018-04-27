@@ -61,7 +61,18 @@
 #  --data_path=/dfs/scratch0/zjian/data/lp_kernel_data/census --opt=sgd --epoch=100 \
 #  --save_path=./test/123/ --approx_type=nystrom --cuda
 
+#python run_model.py --model=logistic_regression --minibatch=250 --l2_reg=0.0 \
+#  --kernel_sigma=1.12 --n_fp_rff=2500 --random_seed=2 --learning_rate=12.5 \
+#  --data_path=/dfs/scratch0/zjian/data/lp_kernel_data/codrna --opt=sgd --epoch=100 \
+#  --save_path=./test/123/ --approx_type=nystrom --cuda
+
+# test lr decay approac
+python run_model.py --model=ridge_regression --minibatch=250 --l2_reg=0.0 \
+  --kernel_sigma=30.0 --n_fp_rff=10000 --random_seed=2 --learning_rate=0.5 \
+  --data_path=/dfs/scratch0/zjian/data/lp_kernel_data/census --opt=sgd --epoch=300 \
+  --save_path=./test/123/ --approx_type=rff --cuda
+
 python run_model.py --model=logistic_regression --minibatch=250 --l2_reg=0.0 \
-  --kernel_sigma=1.12 --n_fp_rff=2500 --random_seed=2 --learning_rate=12.5 \
-  --data_path=/dfs/scratch0/zjian/data/lp_kernel_data/codrna --opt=sgd --epoch=100 \
-  --save_path=./test/123/ --approx_type=nystrom --cuda
+  --kernel_sigma=1.12 --n_fp_rff=10000 --random_seed=2 --learning_rate=12.5 \
+  --data_path=/dfs/scratch0/zjian/data/lp_kernel_data/codrna --opt=sgd --epoch=200 \
+  --save_path=./test/123/ --approx_type=rff --cuda

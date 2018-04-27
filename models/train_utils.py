@@ -1,6 +1,7 @@
 import torch
 from torch.autograd import Variable
 import numpy as np
+from copy import deepcopy
 
 def train(args, model, epoch, train_loader, optimizer, quantizer, kernel):
     train_loss = []
@@ -58,6 +59,7 @@ def evaluate(args, model, epoch, val_loader, quantizer, kernel):
     sample_cnt = 0
     if args.model == "logistic_regression":
         correct_cnt = 0
+        cross_entropy_accum = 0.0
         for i, minibatch in enumerate(val_loader):
             X, Y = minibatch
             if args.approx_type == "rff":
@@ -71,14 +73,17 @@ def evaluate(args, model, epoch, val_loader, quantizer, kernel):
                 X = quantizer.quantize(X)
             X = Variable(X, requires_grad=False)
             Y = Variable(Y, requires_grad=False)
-            pred = model.predict(X)
+            pred, output = model.predict(X)
             correct_cnt += np.sum(pred.reshape(pred.size, 1) == Y.data.cpu().numpy() )
+            if len(list(Y.size() ) ) == 2:
+                Y = Y.squeeze()
+            cross_entropy_accum += model.criterion(output, Y).data.cpu().numpy()[0]
             sample_cnt += pred.size
             # print correct_cnt, sample_cnt
         # print eval_acc
         # eval_acc.append(correct_cnt / float(sample_cnt) )
-        print("eval_acc at epoch ", epoch, "step", i, " iterations ", " acc ", correct_cnt / float(sample_cnt) )
-        return correct_cnt / float(sample_cnt)
+        print("eval_acc at epoch ", epoch, "step", i, " iterations ", " acc ", correct_cnt / float(sample_cnt), " cross entropy ", cross_entropy_accum / float(sample_cnt) )
+        return correct_cnt / float(sample_cnt), cross_entropy_accum / float(sample_cnt)
     else:
         l2_accum = 0.0
         for i, minibatch in enumerate(val_loader):
@@ -101,7 +106,7 @@ def evaluate(args, model, epoch, val_loader, quantizer, kernel):
         # eval_l2.append(l2_accum / float(sample_cnt) )
         print("eval_l2 at epoch ", epoch, "step", i, " iterations ", " loss ", np.sqrt(l2_accum / float(sample_cnt) ) )
         # return np.sqrt(l2_accum / float(sample_cnt) )
-        return l2_accum / float(sample_cnt)
+        return l2_accum / float(sample_cnt), l2_accum / float(sample_cnt)
 
 
 def sample_data(X, n_sample):
@@ -172,7 +177,7 @@ class ProgressMonitor(object):
             print("loading previous best model with metric ", self.prev_best)
         if (self.prev_best is not None) \
             and ( (self.min_metric_better and (metric > self.decay_thresh * self.prev_best) ) \
-            or ( (not self.min_metric_better) and (self.prev_best > self.decay_thresh * metric) ) ):
+            or ( (not self.min_metric_better) and (metric < (1.0 + 1.0 - self.decay_thresh) * self.prev_best) ) ):
             self.lr /= 2.0
             for g in optimizer.param_groups:
                 g['lr'] = self.lr

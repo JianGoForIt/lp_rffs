@@ -176,9 +176,9 @@ if __name__ == "__main__":
     train_loss = []
     eval_metric = []
     if args.model == "logistic_regression":
-        monitor = ProgressMonitor(init_lr=args.learning_rate, lr_decay_fac=2.0, min_lr=0.00001, min_metric_better=False, decay_thresh=0.99)
+        monitor = ProgressMonitor(init_lr=args.learning_rate, lr_decay_fac=2.0, min_lr=0.00001, min_metric_better=True, decay_thresh=0.999)
     elif args.model == "ridge_regression":
-        monitor = ProgressMonitor(init_lr=args.learning_rate, lr_decay_fac=2.0, min_lr=0.00001, min_metric_better=True, decay_thresh=0.99)
+        monitor = ProgressMonitor(init_lr=args.learning_rate, lr_decay_fac=2.0, min_lr=0.00001, min_metric_better=True, decay_thresh=0.999)
     else:
         raise Exception("model not supported!")
     for epoch in range(args.epoch):  
@@ -186,7 +186,7 @@ if __name__ == "__main__":
         loss_per_step = train(args, model, epoch, train_loader, optimizer, quantizer, kernel_approx)
         train_loss += loss_per_step
         # evaluate and save evaluate metric
-        metric = evaluate(args, model, epoch, val_loader, quantizer, kernel_approx)
+        metric, monitor_signal = evaluate(args, model, epoch, val_loader, quantizer, kernel_approx)
         eval_metric.append(metric)
 
         if not os.path.isdir(args.save_path):
@@ -196,6 +196,6 @@ if __name__ == "__main__":
         
         # for param in optimizer._z:
         #     print param
-        # early_stop = monitor.end_of_epoch(metric, model, optimizer, epoch)
-        # if early_stop:
-        #     break
+        early_stop = monitor.end_of_epoch(monitor_signal, model, optimizer, epoch)
+        if early_stop:
+            break
