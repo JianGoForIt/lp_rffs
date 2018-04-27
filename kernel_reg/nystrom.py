@@ -36,10 +36,15 @@ class Nystrom(object):
 		feat = torch.mm(kernel_matrix, self.A_d)
 		return feat
 
-	def get_kernel_matrix(self, X1, X2):
+	def get_kernel_matrix(self, X1, X2, quantizer1=None, quantizer2=None):
 		feat_x1 = self.get_feat(X1)
 		feat_x2 = self.get_feat(X2)
 		return torch.mm(feat_x1, torch.transpose(feat_x2, 0, 1) )
+
+	def torch(self, cuda):
+		if cuda:
+			self.A_d = self.A_d.cuda()
+			self.landmark = self.landmark.cuda()
 
 
 # test full dimension almost match exact kernel results
