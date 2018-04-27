@@ -51,7 +51,7 @@ class GaussianKernel(object):
       kernel = torch.exp(-0.5 / float(self.sigma)**2 * (norms_X1 + norms_X2 - 2* cross) )
       return kernel
 
-  def torch(self, use_cuda=False):
+  def torch(self, cuda=False):
     '''
     adapt the interface to the model launching wrapper
     '''
