@@ -1,4 +1,5 @@
 import numpy as np
+import scipy
 import torch
 from rff import GaussianKernel
 
@@ -22,14 +23,26 @@ class Nystrom(object):
 		if n_landmark is None:
 			n_landmark = self.n_feat
 		self.landmark = X[perm[:n_landmark], :]
+		self.n_landmark = n_landmark
 		self.K_landmark = \
-			self.kernel.get_kernel_matrix(self.landmark, self.landmark)
-		S, U = np.linalg.eigh(self.K_landmark.cpu().numpy() )
+			self.kernel.get_kernel_matrix(self.landmark.double(), self.landmark.double() )
+		# linalg.eigh can give negative value on cencus regression dataset
+		# So we use svd here and we have not seen numerical issue yet.
+		S, U = np.linalg.eigh(self.K_landmark.cpu().numpy().astype(np.float64), UPLO='U')
 		S = S[::-1].copy()
 		U = U[:, ::-1].copy()
-		self.U_d = torch.FloatTensor(U[:, :self.n_feat] )
-		self.S_d = torch.FloatTensor(S[:self.n_feat] )
+		if np.min(S[:self.n_landmark] ) <= 0:
+			print("numpy eigh gives negative values, switch to use SVD")
+			U, S, _ = np.linalg.svd(self.K_landmark.cpu().numpy().astype(np.float64) )
+
+		self.U_d = torch.FloatTensor(U[:, :n_landmark] )
+		self.S_d = torch.FloatTensor(S[:n_landmark] )
 		self.A_d = torch.mm(self.U_d, torch.diag(1.0/torch.sqrt(self.S_d) ) )
+		# print "inside ", torch.sum(self.U_d), torch.sum(self.S_d), torch.sum(self.A_d)
+		# print self.S_d, torch.sqrt(self.S_d)
+		# # print torch.diag(1.0/torch.sqrt(self.S_d) )
+
+
 
 	def get_feat(self, X):
 		kernel_matrix = self.kernel.get_kernel_matrix(X, self.landmark)
