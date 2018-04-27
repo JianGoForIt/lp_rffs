@@ -76,11 +76,11 @@ if __name__ == "__main__":
         Y_val = torch.LongTensor(np.array(Y_val.tolist() ).reshape(Y_val.size, 1) )
     else:
         raise Exception("model not supported")
-    if use_cuda:
-        X_train = X_train.cuda()
-        Y_train = Y_train.cuda()
-        X_val = X_val.cuda()
-        Y_val = Y_val.cuda()
+    # if use_cuda:
+    #     X_train = X_train.cuda()
+    #     Y_train = Y_train.cuda()
+    #     X_val = X_val.cuda()
+    #     Y_val = Y_val.cuda()
 
     # setup dataloader 
     train_data = \

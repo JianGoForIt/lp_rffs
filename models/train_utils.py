@@ -5,8 +5,12 @@ from copy import deepcopy
 
 def train(args, model, epoch, train_loader, optimizer, quantizer, kernel):
     train_loss = []
+    use_cuda = torch.cuda.is_available() and args.cuda
     for i, minibatch in enumerate(train_loader):
         X, Y = minibatch
+        if use_cuda:
+            X = X.cuda()
+            Y = Y.cuda()
         optimizer.zero_grad()
         if args.opt == "halp":
             # We need to add this function to models when we want to use SVRG
@@ -28,8 +32,8 @@ def train(args, model, epoch, train_loader, optimizer, quantizer, kernel):
                 if not isinstance(target, torch.autograd.variable.Variable):
                     target = Variable(target, requires_grad=False)
 
-                if use_cuda:
-                    data, target = data.cuda(), target.cuda()
+                # if use_cuda:
+                #     data, target = data.cuda(), target.cuda()
                 cost = model.forward(data, target)
                 cost.backward()
                 return cost
@@ -57,11 +61,15 @@ def train(args, model, epoch, train_loader, optimizer, quantizer, kernel):
 def evaluate(args, model, epoch, val_loader, quantizer, kernel):
     # perform evaluation
     sample_cnt = 0
+    use_cuda = torch.cuda.is_available() and args.cuda
     if args.model == "logistic_regression":
         correct_cnt = 0
         cross_entropy_accum = 0.0
         for i, minibatch in enumerate(val_loader):
             X, Y = minibatch
+            if use_cuda:
+                X = X.cuda()
+                Y = Y.cuda()
             if args.approx_type == "rff":
                 X = kernel.get_cos_feat(X, dtype="float")
             elif args.approx_type == "nystrom":
@@ -88,6 +96,9 @@ def evaluate(args, model, epoch, val_loader, quantizer, kernel):
         l2_accum = 0.0
         for i, minibatch in enumerate(val_loader):
             X, Y = minibatch
+            if use_cuda:
+                X = X.cuda()
+                Y = Y.cuda()
             if args.approx_type == "rff":
                 X = kernel.get_cos_feat(X, dtype="float")
             elif args.approx_type == "nystrom":
