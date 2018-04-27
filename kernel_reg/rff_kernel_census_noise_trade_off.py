@@ -134,6 +134,8 @@ if __name__=="__main__":
       np.save(f, U)
     with open("/dfs/scratch0/zjian/lp_kernel/noise_trade_off/S_" + str(args.n_fp_rff) + ".npy", "w") as f:
       np.save(f, S)
+    with open("/dfs/scratch0/zjian/lp_kernel/noise_trade_off/Y_" + str(args.n_fp_rff) + ".npy", "w") as f:
+      np.save(f, Y_train_orig)
     # numerically figure out the best lambda in the fixed design setting
     x0 = 1.0
     lambda_list_print = [] 
