@@ -28,6 +28,10 @@ class Nystrom(object):
 		self.n_landmark = n_landmark
 		self.K_landmark = \
 			self.kernel.get_kernel_matrix(self.landmark.double(), self.landmark.double() )
+		# # the torch mm function can make very sutle difference of upper and lower triangular in
+		# # a symetric matrix
+		# if not torch.equal(self.K_landmark, torch.transpose(self.K_landmark, 0, 1) ):
+		# 	raise Exception("Kernel matrix is not symetric!")
 		# linalg.eigh can give negative value on cencus regression dataset
 		# So we use svd here and we have not seen numerical issue yet.
 		S, U = np.linalg.eigh(self.K_landmark.cpu().numpy().astype(np.float64), UPLO='U')
@@ -44,17 +48,18 @@ class Nystrom(object):
 		# print self.S_d, torch.sqrt(self.S_d)
 		# # print torch.diag(1.0/torch.sqrt(self.S_d) )
 
-
-
 	def get_feat(self, X):
 		kernel_matrix = self.kernel.get_kernel_matrix(X, self.landmark)
 		feat = torch.mm(kernel_matrix, self.A_d)
 		return feat
 
-	def get_kernel_matrix(self, X1, X2, quantizer1=None, quantizer2=None):
+	def get_kernel_matrix(self, X1, X2, quantizer1=None, quantizer2=None, dtype="float"):
 		feat_x1 = self.get_feat(X1)
 		feat_x2 = self.get_feat(X2)
-		return torch.mm(feat_x1, torch.transpose(feat_x2, 0, 1) )
+		if dtype == "float":
+			return torch.mm(feat_x1, torch.transpose(feat_x2, 0, 1) )
+		else:
+			return torch.mm(feat_x1.double(), torch.transpose(feat_x2, 0, 1).double() ).float()
 
 	def torch(self, cuda):
 		if cuda:
@@ -75,7 +80,7 @@ def test_nystrom_full():
 
 	approx = Nystrom(n_feat, kernel=kernel)
 	approx.setup(input_val1)
-	approx_kernel_mat = approx.get_kernel_matrix(torch.Tensor(input_val1), torch.Tensor(input_val2) )
+	approx_kernel_mat = approx.get_kernel_matrix(torch.FloatTensor(input_val1), torch.FloatTensor(input_val2) )
 
 	np.testing.assert_array_almost_equal(kernel_mat.cpu().numpy(), approx_kernel_mat.cpu().numpy() )
 	print("nystrom full dimension test passed!")
