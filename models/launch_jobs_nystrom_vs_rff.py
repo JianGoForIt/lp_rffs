@@ -29,7 +29,7 @@ else:
 if dataset == "census":
     model = "ridge_regression"
     if do_metric == "with_metric":
-	l2_reg_list = [0.0, ]
+        l2_reg_list = [0.0, ]
     else:
         l2_reg_list = [0, 1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1]
     kernel_sigma = math.sqrt(1.0/0.0006/2.0)
