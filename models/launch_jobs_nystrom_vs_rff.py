@@ -19,6 +19,7 @@ if dataset == "census":
     model = "ridge_regression"
     l2_reg_list = [0, 1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1]
     kernel_sigma = math.sqrt(1.0/0.0006/2.0)
+    #n_fp_nystrom_list= [1250, 2500, 5000, 10000, 20000]
     n_fp_rff_list = [1250, 2500, 5000, 10000, 20000, 50000, 100000, 200000, 400000, 800000, 1600000]
     seed_list = [1, 2, 3]
     lr_list = [0.5, 0.1, 1.0]
@@ -33,6 +34,8 @@ for seed in seed_list:
 		for n_fp_rff in n_fp_rff_list:
 			for lr in lr_list:
 				for approx_type in ["nystrom", "rff"]:
+					if approx_type == "nystrom" and n_fp_rff > 20000:
+						continue
 					save_suffix = "_type_" + approx_type + "_l2_reg_" + str(l2_reg) + "_n_fp_rff_" + str(n_fp_rff) \
 					 	+ "_opt_" + opt + "_lr_" + str(lr) + "_seed_" + str(seed)
 					command = deepcopy(template)
