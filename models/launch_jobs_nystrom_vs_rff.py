@@ -17,13 +17,13 @@ if cluster == "starcluster":
     template = "python /dfs/scratch0/zjian/lp_kernel_code/lp_kernel/models/run_model.py --model=unk --minibatch=250 --l2_reg=unk \
         --kernel_sigma=unk --n_fp_rff=unk --random_seed=unk --learning_rate=unk \
         --data_path=unk --opt=unk --epoch=unk \
-        --save_path=unk --approx_type=unk --cuda"
+        --save_path=unk --approx_type=unk --cuda --do_fp_feat"
 
 else:
     template = "python /lfs/1/zjian/lp_kernel/lp_kernel/models/run_model.py --model=unk --minibatch=250 --l2_reg=unk \
         --kernel_sigma=unk --n_fp_rff=unk --random_seed=unk --learning_rate=unk \
         --data_path=unk --opt=unk --epoch=unk \
-        --save_path=unk --approx_type=unk"
+        --save_path=unk --approx_type=unk --do_fp_feat"
 
 
 if dataset == "census":
@@ -34,7 +34,9 @@ if dataset == "census":
         l2_reg_list = [0, 1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1]
     kernel_sigma = math.sqrt(1.0/0.0006/2.0)
     #n_fp_nystrom_list= [1250, 2500, 5000, 10000, 20000]
-    n_fp_rff_list = [1250, 2500, 5000, 10000, 20000, 50000, 100000, 200000, 400000, 800000, 1600000]
+    #n_fp_rff_list = [1250, 2500, 5000, 10000, 20000, 50000, 100000, 200000, 400000, 800000, 1600000]
+    n_fp_rff_list = [1250, 5000, 20000, 100000, 400000, 1600000]
+#    n_fp_rff_list = [2500, 10000, 50000, 200000, 800000]    
     seed_list = [1, 2, 3]
     if do_metric == "with_metric":
 	lr_list = [0.5]
@@ -53,7 +55,7 @@ for seed in seed_list:
 				for approx_type in ["nystrom", "rff"]:
 					if approx_type == "nystrom" and n_fp_rff > 20000:
 						continue
-					save_suffix = "_type_" + approx_type + "_l2_reg_" + str(l2_reg) + "_n_fp_rff_" + str(n_fp_rff) \
+					save_suffix = "_type_" + approx_type + "_l2_reg_" + str(l2_reg) + "_n_fp_feat_" + str(n_fp_rff) \
 					 	+ "_opt_" + opt + "_lr_" + str(lr) + "_seed_" + str(seed)
 					command = deepcopy(template)
 					command = command.replace("--model=unk", "--model="+model)
@@ -67,7 +69,8 @@ for seed in seed_list:
 					command = command.replace("--epoch=unk", "--epoch="+str(epoch) )
 					command = command.replace("--save_path=unk", "--save_path="+save_path + save_suffix)
 					command = command.replace("--approx_type=unk", "--approx_type="+approx_type)
-					command += " --collect_sample_metrics"
+					if do_metric == "with_metric":
+						command += " --collect_sample_metrics"
 					os.system("mkdir -p " + save_path + save_suffix)
 					if cluster == "starcluster":
 						command = "cd /dfs/scratch0/zjian/lp_kernel_code/lp_kernel/models && " + command
