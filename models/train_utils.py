@@ -154,9 +154,10 @@ def get_sample_kernel_metrics(X, kernel, kernel_approx, quantizer, n_sample):
     F_norm_error = torch.sum(error_matrix**2)
     spectral_norm_error = np.max(np.abs(get_matrix_spectrum(error_matrix) ) )
     spectrum = get_matrix_spectrum(kernel_mat_approx)
+    spectrum_exact = get_matrix_spectrum(kernel_mat)
     metric_dict = {"F_norm_error": float(F_norm_error),
                    "spectral_norm_error": float(spectral_norm_error) }
-    return metric_dict, spectrum
+    return metric_dict, spectrum, spectrum_exact
 
 
 

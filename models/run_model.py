@@ -161,24 +161,27 @@ if __name__ == "__main__":
     if args.collect_sample_metrics:
         print("start doing sample metric collection with ", args.n_measure_sample, " samples")
         if use_cuda:
-            metric_dict_sample_train, spectrum_sample_train = \
+            metric_dict_sample_train, spectrum_sample_train, spectrum_sample_train_exact = \
                 get_sample_kernel_metrics(X_train.cuda(), kernel, kernel_approx, quantizer, args.n_measure_sample)
-            metric_dict_sample_val, spectrum_sample_val = \
+            metric_dict_sample_val, spectrum_sample_val, spectrum_sample_val_exact = \
                 get_sample_kernel_metrics(X_val.cuda(), kernel, kernel_approx, quantizer, args.n_measure_sample)  
         else:
-            metric_dict_sample_train, spectrum_sample_train = \
+            metric_dict_sample_train, spectrum_sample_train, spectrum_sample_train_exact = \
                 get_sample_kernel_metrics(X_train, kernel, kernel_approx, quantizer, args.n_measure_sample)
-            metric_dict_sample_val, spectrum_sample_val = \
+            metric_dict_sample_val, spectrum_sample_val, spectrum_sample_val_exact = \
                 get_sample_kernel_metrics(X_val, kernel, kernel_approx, quantizer, args.n_measure_sample) 
         with open(args.save_path + "/metric_sample_train.txt", "w") as f:
             cp.dump(metric_dict_sample_train, f)
         np.save(args.save_path + "/spectrum_train.npy", spectrum_sample_train)
+        np.save(args.save_path + "/spectrum_train_exact.npy", spectrum_sample_train_exact)
         with open(args.save_path + "/metric_sample_eval.txt", "w") as f:
             cp.dump(metric_dict_sample_val, f)
         np.save(args.save_path + "/spectrum_eval.npy", spectrum_sample_val)
+        np.save(args.save_path + "/spectrum_eval_exact.npy", spectrum_sample_val_exact)
         # print metric_dict_sample_train, metric_dict_sample_val
         # print spectrum_sample_train, spectrum_sample_val
         print("Sample metric collection done!")
+        exit(0)
 
 
     # setup sgd training process
