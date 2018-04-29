@@ -20,7 +20,8 @@ class Nystrom(object):
 		perm = np.random.permutation(np.arange(X.size(0) ) )
 		# using the standard way to select n_feat landmark points
 		if n_landmark is None:
-			n_landmark = self.n_feat
+			n_landmark = min(self.n_feat, X.size(0) )
+			print("# landmarks ", n_landmark)
 		self.landmark = X[perm[:n_landmark], :]
 		self.n_landmark = n_landmark
 		#self.landmark = X
