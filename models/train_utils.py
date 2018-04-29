@@ -144,19 +144,29 @@ def get_matrix_spectrum(X):
     return S 
 
 def get_sample_kernel_metrics(X_all, kernel, kernel_approx, quantizer, n_sample):
-    X = sample_data(X_all, n_sample)
+    #X = sample_data(X_all, n_sample)
+    X = X_all
     kernel_mat = kernel.get_kernel_matrix(X, X, dtype="double")
     kernel_mat_approx = kernel_approx.get_kernel_matrix(X, X, quantizer, quantizer, dtype="double")
     # # need to use double for XXT if we want the torch equal to hold.
     # if not torch.equal(kernel_mat_approx, torch.transpose(kernel_mat_approx, 0, 1) ):
     #     raise Exception("Kernel matrix is not symetric!")
+#    error_matrix = kernel_mat_approx - kernel_mat
+#    F_norm_error = torch.sum(error_matrix**2)
+#    spectral_norm_error = np.max(np.abs(get_matrix_spectrum(error_matrix) ) )
+#    spectrum = get_matrix_spectrum(kernel_mat_approx)
+#    spectrum_exact = get_matrix_spectrum(kernel_mat)
+#    metric_dict = {"F_norm_error": float(F_norm_error),
+#                   "spectral_norm_error": float(spectral_norm_error) }
     error_matrix = kernel_mat_approx - kernel_mat
     F_norm_error = torch.sum(error_matrix**2)
-    spectral_norm_error = np.max(np.abs(get_matrix_spectrum(error_matrix) ) )
+#    spectral_norm_error = np.max(np.abs(get_matrix_spectrum(error_matrix) ) )
     spectrum = get_matrix_spectrum(kernel_mat_approx)
     spectrum_exact = get_matrix_spectrum(kernel_mat)
-    metric_dict = {"F_norm_error": float(F_norm_error),
-                   "spectral_norm_error": float(spectral_norm_error) }
+#    metric_dict = {"F_norm_error": float(F_norm_error),
+#                   "spectral_norm_error": float(spectral_norm_error) }
+#    spectrum_exact = spectrum
+    metric_dict = {}
     return metric_dict, spectrum, spectrum_exact
 
 
