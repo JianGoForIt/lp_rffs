@@ -26,7 +26,7 @@ class GaussianKernel(object):
   #     -2 * cross) )
   #   return torch.DoubleTensor(kernel)
   
-  def get_kernel_matrix(self, X1, X2, quantizer1=None, quantizer2=None):
+  def get_kernel_matrix(self, X1, X2, quantizer1=None, quantizer2=None, dtype="float"):
     '''
     the input value has shape [n_sample, n_dim]
     quantizer is dummy here
@@ -41,7 +41,10 @@ class GaussianKernel(object):
       kernel = np.exp(-0.5 / float(self.sigma)**2 \
         * (np.tile(norms_X1**2, (1, n_sample_X2) ) + np.tile( (norms_X2.T)**2, (n_sample_X1, 1) ) \
         -2 * cross) )
-      return torch.DoubleTensor(kernel)
+      if dtype == "float":
+          return torch.Tensor(kernel).float()
+      else:
+          return torch.Tensor(kernel).double()
     else:
       norms_X1 = (X1**2).sum(1).view(-1, 1)
       norms_X2 = (X2**2).sum(1).view(-1, 1)
@@ -49,7 +52,10 @@ class GaussianKernel(object):
       norms_X2 = torch.transpose(norms_X2.repeat(1, int(X1.size(0) ) ), 0, 1)
       cross = torch.mm(X1, torch.transpose(X2, 0, 1) )
       kernel = torch.exp(-0.5 / float(self.sigma)**2 * (norms_X1 + norms_X2 - 2* cross) )
-      return kernel
+      if dtype == "float":
+          return kernel.float()
+      else:
+          return kernel.double()
 
   def torch(self, cuda=False):
     '''
@@ -116,7 +122,7 @@ class RFF(object):
   def get_sin_cos_feat(self, input_val):
     pass
 
-  def get_kernel_matrix(self, X1, X2, quantizer1=None, quantizer2=None):
+  def get_kernel_matrix(self, X1, X2, quantizer1=None, quantizer2=None, dtype="float"):
     '''
     X1 shape is [n_sample, n_dim]
     '''
@@ -135,8 +141,10 @@ class RFF(object):
       # print("quantizer 2 scale", quantizer2.scale)
       rff_x2 = quantizer2.quantize(rff_x2)
     self.rff_x1, self.rff_x2 = rff_x1, rff_x2
-    return torch.mm(rff_x1, torch.transpose(rff_x2, 0, 1) )
-
+    if dtype == "float":
+        return torch.mm(rff_x1, torch.transpose(rff_x2, 0, 1) ).float()
+    else:
+        return torch.mm(rff_x1.double(), torch.transpose(rff_x2, 0, 1).double() )
 
 def test_pytorch_gaussian_kernel():
   n_feat = 10
