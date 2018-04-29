@@ -3,7 +3,8 @@ import math
 from copy import deepcopy
 
 # example
-#python launch_jobs_nystrom_vs_rff.py census nystrom_vs_rff dawn with_metric run &
+#python launch_jobs_nystrom_vs_rff.py census nystrom_vs_rff dawn with_metric cuda run &
+#python launch_jobs_nystrom_vs_rff.py covtype nystrom_vs_rff_covtype_no_metric dawn without_metric cuda run &
 
 #dataset = "census"
 #exp_name = "nystrom_vs_rff"
@@ -12,6 +13,7 @@ dataset = sys.argv[1]
 exp_name = sys.argv[2]
 cluster = sys.argv[3]  # starcluster / dawn
 do_metric = sys.argv[4] # with_metric / without_metric
+do_cuda = sys.argv[5]
 #approx_type = sys.argv[3]
 
 # /dfs/scratch0/zjian/data/lp_kernel_data/census
@@ -19,7 +21,7 @@ if cluster == "starcluster":
     template = "python /dfs/scratch0/zjian/lp_kernel_code/lp_kernel/models/run_model.py --model=unk --minibatch=250 --l2_reg=unk \
         --kernel_sigma=unk --n_fp_rff=unk --random_seed=unk --learning_rate=unk \
         --data_path=unk --opt=unk --epoch=unk \
-        --save_path=unk --approx_type=unk --cuda --do_fp_feat"
+        --save_path=unk --approx_type=unk --do_fp_feat"
 
 else:
     template = "python /lfs/1/zjian/lp_kernel/lp_kernel/models/run_model.py --model=unk --minibatch=250 --l2_reg=unk \
@@ -44,10 +46,29 @@ if dataset == "census":
         lr_list = [0.5]
     else:
         lr_list = [0.5, 0.1, 1.0]
-    data_path = "/dfs/scratch0/zjian/data/lp_kernel_data/" + dataset
-    opt = "sgd"
-    epoch = 300
-    save_path = "/dfs/scratch0/zjian/lp_kernel/" + exp_name + "/" + dataset
+
+if dataset == "covtype":
+    model = "logistic_regression"
+    if do_metric == "with_metric":
+        l2_reg_list = [0.0, ]
+    else:
+        l2_reg_list = [0, 1e-3, ]
+    kernel_sigma = math.sqrt(1.0/0.6/2.0)
+    #n_fp_nystrom_list= [1250, 2500, 5000, 10000, 20000]
+    #n_fp_rff_list = [1250, 2500, 5000, 10000, 20000, 50000, 100000, 200000, 400000]
+    n_fp_rff_list = [1250, 10000, 100000]
+    #n_fp_rff_list = [2500, 20000, 200000]
+    #n_fp_rff_list = [5000, 50000, 400000]
+    seed_list = [1,]
+    if do_metric == "with_metric":
+        lr_list = [5]
+    else:
+        lr_list = [10,]
+
+data_path = "/dfs/scratch0/zjian/data/lp_kernel_data/" + dataset
+opt = "sgd"
+epoch = 300
+save_path = "/dfs/scratch0/zjian/lp_kernel/" + exp_name + "/" + dataset
 
 cnt = 0
 for seed in seed_list:
@@ -73,6 +94,8 @@ for seed in seed_list:
 					command = command.replace("--approx_type=unk", "--approx_type="+approx_type)
 					if do_metric == "with_metric":
 						command += " --collect_sample_metrics"
+					if do_cuda == "cuda":
+						command += " --cuda"
 					os.system("mkdir -p " + save_path + save_suffix)
 					if cluster == "starcluster":
 						command = "cd /dfs/scratch0/zjian/lp_kernel_code/lp_kernel/models && " + command
@@ -87,7 +110,7 @@ for seed in seed_list:
                                 	        + " -e " + save_path + save_suffix + "/run.err " + save_path + save_suffix + "/job.sh"
 					else:
 						launch_command = "bash " + save_path + save_suffix + "/job.sh"
-					if sys.argv[5] == "dryrun":
+					if sys.argv[6] == "dryrun":
 						print(launch_command)
 					else:
 						print(launch_command)	

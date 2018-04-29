@@ -183,6 +183,7 @@ if __name__ == "__main__":
     # setup sgd training process
     train_loss = []
     eval_metric = []
+    monitor_signal_history = []
     if args.model == "logistic_regression":
         monitor = ProgressMonitor(init_lr=args.learning_rate, lr_decay_fac=2.0, min_lr=0.00001, min_metric_better=True, decay_thresh=0.999)
     elif args.model == "ridge_regression":
@@ -196,12 +197,13 @@ if __name__ == "__main__":
         # evaluate and save evaluate metric
         metric, monitor_signal = evaluate(args, model, epoch, val_loader, quantizer, kernel_approx)
         eval_metric.append(metric)
+        monitor_signal_history.append(monitor_signal)
 
         if not os.path.isdir(args.save_path):
             os.makedirs(args.save_path)
         np.savetxt(args.save_path + "/train_loss.txt", train_loss)
         np.savetxt(args.save_path + "/eval_metric.txt", eval_metric)
-        
+        np.savetxt(args.save_path + "/monitor_signal.txt", monitor_signal_history)
         # for param in optimizer._z:
         #     print param
         early_stop = monitor.end_of_epoch(monitor_signal, model, optimizer, epoch)
