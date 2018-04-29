@@ -25,14 +25,14 @@ def load_data(path="../../data/census/census"):
   else:
     Y_train = Y_train['lab']
 
-  # # DEBUG
-  s = np.arange(X_train.shape[0] )
-  np.random.seed(0)
-  np.random.shuffle(s)
-  X_train = X_train[s, :]
-  Y_train = Y_train[s]
-  X_train, Y_train, X_test, Y_test = \
-  X_train[:(s.size * 1 / 3), :], Y_train[:(s.size * 1 / 3)], X_test[:(s.size * 1 / 3), :], Y_test[:(s.size * 1 / 3)]
+  ## # DEBUG
+  #s = np.arange(X_train.shape[0] )
+  #np.random.seed(0)
+  #np.random.shuffle(s)
+  #X_train = X_train[s, :]
+  #Y_train = Y_train[s]
+  #X_train, Y_train, X_test, Y_test = \
+  #X_train[:(s.size * 1 / 3), :], Y_train[:(s.size * 1 / 3)], X_test[:(s.size * 1 / 3), :], Y_test[:(s.size * 1 / 3)]
   assert X_train.shape[0] == Y_train.shape[0]
   assert X_test.shape[0] == Y_test.shape[0]
   assert X_train.shape[0] != X_test.shape[0]

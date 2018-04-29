@@ -21,10 +21,10 @@ class Nystrom(object):
 		# using the standard way to select n_feat landmark points
 		if n_landmark is None:
 			n_landmark = self.n_feat
-		#self.landmark = X[perm[:n_landmark], :]
-		#self.n_landmark = n_landmark
-		self.landmark = X
-		self.n_landmark = X.size(0)
+		self.landmark = X[perm[:n_landmark], :]
+		self.n_landmark = n_landmark
+		#self.landmark = X
+		#self.n_landmark = X.size(0)
 		self.K_landmark = \
 			self.kernel.get_kernel_matrix(self.landmark, self.landmark)
 		# # the torch mm function can make very sutle difference of upper and lower triangular in
