@@ -418,7 +418,7 @@ We consider several simplified scenarios:
 
 \subsection{Generalizatio bound using $\eps$-log-spectral distance}
 
-\textbf{$\eps$-log-spectral distance (Definition)}:  Given $\eps \geq 0$, and two element-wise non-negative vectors $\sigma,\tsigma \in \RR^n$,  we define the $\eps$-log-spectral distance between $\sigma$ and $\tsigma$ as $D_{\eps}(\sigma,\tsigma) = \max_i (\log(\sigma_i) - \log(\tsigma_i))^2$.
+\textbf{$\eps$-log-spectral distance (Definition)}:  Given $\eps \geq 0$, and two element-wise non-negative vectors $\sigma,\tsigma \in \RR^n$,  we define the $\eps$-log-spectral distance between $\sigma$ and $\tsigma$ as $D_{\eps}(\sigma,\tsigma) = \max_i (\log(\sigma_i + \eps) - \log(\tsigma_i + \eps)^2$.
 \begin{theorem}
 	Let $K = USU^T$ and $\tK = U\tS U^T$, be two kernel matrices with the same eigenvectors, but different eigenvalues, where $S = diag(\sigma)$, and $\tS = diag(\tsigma)$.  Then, for any $\lambda \geq \eps \geq 0$, if $L(K; \lambda, \alpha^2)$ and $L(\tK; \lambda, \alpha^2)$ denote the expected losses under fixed design linear regression model (with noise variance $\alpha^2$, and regularizing constant $\lambda$), then the following holds:
 	$$L(\tK; \lambda, \alpha^2) \leq L(K; \lambda, \alpha^2) + \Big(2\sqrt{D_{\eps}(\sigma,\tsigma)} + D_{\eps}(\sigma,\tsigma)\Big)\Big(\frac{1}{n}\|y\|^2 + \alpha^2\Big)$$
