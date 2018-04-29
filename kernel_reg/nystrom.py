@@ -16,6 +16,9 @@ class Nystrom(object):
 		X is in the shape of [n_sample, n_dimension]
 		call setup() once before using Nystrom
 		'''
+		# if n feat > n sample then make n feat = n sample
+		if self.n_feat > X.size(0):
+			self.n_feat = X.size(0)
 		np.random.seed(self.rand_seed)
 		perm = np.random.permutation(np.arange(X.size(0) ) )
 		# using the standard way to select n_feat landmark points
@@ -40,6 +43,8 @@ class Nystrom(object):
 		#if np.min(S[:self.n_landmark] ) <= 0:
 		#	print("numpy eigh gives negative values, switch to use SVD")
 		U, S, _ = np.linalg.svd(self.K_landmark.cpu().numpy() )
+		#U = np.random.normal(size=(self.K_landmark.size(0), self.K_landmark.size(1)))
+		#S = np.random.normal(size=(self.K_landmark.size(0)) )
 		self.U_d = torch.DoubleTensor(U[:, :n_landmark] )
 		self.S_d = torch.DoubleTensor(S[:n_landmark] )
 		self.A_d = torch.mm(self.U_d, torch.diag(1.0/torch.sqrt(self.S_d) ) )
