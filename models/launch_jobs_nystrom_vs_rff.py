@@ -35,8 +35,8 @@ if dataset == "census":
     kernel_sigma = math.sqrt(1.0/0.0006/2.0)
     #n_fp_nystrom_list= [1250, 2500, 5000, 10000, 20000]
     #n_fp_rff_list = [1250, 2500, 5000, 10000, 20000, 50000, 100000, 200000, 400000, 800000, 1600000]
-    n_fp_rff_list = [1250, 5000, 20000, 100000, 400000, 1600000]
-#    n_fp_rff_list = [2500, 10000, 50000, 200000, 800000]    
+    #n_fp_rff_list = [1250, 5000, 20000, 100000, 400000, 1600000]
+    n_fp_rff_list = [2500, 10000, 50000, 200000, 800000]    
     seed_list = [1, 2, 3]
     if do_metric == "with_metric":
 	lr_list = [0.5]
@@ -52,7 +52,7 @@ for seed in seed_list:
 	for l2_reg in l2_reg_list:
 		for n_fp_rff in n_fp_rff_list:
 			for lr in lr_list:
-				for approx_type in ["nystrom", "rff"]:
+				for approx_type in ["rff", "nystrom"]:
 					if approx_type == "nystrom" and n_fp_rff > 20000:
 						continue
 					save_suffix = "_type_" + approx_type + "_l2_reg_" + str(l2_reg) + "_n_fp_feat_" + str(n_fp_rff) \

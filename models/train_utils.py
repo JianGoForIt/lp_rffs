@@ -137,16 +137,16 @@ def get_matrix_spectrum(X):
     # np.testing.assert_array_almost_equal
     # if not torch.equal(X, torch.transpose(X, 0, 1) ):
     #     raise Exception("Kernel matrix is not symetric!")
-    S, U = np.linalg.eigh(X.cpu().numpy().astype(np.float64), UPLO='U')
-    if np.min(S) <= 0:
-        print("numpy eigh gives negative values, switch to use SVD")
-        U, S, _ = np.linalg.svd(X.cpu().numpy().astype(np.float64) )
+    #S, U = np.linalg.eigh(X.cpu().numpy().astype(np.float64), UPLO='U')
+    #if np.min(S) <= 0:
+    #    print("numpy eigh gives negative values, switch to use SVD")
+    U, S, _ = np.linalg.svd(X.cpu().numpy().astype(np.float64) )
     return S 
 
-def get_sample_kernel_metrics(X, kernel, kernel_approx, quantizer, n_sample):
-    X_sample = sample_data(X, n_sample)
-    kernel_mat = kernel.get_kernel_matrix(X, X)
-    kernel_mat_approx = kernel_approx.get_kernel_matrix(X, X, quantizer, quantizer)
+def get_sample_kernel_metrics(X_all, kernel, kernel_approx, quantizer, n_sample):
+    X = sample_data(X_all, n_sample)
+    kernel_mat = kernel.get_kernel_matrix(X, X, dtype="double")
+    kernel_mat_approx = kernel_approx.get_kernel_matrix(X, X, quantizer, quantizer, dtype="double")
     # # need to use double for XXT if we want the torch equal to hold.
     # if not torch.equal(kernel_mat_approx, torch.transpose(kernel_mat_approx, 0, 1) ):
     #     raise Exception("Kernel matrix is not symetric!")
