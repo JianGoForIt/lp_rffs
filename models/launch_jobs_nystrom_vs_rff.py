@@ -2,6 +2,8 @@ import os, sys
 import math
 from copy import deepcopy
 
+# example
+#python launch_jobs_nystrom_vs_rff.py census nystrom_vs_rff dawn with_metric run &
 
 #dataset = "census"
 #exp_name = "nystrom_vs_rff"
@@ -35,8 +37,8 @@ if dataset == "census":
     kernel_sigma = math.sqrt(1.0/0.0006/2.0)
     #n_fp_nystrom_list= [1250, 2500, 5000, 10000, 20000]
     #n_fp_rff_list = [1250, 2500, 5000, 10000, 20000, 50000, 100000, 200000, 400000, 800000, 1600000]
-    #n_fp_rff_list = [1250, 5000, 20000, 100000, 400000, 1600000]
-    n_fp_rff_list = [2500, 10000, 50000, 200000, 800000]    
+    n_fp_rff_list = [1250, 5000, 20000, 100000, 400000, 1600000]
+#    n_fp_rff_list = [2500, 10000, 50000, 200000, 800000]    
     seed_list = [1, 2, 3]
     if do_metric == "with_metric":
 	lr_list = [0.5]
