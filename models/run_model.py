@@ -22,7 +22,7 @@ from data_loader import load_data
 import halp
 import halp.optim
 import halp.quantize
-from train_utils import train, evaluate, ProgressMonitor, get_sample_kernel_metrics
+from train_utils import train, evaluate, ProgressMonitor, get_sample_kernel_metrics, sample_data
 # import halp.optim
 # from halp import LPSGD
 # from halp import HALP
@@ -52,13 +52,14 @@ parser.add_argument("--save_path", type=str, default="./test")
 parser.add_argument("--approx_type", type=str, default="rff", help="specify using exact, rff or nystrom")
 parser.add_argument("--collect_sample_metrics", action="store_true", 
     help="True if we want to collect metrics from the subsampled kernel matrix")
-parser.add_argument("--n_measure_sample", type=int, default=20000, 
+parser.add_argument("--n_sample", type=int, default=-1, 
     help="samples for metric measurements, including approximation error and etc.")
 args = parser.parse_args()
 
 
 
 if __name__ == "__main__":
+    np.random.seed(args.random_seed)
     use_cuda = torch.cuda.is_available() and args.cuda
     torch.manual_seed(args.random_seed)
     if use_cuda:
@@ -66,6 +67,14 @@ if __name__ == "__main__":
         # torch.cuda.manual_seed_all(args.seed)
     # load dataset
     X_train, X_val, Y_train, Y_val = load_data(args.data_path)
+    if args.n_sample > 0:
+        # downsample if specified
+        X_train, Y_train = sample_data(X_train, Y_train, args.n_sample)
+        X_val, Y_val = sample_data(X_val, Y_val, args.n_sample)
+        assert X_train.shape[0] == Y_train.shape[0]
+        assert X_val.shape[0] == Y_val.shape[0]
+        print(X_train.shape[0], " training sample ", X_val.shape[0], "evaluation sample")
+
     X_train = torch.DoubleTensor(X_train)
     X_val = torch.DoubleTensor(X_val)
     if args.model == "ridge_regression":
@@ -155,17 +164,17 @@ if __name__ == "__main__":
 
     # collect metrics
     if args.collect_sample_metrics:
-        print("start doing sample metric collection with ", args.n_measure_sample, " samples")
+        print("start doing sample metric collection with ", X_train.size(0), " training samples")
         if use_cuda:
             metric_dict_sample_train, spectrum_sample_train, spectrum_sample_train_exact = \
-                get_sample_kernel_metrics(X_train.cuda(), kernel, kernel_approx, quantizer, args.n_measure_sample)
+                get_sample_kernel_metrics(X_train.cuda(), kernel, kernel_approx, quantizer)
             metric_dict_sample_val, spectrum_sample_val, spectrum_sample_val_exact = \
-                get_sample_kernel_metrics(X_val.cuda(), kernel, kernel_approx, quantizer, args.n_measure_sample)  
+                get_sample_kernel_metrics(X_val.cuda(), kernel, kernel_approx, quantizer)  
         else:
             metric_dict_sample_train, spectrum_sample_train, spectrum_sample_train_exact = \
-                get_sample_kernel_metrics(X_train, kernel, kernel_approx, quantizer, args.n_measure_sample)
+                get_sample_kernel_metrics(X_train, kernel, kernel_approx, quantizer)
             metric_dict_sample_val, spectrum_sample_val, spectrum_sample_val_exact = \
-                get_sample_kernel_metrics(X_val, kernel, kernel_approx, quantizer, args.n_measure_sample) 
+                get_sample_kernel_metrics(X_val, kernel, kernel_approx, quantizer) 
         with open(args.save_path + "/metric_sample_train.txt", "w") as f:
             cp.dump(metric_dict_sample_train, f)
         np.save(args.save_path + "/spectrum_train.npy", spectrum_sample_train)

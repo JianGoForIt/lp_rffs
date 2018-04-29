@@ -120,13 +120,24 @@ def evaluate(args, model, epoch, val_loader, quantizer, kernel):
         return l2_accum / float(sample_cnt), l2_accum / float(sample_cnt)
 
 
-def sample_data(X, n_sample):
+def sample_data(X, Y, n_sample):
     '''
     X is in the shape of [n_sample, n_feat]
     '''
-    perm = np.random.permutation(np.arange(X.size(0) ) )
-    X_sample = X[perm[:min(n_sample, X.size(0) ) ], :]
-    return X_sample
+    if isinstance(X, np.ndarray):
+        # perm = np.random.permutation(np.arange(X.shape[0] ) )
+        total_sample = X.shape[0]
+        n_sample = min(n_sample, X.shape[0])
+    else:
+        total_sample = X.size(0)
+        n_sample = min(n_sample, X.size(0) )
+    if n_sample == total_sample:
+        return X, Y
+    else:
+        perm = np.random.permutation(np.arange(total_sample) )
+        X_sample = X[perm[:n_sample], :]
+        Y_sample = Y[perm[:n_sample] ]
+    return X_sample, Y_sample
 
 def get_matrix_spectrum(X):
     # linalg.eigh can give negative value on cencus regression dataset
@@ -143,8 +154,8 @@ def get_matrix_spectrum(X):
     U, S, _ = np.linalg.svd(X.cpu().numpy().astype(np.float64) )
     return S 
 
-def get_sample_kernel_metrics(X_all, kernel, kernel_approx, quantizer, n_sample):
-    X = sample_data(X_all, n_sample)
+def get_sample_kernel_metrics(X, kernel, kernel_approx, quantizer):
+    # X = sample_data(X_all, n_sample)
     kernel_mat = kernel.get_kernel_matrix(X, X)
     kernel_mat_approx = kernel_approx.get_kernel_matrix(X, X, quantizer, quantizer)
     # # need to use double for XXT if we want the torch equal to hold.

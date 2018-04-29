@@ -6,10 +6,10 @@
 #   --kernel_sigma=2.24 --n_fp_rff=10000 --random_seed=2 --do_fp_feat --learning_rate=100.0 \
 #   --data_path=../../data/adult/adult --opt=sgd --epoch=5
 
-python run_model.py --model=logistic_regression --minibatch=250 --l2_reg=0.0 \
-  --kernel_sigma=2.24 --n_fp_rff=10000 --random_seed=2 --do_fp_feat --learning_rate=100.0 \
-  --data_path=../../data/adult/adult --opt=lpsgd --epoch=1 --n_bit_model=2 --scale_model=0.001 \
-  --save_path=./test/123/
+# python run_model.py --model=logistic_regression --minibatch=250 --l2_reg=0.0 \
+#   --kernel_sigma=2.24 --n_fp_rff=10000 --random_seed=2 --do_fp_feat --learning_rate=100.0 \
+#   --data_path=../../data/adult/adult --opt=lpsgd --epoch=1 --n_bit_model=2 --scale_model=0.001 \
+#   --save_path=./test/123/
 
 
 # python run_model.py --model=logistic_regression --minibatch=250 --l2_reg=0.0 \
@@ -54,3 +54,16 @@ python run_model.py --model=logistic_regression --minibatch=250 --l2_reg=0.0 \
 # python run_model.py --model=logistic_regression --minibatch=250 --dataset=adult --l2_reg=0.0001 \
 #   --kernel_sigma=30.0 --n_fp_rff=256 --n_bit_feat=4 --random_seed=1 --learning_rate=0.1 \
 #   --data_path=../../data/adult/adult
+
+# # test n feat > n sample issue in nystrom
+# python run_model.py --model=ridge_regression --minibatch=250 --l2_reg=0.0 \
+#   --kernel_sigma=30.0 --n_fp_rff=100000 --random_seed=2 --learning_rate=0.5 \
+#   --data_path=/dfs/scratch0/zjian/data/lp_kernel_data/census --opt=sgd --epoch=300 \
+#   --save_path=./test/123/ --do_fp_feat --approx_type=rff --cuda --do_fp_feat 
+
+
+# test sampled data spectrum visualization
+python run_model.py --model=ridge_regression --minibatch=250 --l2_reg=0.0 \
+  --kernel_sigma=30.0 --n_fp_rff=20000 --random_seed=2 --learning_rate=0.5 \
+  --data_path=../../data/census/census --opt=sgd --epoch=300 \
+  --save_path=./test/123/ --do_fp_feat --approx_type=nystrom --cuda --do_fp_feat --n_sample=100000
