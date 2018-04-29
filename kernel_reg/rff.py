@@ -81,8 +81,8 @@ class RFF(object):
     self.b = np.random.uniform(low=0.0, high=2.0 * np.pi, size=(self.n_feat, 1) )
 
   def torch(self, cuda=False):
-    self.w = torch.FloatTensor(self.w)
-    self.b = torch.FloatTensor(self.b)
+    self.w = torch.DoubleTensor(self.w)
+    self.b = torch.DoubleTensor(self.b)
     if cuda:
       self.w = self.w.cuda()
       self.b = self.b.cuda()
@@ -120,7 +120,7 @@ class RFF(object):
   def get_sin_cos_feat(self, input_val):
     pass
 
-  def get_kernel_matrix(self, X1, X2, quantizer1=None, quantizer2=None, dtype="float"):
+  def get_kernel_matrix(self, X1, X2, quantizer1=None, quantizer2=None):
     '''
     X1 shape is [n_sample, n_dim]
     '''
@@ -139,10 +139,8 @@ class RFF(object):
       # print("quantizer 2 scale", quantizer2.scale)
       rff_x2 = quantizer2.quantize(rff_x2)
     self.rff_x1, self.rff_x2 = rff_x1, rff_x2
-    if dtype == "float":
-        return torch.mm(rff_x1, torch.transpose(rff_x2, 0, 1) ).float()
-    else:
-        return torch.mm(rff_x1.double(), torch.transpose(rff_x2, 0, 1).double() )
+    return torch.mm(rff_x1, torch.transpose(rff_x2, 0, 1) )
+    
 
 def test_pytorch_gaussian_kernel():
   n_feat = 10
@@ -187,7 +185,7 @@ def test_rff_generation2():
   rff.get_gaussian_wb()
   approx_kernel_mat = rff.get_kernel_matrix(input_val, input_val)
   rff.torch(cuda=False)
-  approx_kernel_mat2 = rff.get_kernel_matrix(torch.FloatTensor(input_val), torch.FloatTensor(input_val) )
+  approx_kernel_mat2 = rff.get_kernel_matrix(torch.DoubleTensor(input_val), torch.DoubleTensor(input_val) )
   np.testing.assert_array_almost_equal(approx_kernel_mat.cpu().numpy(), approx_kernel_mat2.cpu().numpy(), decimal=6)
   print("rff generation test 2 passed!")
 
