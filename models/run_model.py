@@ -66,11 +66,11 @@ if __name__ == "__main__":
         # torch.cuda.manual_seed_all(args.seed)
     # load dataset
     X_train, X_val, Y_train, Y_val = load_data(args.data_path)
-    X_train = torch.FloatTensor(X_train.astype(np.float32) )
-    X_val = torch.FloatTensor(X_val.astype(np.float32) )
+    X_train = torch.DoubleTensor(X_train)
+    X_val = torch.DoubleTensor(X_val)
     if args.model == "ridge_regression":
-        Y_train = torch.FloatTensor(Y_train.astype(np.float32) )        
-        Y_val = torch.FloatTensor(Y_val.astype(np.float32) )
+        Y_train = torch.DoubleTensor(Y_train)        
+        Y_val = torch.DoubleTensor(Y_val)
     elif args.model == "logistic_regression":
         Y_train = Y_train.reshape( (Y_train.size) )
         Y_val = Y_val.reshape( (Y_val.size) )
@@ -79,11 +79,6 @@ if __name__ == "__main__":
         Y_val = torch.LongTensor(np.array(Y_val.tolist() ).reshape(Y_val.size, 1) )
     else:
         raise Exception("model not supported")
-    # if use_cuda:
-    #     X_train = X_train.cuda()
-    #     Y_train = Y_train.cuda()
-    #     X_val = X_val.cuda()
-    #     Y_val = Y_val.cuda()
 
     # setup dataloader 
     train_data = \
@@ -135,7 +130,8 @@ if __name__ == "__main__":
     elif args.model == "ridge_regression":
         model = RidgeRegression(input_dim=kernel_approx.n_feat, reg_lambda=args.l2_reg)
     if use_cuda:
-        model.cuda()    
+        model.cuda() 
+    model.double()   
 
     # set up optimizer
     if args.opt == "sgd":

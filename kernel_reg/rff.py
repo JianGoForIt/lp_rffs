@@ -30,6 +30,7 @@ class GaussianKernel(object):
     '''
     the input value has shape [n_sample, n_dim]
     quantizer is dummy here
+    dtype only works for numpy input for X1 X2
     '''
     if isinstance(X1, np.ndarray) and isinstance(X2, np.ndarray):
       n_sample_X1 = X1.shape[0]
@@ -52,10 +53,7 @@ class GaussianKernel(object):
       norms_X2 = torch.transpose(norms_X2.repeat(1, int(X1.size(0) ) ), 0, 1)
       cross = torch.mm(X1, torch.transpose(X2, 0, 1) )
       kernel = torch.exp(-0.5 / float(self.sigma)**2 * (norms_X1 + norms_X2 - 2* cross) )
-      if dtype == "float":
-          return kernel.float()
-      else:
-          return kernel.double()
+      return kernel
 
   def torch(self, cuda=False):
     '''

@@ -16,11 +16,8 @@ class Nystrom(object):
 		X is in the shape of [n_sample, n_dimension]
 		call setup() once before using Nystrom
 		'''
-		if isinstance(X, np.ndarray):
-			X = torch.FloatTensor(X)
 		np.random.seed(self.rand_seed)
 		perm = np.random.permutation(np.arange(X.size(0) ) )
-		#perm = torch.randperm(X.size(0) )
 		# using the standard way to select n_feat landmark points
 		if n_landmark is None:
 			n_landmark = self.n_feat
@@ -29,7 +26,7 @@ class Nystrom(object):
 		self.landmark = X
 		self.n_landmark = X.size(0)
 		self.K_landmark = \
-			self.kernel.get_kernel_matrix(self.landmark.double(), self.landmark.double(), dtype="double")
+			self.kernel.get_kernel_matrix(self.landmark, self.landmark)
 		# # the torch mm function can make very sutle difference of upper and lower triangular in
 		# # a symetric matrix
 		# if not torch.equal(self.K_landmark, torch.transpose(self.K_landmark, 0, 1) ):
@@ -41,30 +38,20 @@ class Nystrom(object):
 		#U = U[:, ::-1].copy()
 		#if np.min(S[:self.n_landmark] ) <= 0:
 		#	print("numpy eigh gives negative values, switch to use SVD")
-		U, S, _ = np.linalg.svd(self.K_landmark.cpu().numpy().astype(np.float64) )
-
-		self.U_d = torch.Tensor(U[:, :n_landmark] ).double()
-		self.S_d = torch.Tensor(S[:n_landmark] ).double()
+		U, S, _ = np.linalg.svd(self.K_landmark.cpu().numpy() )
+		self.U_d = torch.DoubleTensor(U[:, :n_landmark] )
+		self.S_d = torch.DoubleTensor(S[:n_landmark] )
 		self.A_d = torch.mm(self.U_d, torch.diag(1.0/torch.sqrt(self.S_d) ) )
-		self.U_d = self.U_d.float()
-		self.S_d = self.S_d.float()
-		self.A_d = self.A_d.float() 
-		# print "inside ", torch.sum(self.U_d), torch.sum(self.S_d), torch.sum(self.A_d)
-		# print self.S_d, torch.sqrt(self.S_d)
-		# # print torch.diag(1.0/torch.sqrt(self.S_d) )
 
-	def get_feat(self, X, dtype="float"):
-		kernel_matrix = self.kernel.get_kernel_matrix(X, self.landmark, dtype)
+	def get_feat(self, X):
+		kernel_matrix = self.kernel.get_kernel_matrix(X, self.landmark)
 		feat = torch.mm(kernel_matrix, self.A_d)
 		return feat
 
-	def get_kernel_matrix(self, X1, X2, quantizer1=None, quantizer2=None, dtype="float"):
+	def get_kernel_matrix(self, X1, X2, quantizer1=None, quantizer2=None):
 		feat_x1 = self.get_feat(X1)
 		feat_x2 = self.get_feat(X2)
-		if dtype == "float":
-			return torch.mm(feat_x1, torch.transpose(feat_x2, 0, 1) ).float()
-		else:
-			return torch.mm(feat_x1.double(), torch.transpose(feat_x2, 0, 1).double() )
+		return torch.mm(feat_x1, torch.transpose(feat_x2, 0, 1) )
 
 	def torch(self, cuda):
 		if cuda:
@@ -77,15 +64,15 @@ def test_nystrom_full():
 	# test if keep all the dimensions is the nystrom kernel matrix equals to the exact kernel
 	n_sample = 15
 	n_feat = n_sample
-	input_val1  = np.random.normal(size=[n_sample, n_feat] )
-	input_val2  = np.random.normal(size=[n_sample - 1, n_feat] )
+	input_val1  = torch.Tensor(np.random.normal(size=[n_sample, n_feat] ) ).double()
+	input_val2  = torch.Tensor(np.random.normal(size=[n_sample - 1, n_feat] ) ).double()
 	# get exact gaussian kernel
 	kernel = GaussianKernel(sigma=np.random.normal() )
 	kernel_mat = kernel.get_kernel_matrix(input_val1, input_val2)
 
 	approx = Nystrom(n_feat, kernel=kernel)
 	approx.setup(input_val1)
-	approx_kernel_mat = approx.get_kernel_matrix(torch.FloatTensor(input_val1), torch.FloatTensor(input_val2) )
+	approx_kernel_mat = approx.get_kernel_matrix(input_val1, input_val2)
 
 	np.testing.assert_array_almost_equal(kernel_mat.cpu().numpy(), approx_kernel_mat.cpu().numpy() )
 	print("nystrom full dimension test passed!")
