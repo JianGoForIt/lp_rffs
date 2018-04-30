@@ -424,7 +424,7 @@ We consider several simplified scenarios:
 	$$L(\tK; \lambda, \alpha^2) \leq L(K; \lambda, \alpha^2) + \Big(2\sqrt{D_{\eps}(\sigma,\tsigma)} + D_{\eps}(\sigma,\tsigma)\Big)\Big(\frac{1}{n}\|y\|^2 + \alpha^2\Big)$$
 \end{theorem}
 \begin{proof}
-	Assume without loss of generality that $\tsigma_i \leq$, and let $\gamma_i=\frac{\sigma_i}{\sigma_i + \lambda}$, and $\tgamma_i=\frac{\tsigma_i}{\tsigma_i + \lambda}$, $z_i = \frac{\tgamma_i - \gamma_i}{1-\tgamma}$.  We will use that inequality that for $z \leq 0$, $\log(1+z)^2 \geq z^2$.
+	Assume without loss of generality that $\tsigma_i \leq \sigma_i$, and let $\gamma_i=\frac{\sigma_i}{\sigma_i + \lambda}$, and $\tgamma_i=\frac{\tsigma_i}{\tsigma_i + \lambda}$ (thus, $\tgamma_i \leq \gamma_i$).  We will use that inequality that for $z \leq 0$, $\log(1+z)^2 \geq z^2$.
 \begin{eqnarray*}
 	\bigg(\log
 	\Big(\sigma_i + \eps\Big) - \log\Big(\tsigma_i + \eps\Big)\bigg)^2 &\geq& 
@@ -436,9 +436,9 @@ We consider several simplified scenarios:
 	&=& \bigg(\log\Big(1 - \gamma_i\Big) - \log\Big(1-\tgamma_i\Big)\bigg)^2 \\
 	&=& \bigg(\log\Big(\frac{1-\gamma_i}{1-\tgamma_i}\Big)\bigg)^2 \\
 	&=& \bigg(\log\Big(1 + \frac{\tgamma_i-\gamma_i}{1-\tgamma_i}\Big)\bigg)^2 \\
-	&=& \bigg(\log\Big(1 + z_i\Big)\bigg)^2 \\
-	&\geq& z_i^2 \\
-	&=&  \bigg(\frac{\tgamma_i-\gamma_i}{1-\tgamma_i}\bigg)^2 \\
+	%&=& \bigg(\log\Big(1 + z_i\Big)\bigg)^2 \\
+	%&\geq& z_i^2 \\
+	&\geq&  \bigg(\frac{\tgamma_i-\gamma_i}{1-\tgamma_i}\bigg)^2 \\
 	&\geq&  \big(\tgamma_i-\gamma_i\big)^2.
 \end{eqnarray*}	
 
