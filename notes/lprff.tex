@@ -7,6 +7,8 @@
 \usepackage{amsthm}
 
 
+\newcommand\tri[1]{\textcolor{red}{[Tri: #1]}}
+
 \topmargin = -0.5in \textwidth=6.5in \textheight=9in
 
 \oddsidemargin = 0in \evensidemargin = 0in
@@ -156,6 +158,10 @@ For a fixed $x,y\in\cX$, let $T$ be any random variable with the property that $
 
 \noindent\textbf{Open Question}: Can Claim 1 (uniform convergence) from Rahimi and Recht [5] be adapted to this low-precision setting?
 
+\tri{Yes, the proof is exactly the same: standard epsilon net argument to
+partition the space into balls, strong concentration at the center of the ball
+(by Hoeffding), then union bound over number of balls.}
+
 \subsubsection{Further analysis of variance}
 In this section, we dig deeper into the bounds proven in Theorem \ref{thm:varn}, to understand whether under a fixed memory budget, we can attain lower kernel approximation error by using LP-RFF.
 To do so, we will analyze the variance of using $\bS_n$ to approximate $k(x,y)$, relative to $\bT_{n*(32/b)}$.  This corresponds to comparing the variance of using $n$ ``full precision''  features (which we will assume are 32-bit), relative to using $n*(32/b)$ $b$-bit low-precision features. Note that both of these feature representations use the same total number of bits.  We will in this case assume we are using random Fourier features, and thus that
@@ -211,10 +217,17 @@ In this section, we analyze the effect that using low-precision has on the spect
 	Above, we use the fact that $\expect{}{c_{ij}^2} \leq \frac{1}{4}\bigg(\frac{2\sqrt{2/d}}{2^b-1}\bigg)^2 = \frac{2}{d(2^b-1)^2}$.
 \end{proof}
 
+\tri{You're using ``spectrum'' to mean two things, the eigenvalues of a
+symmetric matrix and the singular values of a rectangular matrix. This is
+confusing. Be precise and use eigenvalues/singular values.}
+
 Notice that the spectrum $\tlambda$ of $(Z+C)(Z+C)^T$ relates to the spectrum $\tsigma$ of $(Z+C)$ via $\tlambda_i = \tsigma_i^2$.  Thus, letting $\sigma$ denote the spectrum of $Z$, we have shown that
 $\expect{}{\sum_i \tsigma_i^2} > \sum_i \sigma_i^2$.  In other words, adding zero mean noise of any kind to a matrix elevates the $\ell_2$ norm of its spectrum.  This is intuitive because the noise will always increase the total weight on the diagonal of $ZZ^T$.
 
 More interestingly, however, we can also show that if we take two random draws $C$ and $D$ of the quantization noise, the spectrum of $(Z+C)(Z+D)^T$ is also elevated relative to $ZZ^T$, even though the expected value of the entries of the diagonal of this matrix are \textit{equal} to the entries of the $ZZ^T$ diagonal.  This is because we can write $(Z+C)(Z+D)^T = ZZ^T + CZ^T + ZD^T + CD^T = ZZ^T + N$, where $N = CZ^T + ZD^T + CD^T$ is zero mean noise.  Thus, just like the spectrum of $Z+C$ was higher than that of $Z$ because we added zero mean noise $C$ to it, the spectrum of $(Z+C)(Z+D)^T$ will be higher than that of $ZZ^T$ because we are adding zero mean noise $N$ to it.  We show this in more detail in the proposition below:
+
+\tri{Why would you look at $(Z + C) (Z + D)^T$? This isn't even symmetric, so I
+  don't see how this matrix relates to anything.}
 
 \begin{proposition}
 	Let $Z$ be an $n$ by $d$ RFF matrix whose $i^{th}$ row is $z(x_i)$, and let $C$, $D$ denote independent draws of zero mean random quantization noise of the same dimension as $Z$.  If $\lambda$ denotes the spectrum of $ZZ^T$, and $\tlambda$ denotes the spectrum of $(Z+C)(Z+D)^T$, it follows that 
