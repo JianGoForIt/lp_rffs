@@ -5,8 +5,12 @@ from copy import deepcopy
 
 def train(args, model, epoch, train_loader, optimizer, quantizer, kernel):
     train_loss = []
+    use_cuda = torch.cuda.is_available() and args.cuda
     for i, minibatch in enumerate(train_loader):
         X, Y = minibatch
+        if use_cuda:
+            X = X.cuda()
+            Y = Y.cuda()
         optimizer.zero_grad()
         if args.opt == "halp":
             # We need to add this function to models when we want to use SVRG
@@ -28,8 +32,8 @@ def train(args, model, epoch, train_loader, optimizer, quantizer, kernel):
                 if not isinstance(target, torch.autograd.variable.Variable):
                     target = Variable(target, requires_grad=False)
 
-                if use_cuda:
-                    data, target = data.cuda(), target.cuda()
+                # if use_cuda:
+                #     data, target = data.cuda(), target.cuda()
                 cost = model.forward(data, target)
                 cost.backward()
                 return cost
@@ -57,11 +61,15 @@ def train(args, model, epoch, train_loader, optimizer, quantizer, kernel):
 def evaluate(args, model, epoch, val_loader, quantizer, kernel):
     # perform evaluation
     sample_cnt = 0
+    use_cuda = torch.cuda.is_available() and args.cuda
     if args.model == "logistic_regression":
         correct_cnt = 0
         cross_entropy_accum = 0.0
         for i, minibatch in enumerate(val_loader):
             X, Y = minibatch
+            if use_cuda:
+                X = X.cuda()
+                Y = Y.cuda()
             if args.approx_type == "rff":
                 X = kernel.get_cos_feat(X, dtype="float")
             elif args.approx_type == "nystrom":
@@ -88,6 +96,9 @@ def evaluate(args, model, epoch, val_loader, quantizer, kernel):
         l2_accum = 0.0
         for i, minibatch in enumerate(val_loader):
             X, Y = minibatch
+            if use_cuda:
+                X = X.cuda()
+                Y = Y.cuda()
             if args.approx_type == "rff":
                 X = kernel.get_cos_feat(X, dtype="float")
             elif args.approx_type == "nystrom":
@@ -126,26 +137,37 @@ def get_matrix_spectrum(X):
     # np.testing.assert_array_almost_equal
     # if not torch.equal(X, torch.transpose(X, 0, 1) ):
     #     raise Exception("Kernel matrix is not symetric!")
-    S, U = np.linalg.eigh(X.cpu().numpy().astype(np.float64), UPLO='U')
-    if np.min(S) <= 0:
-        print("numpy eigh gives negative values, switch to use SVD")
-        U, S, _ = np.linalg.svd(X.cpu().numpy().astype(np.float64) )
+    #S, U = np.linalg.eigh(X.cpu().numpy().astype(np.float64), UPLO='U')
+    #if np.min(S) <= 0:
+    #    print("numpy eigh gives negative values, switch to use SVD")
+    U, S, _ = np.linalg.svd(X.cpu().numpy().astype(np.float64) )
     return S 
 
-def get_sample_kernel_metrics(X, kernel, kernel_approx, quantizer, n_sample):
-    X_sample = sample_data(X, n_sample)
-    kernel_mat = kernel.get_kernel_matrix(X, X)
-    kernel_mat_approx = kernel_approx.get_kernel_matrix(X, X, quantizer, quantizer)
+def get_sample_kernel_metrics(X_all, kernel, kernel_approx, quantizer, n_sample):
+    #X = sample_data(X_all, n_sample)
+    X = X_all
+    kernel_mat = kernel.get_kernel_matrix(X, X, dtype="double")
+    kernel_mat_approx = kernel_approx.get_kernel_matrix(X, X, quantizer, quantizer, dtype="double")
     # # need to use double for XXT if we want the torch equal to hold.
     # if not torch.equal(kernel_mat_approx, torch.transpose(kernel_mat_approx, 0, 1) ):
     #     raise Exception("Kernel matrix is not symetric!")
+#    error_matrix = kernel_mat_approx - kernel_mat
+#    F_norm_error = torch.sum(error_matrix**2)
+#    spectral_norm_error = np.max(np.abs(get_matrix_spectrum(error_matrix) ) )
+#    spectrum = get_matrix_spectrum(kernel_mat_approx)
+#    spectrum_exact = get_matrix_spectrum(kernel_mat)
+#    metric_dict = {"F_norm_error": float(F_norm_error),
+#                   "spectral_norm_error": float(spectral_norm_error) }
     error_matrix = kernel_mat_approx - kernel_mat
     F_norm_error = torch.sum(error_matrix**2)
-    spectral_norm_error = np.max(np.abs(get_matrix_spectrum(error_matrix) ) )
+#    spectral_norm_error = np.max(np.abs(get_matrix_spectrum(error_matrix) ) )
     spectrum = get_matrix_spectrum(kernel_mat_approx)
-    metric_dict = {"F_norm_error": float(F_norm_error),
-                   "spectral_norm_error": float(spectral_norm_error) }
-    return metric_dict, spectrum
+    spectrum_exact = get_matrix_spectrum(kernel_mat)
+#    metric_dict = {"F_norm_error": float(F_norm_error),
+#                   "spectral_norm_error": float(spectral_norm_error) }
+#    spectrum_exact = spectrum
+    metric_dict = {}
+    return metric_dict, spectrum, spectrum_exact
 
 
 

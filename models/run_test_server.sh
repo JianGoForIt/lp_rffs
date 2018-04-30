@@ -70,7 +70,7 @@
 python run_model.py --model=ridge_regression --minibatch=250 --l2_reg=0.0 \
   --kernel_sigma=30.0 --n_fp_rff=10000 --random_seed=2 --learning_rate=0.5 \
   --data_path=/dfs/scratch0/zjian/data/lp_kernel_data/census --opt=sgd --epoch=300 \
-  --save_path=./test/123/ --approx_type=rff --cuda
+  --save_path=./test/123/ --do_fp_feat --approx_type=rff --cuda --collect_sample_metrics --n_measure_sample=2000
 
 python run_model.py --model=logistic_regression --minibatch=250 --l2_reg=0.0 \
   --kernel_sigma=1.12 --n_fp_rff=10000 --random_seed=2 --learning_rate=12.5 \
