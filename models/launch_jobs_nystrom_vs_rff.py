@@ -61,7 +61,7 @@ if dataset == "covtype":
     n_fp_rff_list = [1250, 10000, 100000]
     #n_fp_rff_list = [2500, 20000, 200000]
     #n_fp_rff_list = [5000, 50000, 400000]
-    seed_list = [1,]
+    seed_list = [1,2,3]
     if do_metric == "with_metric":
         lr_list = [5]
     else:
@@ -99,7 +99,7 @@ for seed in seed_list:
 					if do_cuda == "cuda":
 						command += " --cuda"
 					if int(n_subsample) > 0:
-						command += " --n_sample " + str(n_subsample)
+						command += " --n_sample=" + str(n_subsample)
 					os.system("mkdir -p " + save_path + save_suffix)
 					if cluster == "starcluster":
 						command = "cd /dfs/scratch0/zjian/lp_kernel_code/lp_kernel/models && " + command
