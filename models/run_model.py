@@ -17,15 +17,19 @@ sys.path.append("../utils")
 sys.path.append("../..")
 from rff import RFF, GaussianKernel
 from nystrom import Nystrom
-from kernel_regressor import Quantizer
+from kernel_regressor import Quantizer, KernelRidgeRegression
 from data_loader import load_data
 import halp
 import halp.optim
 import halp.quantize
 from train_utils import train, evaluate, ProgressMonitor, get_sample_kernel_metrics, sample_data
-# import halp.optim
-# from halp import LPSGD
-# from halp import HALP
+# imports for fixed design runs
+from misc_utils import expected_loss
+from scipy.optimize import minimize
+
+# EPS to prevent numerical issue in closed form ridge regression solver
+EPS = 1e-10
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--model", type=str, default="logistic_regression")
@@ -54,6 +58,11 @@ parser.add_argument("--collect_sample_metrics", action="store_true",
     help="True if we want to collect metrics from the subsampled kernel matrix")
 parser.add_argument("--n_sample", type=int, default=-1, 
     help="samples for metric measurements, including approximation error and etc.")
+parser.add_argument("--fixed_design", action="store_true", 
+    help="do fixed design experiment")
+parser.add_argument("--fixed_design_noise_sigma", type=float, help="label noise std")
+parser.add_argument("--fixed_design_l2_reg", type=float, default=None,
+    help="if none, we need to search for the optimal lambda")
 args = parser.parse_args()
 
 
@@ -67,6 +76,14 @@ if __name__ == "__main__":
         # torch.cuda.manual_seed_all(args.seed)
     # load dataset
     X_train, X_val, Y_train, Y_val = load_data(args.data_path)
+    if args.fixed_design:
+        print("fixed design using label noise sigma ", args.fixed_design_noise_sigma)
+        Y_train_orig = Y_train.copy()
+        X_val = X_train.copy()
+        Y_val = Y_train.copy()
+        Y_train += np.random.normal(scale=args.fixed_design_noise_sigma, size=Y_train.shape)
+        Y_val += np.random.normal(scale=args.fixed_design_noise_sigma, size=Y_train.shape)
+
     if args.n_sample > 0:
         # downsample if specified
         X_train, Y_train = sample_data(X_train, Y_train, args.n_sample)
@@ -129,37 +146,51 @@ if __name__ == "__main__":
     kernel.torch(cuda=use_cuda)
     kernel_approx.torch(cuda=use_cuda)
 
-
-    # construct model
-    if args.model == "logistic_regression":
-        model = LogisticRegression(input_dim=kernel_approx.n_feat, 
-            n_class=n_class, reg_lambda=args.l2_reg)
-        # model = LogisticRegression(input_dim=123, 
-        #     n_class=n_class, reg_lambda=args.l2_reg)
-    elif args.model == "ridge_regression":
-        model = RidgeRegression(input_dim=kernel_approx.n_feat, reg_lambda=args.l2_reg)
-    if use_cuda:
-        model.cuda() 
-    model.double()   
-
-    # set up optimizer
-    if args.opt == "sgd":
-        print("using sgd optimizer")
-        optimizer = optim.SGD(model.parameters(), lr=args.learning_rate, weight_decay=args.l2_reg)
-    elif args.opt == "lpsgd":
-        print("using lp sgd optimizer")
-        optimizer = halp.optim.LPSGD(model.parameters(), lr=args.learning_rate, 
-            scale_factor=args.scale_model, bits=args.n_bit_model, weight_decay=args.l2_reg)
-        print("model quantization scale and bit ", optimizer._scale_factor, optimizer._bits)
-    elif args.opt == "halp":
-        print("using halp optimizer")
-        optimizer = halp.optim.HALP(model.parameters(), lr=args.learning_rate, 
-            T=int(args.halp_epoch_T * X_train.size(0) / float(args.minibatch) ), 
-            data_loader=train_loader, mu=args.halp_mu, bits=args.n_bit_model, weight_decay=args.l2_reg)
-        print("model quantization, interval, mu, bit", optimizer.T, optimizer._mu, 
-            optimizer._bits, optimizer._biased)
+    if args.fixed_design:
+        if args.fixed_design_l2_reg is None:
+            # get kernel matrix and get the decomposition
+            assert isinstance(X_train, torch.DoubleTensor)
+            kernel_mat = kernel_approx.get_kernel_matrix(X_train, X_train, quantizer, quantizer)
+            assert isinstance(kernel_mat, torch.DoubleTensor)
+            U, S, _ = np.linalg.svd(kernel_mat.cpu().numpy().astype(np.float64) )
+            # numerically figure out the best lambda in the fixed design setting
+            x0 = 1.0 
+            f = lambda lam: expected_loss(lam,U,S,Y_train_orig,args.fixed_design_noise_sigma)
+            res = minimize(f, x0, bounds=[(0.0, None)], options={'xtol': 1e-6, 'disp': True})
+            loss = f(res.x)
+            print("fixed design opt reg and loss", res.x, loss)
+            args.l2_reg = max(res.x[0], EPS)
     else:
-        raise Exception("optimizer not supported")
+        # construct model
+        if args.model == "logistic_regression":
+            model = LogisticRegression(input_dim=kernel_approx.n_feat, 
+                n_class=n_class, reg_lambda=args.l2_reg)
+            # model = LogisticRegression(input_dim=123, 
+            #     n_class=n_class, reg_lambda=args.l2_reg)
+        elif args.model == "ridge_regression":
+            model = RidgeRegression(input_dim=kernel_approx.n_feat, reg_lambda=args.l2_reg)
+        if use_cuda:
+            model.cuda() 
+        model.double()   
+
+        # set up optimizer
+        if args.opt == "sgd":
+            print("using sgd optimizer")
+            optimizer = optim.SGD(model.parameters(), lr=args.learning_rate, weight_decay=args.l2_reg)
+        elif args.opt == "lpsgd":
+            print("using lp sgd optimizer")
+            optimizer = halp.optim.LPSGD(model.parameters(), lr=args.learning_rate, 
+                scale_factor=args.scale_model, bits=args.n_bit_model, weight_decay=args.l2_reg)
+            print("model quantization scale and bit ", optimizer._scale_factor, optimizer._bits)
+        elif args.opt == "halp":
+            print("using halp optimizer")
+            optimizer = halp.optim.HALP(model.parameters(), lr=args.learning_rate, 
+                T=int(args.halp_epoch_T * X_train.size(0) / float(args.minibatch) ), 
+                data_loader=train_loader, mu=args.halp_mu, bits=args.n_bit_model, weight_decay=args.l2_reg)
+            print("model quantization, interval, mu, bit", optimizer.T, optimizer._mu, 
+                optimizer._bits, optimizer._biased)
+        else:
+            raise Exception("optimizer not supported")
     
 
     # collect metrics
@@ -186,35 +217,52 @@ if __name__ == "__main__":
         # print metric_dict_sample_train, metric_dict_sample_val
         # print spectrum_sample_train, spectrum_sample_val
         print("Sample metric collection done!")
-        exit(0)
+        if not args.fixed_design:
+            # for fixed design experiments, we need to carry out closed form training
+            exit(0)
 
-
-    # setup sgd training process
-    train_loss = []
-    eval_metric = []
-    monitor_signal_history = []
-    if args.model == "logistic_regression":
-        monitor = ProgressMonitor(init_lr=args.learning_rate, lr_decay_fac=2.0, min_lr=0.00001, min_metric_better=True, decay_thresh=0.999)
-    elif args.model == "ridge_regression":
-        monitor = ProgressMonitor(init_lr=args.learning_rate, lr_decay_fac=2.0, min_lr=0.00001, min_metric_better=True, decay_thresh=0.999)
-    else:
-        raise Exception("model not supported!")
-    for epoch in range(args.epoch):  
-        # train for one epoch
-        loss_per_step = train(args, model, epoch, train_loader, optimizer, quantizer, kernel_approx)
-        train_loss += loss_per_step
-        # evaluate and save evaluate metric
-        metric, monitor_signal = evaluate(args, model, epoch, val_loader, quantizer, kernel_approx)
-        eval_metric.append(metric)
-        monitor_signal_history.append(monitor_signal)
-
+    if args.fixed_design:
+        print("fixed design using kernel type", type(kernel_approx) )
+        regressor = KernelRidgeRegression(kernel_approx, reg_lambda=args.l2_reg)
+        print("start to do regression!")
+        # print("test quantizer", quantizer)
+        regressor.fit(X_train, Y_train, quantizer=quantizer)
+        print("finish regression!")
+        train_error = regressor.get_train_error()
+        pred = regressor.predict(X_val, quantizer_train=quantizer, quantizer_test=quantizer)
+        test_error = regressor.get_test_error(Y_val)
         if not os.path.isdir(args.save_path):
             os.makedirs(args.save_path)
-        np.savetxt(args.save_path + "/train_loss.txt", train_loss)
-        np.savetxt(args.save_path + "/eval_metric.txt", eval_metric)
-        np.savetxt(args.save_path + "/monitor_signal.txt", monitor_signal_history)
-        # for param in optimizer._z:
-        #     print param
-        early_stop = monitor.end_of_epoch(monitor_signal, model, optimizer, epoch)
-        if early_stop:
-            break
+        np.savetxt(args.save_path + "/train_loss.txt", np.array(train_error).reshape( (1, ) ) )
+        np.savetxt(args.save_path + "/eval_metric.txt", np.array(test_error).reshape( (1, ) ) )
+        np.savetxt(args.save_path + "/lambda.txt", np.array(args.l2_reg).reshape( (1, ) ) )
+    else:
+        # setup sgd training process
+        train_loss = []
+        eval_metric = []
+        monitor_signal_history = []
+        if args.model == "logistic_regression":
+            monitor = ProgressMonitor(init_lr=args.learning_rate, lr_decay_fac=2.0, min_lr=0.00001, min_metric_better=True, decay_thresh=0.999)
+        elif args.model == "ridge_regression":
+            monitor = ProgressMonitor(init_lr=args.learning_rate, lr_decay_fac=2.0, min_lr=0.00001, min_metric_better=True, decay_thresh=0.999)
+        else:
+            raise Exception("model not supported!")
+        for epoch in range(args.epoch):  
+            # train for one epoch
+            loss_per_step = train(args, model, epoch, train_loader, optimizer, quantizer, kernel_approx)
+            train_loss += loss_per_step
+            # evaluate and save evaluate metric
+            metric, monitor_signal = evaluate(args, model, epoch, val_loader, quantizer, kernel_approx)
+            eval_metric.append(metric)
+            monitor_signal_history.append(monitor_signal)
+
+            if not os.path.isdir(args.save_path):
+                os.makedirs(args.save_path)
+            np.savetxt(args.save_path + "/train_loss.txt", train_loss)
+            np.savetxt(args.save_path + "/eval_metric.txt", eval_metric)
+            np.savetxt(args.save_path + "/monitor_signal.txt", monitor_signal_history)
+            # for param in optimizer._z:
+            #     print param
+            early_stop = monitor.end_of_epoch(monitor_signal, model, optimizer, epoch)
+            if early_stop:
+                break
