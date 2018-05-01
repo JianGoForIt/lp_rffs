@@ -63,6 +63,7 @@ parser.add_argument("--fixed_design", action="store_true",
 parser.add_argument("--fixed_design_noise_sigma", type=float, help="label noise std")
 parser.add_argument("--fixed_design_auto_l2_reg", action="store_true",
     help="if true, we auto search for the optimal lambda")
+parser.add_argument("--closed_form_sol", action="store_true", help="use closed form solution")
 args = parser.parse_args()
 
 
@@ -146,7 +147,8 @@ if __name__ == "__main__":
     kernel.torch(cuda=use_cuda)
     kernel_approx.torch(cuda=use_cuda)
 
-    if args.fixed_design:
+    if args.fixed_design or args.closed_form_sol:
+        # for fixed design experiments and closed form solution form real setting
         if args.fixed_design_auto_l2_reg:
             # get kernel matrix and get the decomposition
             assert isinstance(X_train, torch.DoubleTensor)
@@ -220,11 +222,12 @@ if __name__ == "__main__":
         # print metric_dict_sample_train, metric_dict_sample_val
         # print spectrum_sample_train, spectrum_sample_val
         print("Sample metric collection done!")
-        if not args.fixed_design:
-            # for fixed design experiments, we need to carry out closed form training
+        if not (args.fixed_design or args.closed_form_sol):
+            # for closed form solution, we need to carry out closed form training
             exit(0)
 
-    if args.fixed_design:
+    if args.fixed_design or args.closed_form_sol:
+        # for fixed design experiments and closed form solution form real setting
         print("fixed design using kernel type", type(kernel_approx) )
         regressor = KernelRidgeRegression(kernel_approx, reg_lambda=args.l2_reg)
         print("start to do regression!")

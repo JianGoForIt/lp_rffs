@@ -85,3 +85,8 @@
 #   --data_path=../../data/census/census --opt=sgd --epoch=300  --save_path=./test/123 --approx_type=nystrom \
 #   --do_fp_feat --collect_sample_metrics
 
+# test closed form real setting lambda star search closeness experiments
+python run_model.py --model=ridge_regression --minibatch=250 \
+  --l2_reg=1e-3  --kernel_sigma=28.8675134595 --random_seed=1 --learning_rate=0.5  \
+  --data_path=../../data/census/census --save_path=./test/exact --approx_type=exact \
+  --collect_sample_metrics --closed_form_sol
