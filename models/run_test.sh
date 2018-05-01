@@ -75,18 +75,28 @@
 #   --data_path=../../data/census/census --opt=sgd --epoch=300  --save_path=./test/123 --approx_type=exact \
 #   --do_fp_feat --collect_sample_metrics --fixed_design --fixed_design_noise_sigma=1e2
 
-# python /lfs/1/zjian/lp_kernel/lp_kernel/models/run_model.py --model=ridge_regression --minibatch=250 \
-#   --l2_reg=0.0  --kernel_sigma=28.8675134595 --n_fp_rff=2500 --random_seed=3 --learning_rate=0.5  \
-#   --data_path=../../data/census/census --opt=sgd --epoch=300  --save_path=./test/123 --approx_type=rff \
-#   --do_fp_feat --collect_sample_metrics
+# python run_model.py --model=ridge_regression --minibatch=250 \
+#   --l2_reg=0.0  --kernel_sigma=28.8675134595 --n_fp_rff=2500 --random_seed=3  \
+#   --data_path=../../data/census/census --opt=sgd --epoch=300  --save_path=./test/rff --approx_type=rff \
+#   --do_fp_feat --collect_sample_metrics --closed_form_sol
 
 # python /lfs/1/zjian/lp_kernel/lp_kernel/models/run_model.py --model=ridge_regression --minibatch=250 \
 #   --l2_reg=0.0  --kernel_sigma=28.8675134595 --n_fp_rff=2500 --random_seed=3 --learning_rate=0.5  \
 #   --data_path=../../data/census/census --opt=sgd --epoch=300  --save_path=./test/123 --approx_type=nystrom \
 #   --do_fp_feat --collect_sample_metrics
 
-# test closed form real setting lambda star search closeness experiments
+# # test closed form real setting lambda star search closeness experiments
 python run_model.py --model=ridge_regression --minibatch=250 \
   --l2_reg=1e-3  --kernel_sigma=28.8675134595 --random_seed=1 --learning_rate=0.5  \
-  --data_path=../../data/census/census --save_path=./test/exact --approx_type=exact \
+  --data_path=../../data/census/census --save_path=./test/rff_256 --approx_type=rff --n_fp_rff=256 \
+  --collect_sample_metrics --closed_form_sol
+
+python run_model.py --model=ridge_regression --minibatch=250 \
+  --l2_reg=1e-3  --kernel_sigma=28.8675134595 --random_seed=1 --learning_rate=0.5  \
+  --data_path=../../data/census/census --save_path=./test/nystrom_256 --approx_type=nystrom --n_fp_rff=256 \
+  --collect_sample_metrics --closed_form_sol
+
+python run_model.py --model=ridge_regression --minibatch=250 \
+  --l2_reg=1e-3  --kernel_sigma=28.8675134595 --random_seed=1 --learning_rate=0.5  \
+  --data_path=../../data/census/census --save_path=./test/nystrom_20000 --approx_type=nystrom --n_fp_rff=20000 \
   --collect_sample_metrics --closed_form_sol

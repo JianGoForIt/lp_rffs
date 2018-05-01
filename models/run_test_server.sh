@@ -103,4 +103,4 @@
 python run_model.py --model=ridge_regression --minibatch=250 \
   --l2_reg=1e-3  --kernel_sigma=28.8675134595 --random_seed=1 --learning_rate=0.5  \
   --data_path=/dfs/scratch0/zjian/data/lp_kernel_data/census --save_path=./test/exact --approx_type=exact \
-  --collect_sample_metrics --closed_form_sol
+  --collect_sample_metrics --closed_form_sol --do_fp_feat
