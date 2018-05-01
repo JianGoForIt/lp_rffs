@@ -44,7 +44,7 @@
 #  --n_fp_rff=1024 --pca_rff_n_base_fp_feat=1024 --sigma=30.0 --random_seed=1 --reg_lambda=1e-6
 
 # test fixed design with opt
-python rff_kernel_census.py --fixed_design --fixed_design_opt_reg --fixed_design_data_sample_int=1 --fixed_design_noise_level=1e1 --n_fp_rff=1024 --sigma=30.0 --random_seed=1 --exact_kernel --output_folder="test/exact"
+# python rff_kernel_census.py --fixed_design --fixed_design_opt_reg --fixed_design_data_sample_int=1 --fixed_design_noise_level=1e1 --n_fp_rff=1024 --sigma=30.0 --random_seed=1 --exact_kernel --output_folder="test/exact"
 
 # python rff_kernel_census.py --fixed_design --fixed_design_opt_reg --fixed_design_data_sample_int=1 --fixed_design_noise_level=1e-2 --n_fp_rff=1024 --sigma=30.0 --random_seed=1 --do_fp --output_folder="test/fp1"
 
@@ -58,4 +58,10 @@ python rff_kernel_census.py --fixed_design --fixed_design_opt_reg --fixed_design
 #python rff_kernel_census.py --fixed_design --fixed_design_opt_reg --fixed_design_data_sample_int=1 --fixed_design_noise_level=1e5 --n_fp_rff=1024 --sigma=30.0 --random_seed=1 --n_bit=4 --output_folder="test/lp"
 #
 #python rff_kernel_census.py --fixed_design --fixed_design_opt_reg --fixed_design_data_sample_int=1 --fixed_design_noise_level=1e5 --n_fp_rff=1024 --sigma=30.0 --random_seed=1 --do_fp --output_folder="test/fp"
+
+# # test if fixed design results is still runable
+# python rff_kernel_census.py --fixed_design --fixed_design_opt_reg --fixed_design_data_sample_int=1 --fixed_design_noise_level=${noise} \
+#   --sigma=${sigma} --random_seed=${seed} --exact_kernel --output_folder="${output}_exact_noise_sigma_${noise}"
+
+python rff_kernel_census.py --fixed_design --fixed_design_opt_reg --fixed_design_data_sample_int=1 --fixed_design_noise_level=1e4 --n_fp_rff=1024 --sigma=30.0 --random_seed=1 --exact_kernel --output_folder="test/exact"
 
