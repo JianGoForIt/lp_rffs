@@ -3,8 +3,7 @@ import math
 from copy import deepcopy
 
 # example
-#python launch_jobs_nystrom_vs_rff.py census nystrom_vs_rff dawn with_metric cuda run &
-#python launch_jobs_nystrom_vs_rff.py covtype nystrom_vs_rff_covtype_no_metric dawn without_metric cuda run &
+#python launch_jobs_nystrom_vs_rff_closed_form_sol.py census closeness/regression_real_settting starcluster with_metric cpu dryrun &
 
 #dataset = "census"
 #exp_name = "nystrom_vs_rff"
@@ -61,8 +60,6 @@ for seed in seed_list:
 					command += " --collect_sample_metrics"
 				if do_cuda == "cuda":
 					command += " --cuda"
-				if int(n_subsample) > 0:
-					command += " --n_sample=" + str(n_subsample)
 				os.system("mkdir -p " + save_path + save_suffix)
 				if cluster == "starcluster":
 					command = "cd /dfs/scratch0/zjian/lp_kernel_code/lp_kernel/models && " + command
@@ -74,8 +71,8 @@ for seed in seed_list:
 				if cluster == "starcluster":
 					# distinguish the log from runs calculating closeness related metrics or not
 					launch_command = "qsub -V " \
-					+ " -o " + save_path + save_suffix + "/run.log." + do_metric \
-                            	        + " -e " + save_path + save_suffix + "/run.err." + do_metric + " " + save_path + save_suffix + "/job.sh"
+					+ " -o " + save_path + save_suffix + "/run.log" \
+                            	        + " -e " + save_path + save_suffix + "/run.err " + save_path + save_suffix + "/job.sh"
 				else:
 					launch_command = "bash " + save_path + save_suffix + "/job.sh"
 				if run_option == "dryrun":

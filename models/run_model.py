@@ -228,6 +228,11 @@ if __name__ == "__main__":
 
     if args.fixed_design or args.closed_form_sol:
         # for fixed design experiments and closed form solution form real setting
+        if use_cuda:
+            X_train = X_train.cuda()
+            X_val = X_val.cuda()
+            Y_train = Y_train.cuda()
+            Y_val = Y_val.cuda()
         print("fixed design using kernel type", type(kernel_approx) )
         regressor = KernelRidgeRegression(kernel_approx, reg_lambda=args.l2_reg)
         print("start to do regression!")
