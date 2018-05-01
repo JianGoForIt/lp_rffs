@@ -61,8 +61,8 @@ parser.add_argument("--n_sample", type=int, default=-1,
 parser.add_argument("--fixed_design", action="store_true", 
     help="do fixed design experiment")
 parser.add_argument("--fixed_design_noise_sigma", type=float, help="label noise std")
-parser.add_argument("--fixed_design_l2_reg", type=float, default=None,
-    help="if none, we need to search for the optimal lambda")
+parser.add_argument("--fixed_design_auto_l2_reg", action="store_true",
+    help="if true, we auto search for the optimal lambda")
 args = parser.parse_args()
 
 
@@ -147,9 +147,10 @@ if __name__ == "__main__":
     kernel_approx.torch(cuda=use_cuda)
 
     if args.fixed_design:
-        if args.fixed_design_l2_reg is None:
+        if args.fixed_design_auto_l2_reg:
             # get kernel matrix and get the decomposition
             assert isinstance(X_train, torch.DoubleTensor)
+            print("fixed design lambda calculation using kernel ", type(kernel_approx))
             kernel_mat = kernel_approx.get_kernel_matrix(X_train, X_train, quantizer, quantizer)
             assert isinstance(kernel_mat, torch.DoubleTensor)
             U, S, _ = np.linalg.svd(kernel_mat.cpu().numpy().astype(np.float64) )
@@ -206,6 +207,8 @@ if __name__ == "__main__":
                 get_sample_kernel_metrics(X_train, kernel, kernel_approx, quantizer)
             metric_dict_sample_val, spectrum_sample_val, spectrum_sample_val_exact = \
                 get_sample_kernel_metrics(X_val, kernel, kernel_approx, quantizer) 
+        if not os.path.isdir(args.save_path):
+            os.makedirs(args.save_path)
         with open(args.save_path + "/metric_sample_train.txt", "w") as f:
             cp.dump(metric_dict_sample_train, f)
         np.save(args.save_path + "/spectrum_train.npy", spectrum_sample_train)

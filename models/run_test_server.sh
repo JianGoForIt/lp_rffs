@@ -78,7 +78,22 @@
 #   --save_path=./test/123/ --approx_type=rff --cuda --do_fp_feat
 
 # test fixed design functionality
+#python run_model.py --model=ridge_regression --minibatch=250 \
+#  --l2_reg=0.0  --kernel_sigma=30.0 --n_fp_rff=2500 --random_seed=1 --learning_rate=0.5  \
+#  --data_path=/dfs/scratch0/zjian/data/lp_kernel_data/census --opt=sgd --epoch=300  --save_path=./test/123 --approx_type=exact \
+#  --do_fp_feat --collect_sample_metrics --fixed_design --fixed_design_noise_sigma=1e4
+
+#python run_model.py --model=ridge_regression --minibatch=250 \
+#  --l2_reg=0.0  --kernel_sigma=30.0 --n_fp_rff=256 --random_seed=1 --learning_rate=0.5  \
+#  --data_path=/dfs/scratch0/zjian/data/lp_kernel_data/census --opt=sgd --epoch=300  --save_path=./test/rff --approx_type=rff \
+#  --do_fp_feat --collect_sample_metrics --fixed_design --fixed_design_noise_sigma=1e4
+#
 python run_model.py --model=ridge_regression --minibatch=250 \
-  --l2_reg=0.0  --kernel_sigma=30.0 --n_fp_rff=2500 --random_seed=3 --learning_rate=0.5  \
-  --data_path=../../data/census/census --opt=sgd --epoch=300  --save_path=./test/123 --approx_type=exact \
-  --do_fp_feat --collect_sample_metrics --fixed_design --fixed_design_noise_sigma=1e2
+  --l2_reg=0.0  --kernel_sigma=28.8675134595 --n_fp_rff=200 --random_seed=1 --learning_rate=0.5  \
+  --data_path=/dfs/scratch0/zjian/data/lp_kernel_data/census --opt=sgd --epoch=300  --save_path=./test/nystrom --approx_type=nystrom \
+  --do_fp_feat --collect_sample_metrics --fixed_design --fixed_design_noise_sigma=1e4 --fixed_design_auto_l2_reg
+
+#python run_model.py --model=ridge_regression --minibatch=250 \
+#  --l2_reg=0.0  --kernel_sigma=30.0 --n_fp_rff=2500 --random_seed=1 --learning_rate=0.5  \
+#  --data_path=/dfs/scratch0/zjian/data/lp_kernel_data/census --opt=sgd --epoch=300  --save_path=./test/exact --approx_type=exact \
+#  --do_fp_feat --collect_sample_metrics --fixed_design --fixed_design_noise_sigma=1e4

@@ -132,7 +132,7 @@ class KernelRidgeRegression(object):
     # pytorch is super slow in inverse, so we finish this operation in numpy
     print("using regularior strength ", self.reg_lambda)
     self.alpha = torch.DoubleTensor( \
-      np.dot(np.linalg.inv( (self.kernel_mat + self.reg_lambda * torch.eye(n_sample).double() ).cpu().numpy() ), Y_train) )
+      np.dot(np.linalg.inv(self.kernel_mat.cpu().numpy().astype(np.float64) + self.reg_lambda * np.eye(n_sample) ), Y_train.cpu().numpy().astype(np.float64) ) )
     # self.alpha = torch.mm(torch.inverse(self.kernel_mat + self.reg_lambda * torch.eye(n_sample) ), 
     #   torch.DoubleTensor(Y_train) )
 
