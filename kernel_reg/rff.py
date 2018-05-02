@@ -26,7 +26,7 @@ class GaussianKernel(object):
   #     -2 * cross) )
   #   return torch.DoubleTensor(kernel)
   
-  def get_kernel_matrix(self, X1, X2, quantizer1=None, quantizer2=None, dtype="float"):
+  def get_kernel_matrix(self, X1, X2, quantizer1=None, quantizer2=None, dtype="float", use_cpu_comp=False):
     '''
     the input value has shape [n_sample, n_dim]
     quantizer is dummy here
@@ -49,20 +49,21 @@ class GaussianKernel(object):
     else:
       # to prevent memory explosion on GPU, we do the following operations on CPU and move results
       # back to GPU
-#      is_cuda_tensor = X1.is_cuda      
-#      X1 = X1.cpu()
-#      X2 = X2.cpu()
+      is_cuda_tensor = X1.is_cuda      
+      if is_cuda_tensor and use_cpu_comp:
+          X1 = X1.cpu()
+          X2 = X2.cpu()
       norms_X1 = (X1**2).sum(1).view(-1, 1)
       norms_X2 = (X2**2).sum(1).view(-1, 1)
       norms_X1 = norms_X1.repeat(1, int(X2.size(0) ) )
       norms_X2 = torch.transpose(norms_X2.repeat(1, int(X1.size(0) ) ), 0, 1)
       cross = torch.mm(X1, torch.transpose(X2, 0, 1) )
       kernel = torch.exp(-0.5 / float(self.sigma)**2 * (norms_X1 + norms_X2 - 2* cross) )
-#      if is_cuda_tensor:
-#          return kernel.cuda()
-#      else:
-#          return kernel
-      return kernel
+      if is_cuda_tensor and use_cpu_comp:
+          return kernel.cuda()
+      else:
+          return kernel
+#      return kernel
 
   def torch(self, cuda=False):
     '''
