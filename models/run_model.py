@@ -211,11 +211,11 @@ if __name__ == "__main__":
                 get_sample_kernel_metrics(X_val, kernel, kernel_approx, quantizer) 
         if not os.path.isdir(args.save_path):
             os.makedirs(args.save_path)
-        with open(args.save_path + "/metric_sample_train.txt", "w") as f:
+        with open(args.save_path + "/metric_sample_train.txt", "wb") as f:
             cp.dump(metric_dict_sample_train, f)
         np.save(args.save_path + "/spectrum_train.npy", spectrum_sample_train)
         np.save(args.save_path + "/spectrum_train_exact.npy", spectrum_sample_train_exact)
-        with open(args.save_path + "/metric_sample_eval.txt", "w") as f:
+        with open(args.save_path + "/metric_sample_eval.txt", "wb") as f:
             cp.dump(metric_dict_sample_val, f)
         np.save(args.save_path + "/spectrum_eval.npy", spectrum_sample_val)
         np.save(args.save_path + "/spectrum_eval_exact.npy", spectrum_sample_val_exact)
