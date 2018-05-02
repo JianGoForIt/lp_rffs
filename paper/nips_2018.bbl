@@ -1,0 +1,17 @@
+\begin{thebibliography}{1}
+
+\bibitem{rahimi07random}
+A.~Rahimi and B.~Recht.
+\newblock Random features for large-scale kernel machines.
+\newblock In {\em Advances in Neural Information Processing Systems 20,
+  Proceedings of the Twenty-First Annual Conference on Neural Information
+  Processing Systems, Vancouver, British Columbia, Canada, December 3-6, 2007},
+  pages 1177--1184, 2007.
+
+\bibitem{nystrom}
+C.~Williams and M.~Seeger.
+\newblock Using the {Nystr\"om} method to speed up kernel machines.
+\newblock In T.~Leen, T.~Dietterich, and V.~Tresp, editors, {\em Advances in
+  Neural Information Processing Systems 13}, pages 682--688. MIT Press, 2001.
+
+\end{thebibliography}
