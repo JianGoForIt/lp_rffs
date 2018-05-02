@@ -64,6 +64,7 @@ parser.add_argument("--fixed_design_noise_sigma", type=float, help="label noise 
 parser.add_argument("--fixed_design_auto_l2_reg", action="store_true",
     help="if true, we auto search for the optimal lambda")
 parser.add_argument("--closed_form_sol", action="store_true", help="use closed form solution")
+parser.add_argument("--fixed_epoch_number", action="store_true", help="if false, use early stopping")
 args = parser.parse_args()
 
 
@@ -211,11 +212,11 @@ if __name__ == "__main__":
                 get_sample_kernel_metrics(X_val, kernel, kernel_approx, quantizer) 
         if not os.path.isdir(args.save_path):
             os.makedirs(args.save_path)
-        with open(args.save_path + "/metric_sample_train.txt", "w") as f:
+        with open(args.save_path + "/metric_sample_train.txt", "wb") as f:
             cp.dump(metric_dict_sample_train, f)
         np.save(args.save_path + "/spectrum_train.npy", spectrum_sample_train)
         np.save(args.save_path + "/spectrum_train_exact.npy", spectrum_sample_train_exact)
-        with open(args.save_path + "/metric_sample_eval.txt", "w") as f:
+        with open(args.save_path + "/metric_sample_eval.txt", "wb") as f:
             cp.dump(metric_dict_sample_val, f)
         np.save(args.save_path + "/spectrum_eval.npy", spectrum_sample_val)
         np.save(args.save_path + "/spectrum_eval_exact.npy", spectrum_sample_val_exact)
@@ -228,6 +229,11 @@ if __name__ == "__main__":
 
     if args.fixed_design or args.closed_form_sol:
         # for fixed design experiments and closed form solution form real setting
+        if use_cuda:
+            X_train = X_train.cuda()
+            X_val = X_val.cuda()
+            Y_train = Y_train.cuda()
+            Y_val = Y_val.cuda()
         print("fixed design using kernel type", type(kernel_approx) )
         regressor = KernelRidgeRegression(kernel_approx, reg_lambda=args.l2_reg)
         print("start to do regression!")
@@ -269,6 +275,8 @@ if __name__ == "__main__":
             np.savetxt(args.save_path + "/monitor_signal.txt", monitor_signal_history)
             # for param in optimizer._z:
             #     print param
-            early_stop = monitor.end_of_epoch(monitor_signal, model, optimizer, epoch)
-            if early_stop:
-                break
+            if not args.fixed_epoch_number:
+                print("using early stopping on lr")
+                early_stop = monitor.end_of_epoch(monitor_signal, model, optimizer, epoch)
+                if early_stop:
+                    break
