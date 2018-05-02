@@ -47,12 +47,21 @@ class GaussianKernel(object):
       else:
           return torch.Tensor(kernel).double()
     else:
+      # to prevent memory explosion on GPU, we do the following operations on CPU and move results
+      # back to GPU
+#      is_cuda_tensor = X1.is_cuda      
+#      X1 = X1.cpu()
+#      X2 = X2.cpu()
       norms_X1 = (X1**2).sum(1).view(-1, 1)
       norms_X2 = (X2**2).sum(1).view(-1, 1)
       norms_X1 = norms_X1.repeat(1, int(X2.size(0) ) )
       norms_X2 = torch.transpose(norms_X2.repeat(1, int(X1.size(0) ) ), 0, 1)
       cross = torch.mm(X1, torch.transpose(X2, 0, 1) )
       kernel = torch.exp(-0.5 / float(self.sigma)**2 * (norms_X1 + norms_X2 - 2* cross) )
+#      if is_cuda_tensor:
+#          return kernel.cuda()
+#      else:
+#          return kernel
       return kernel
 
   def torch(self, cuda=False):
