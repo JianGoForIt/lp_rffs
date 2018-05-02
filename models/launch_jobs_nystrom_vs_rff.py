@@ -5,6 +5,7 @@ from copy import deepcopy
 # example
 #python launch_jobs_nystrom_vs_rff.py census nystrom_vs_rff dawn with_metric cuda -1 run &
 #python launch_jobs_nystrom_vs_rff.py covtype nystrom_vs_rff_covtype_no_metric dawn without_metric cuda -1 run &
+#for search lamda star for covtype in closeness experiments: python launch_jobs_nystrom_vs_rff.py covtype closeness/classification_real_setting starcluster without_metric cuda 20000 dryrun no_early_stop &
 
 #dataset = "census"
 #exp_name = "nystrom_vs_rff"
@@ -15,7 +16,8 @@ cluster = sys.argv[3]  # starcluster / dawn
 do_metric = sys.argv[4] # with_metric / without_metric
 do_cuda = sys.argv[5]
 n_subsample = sys.argv[6]
-
+run_option = sys.argv[7]
+early_stop = sys.argv[8]
 #approx_type = sys.argv[3]
 
 # /dfs/scratch0/zjian/data/lp_kernel_data/census
@@ -54,18 +56,19 @@ if dataset == "covtype":
     if do_metric == "with_metric":
         l2_reg_list = [0.0, ]
     else:
-        l2_reg_list = [0, 1e-3, ]
+        l2_reg_list = [1e-5, 5e-5, 1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1]
     kernel_sigma = math.sqrt(1.0/0.6/2.0)
     #n_fp_nystrom_list= [1250, 2500, 5000, 10000, 20000]
     #n_fp_rff_list = [1250, 2500, 5000, 10000, 20000, 50000, 100000, 200000, 400000]
-    n_fp_rff_list = [1250, 10000, 100000]
+    #n_fp_rff_list = [1250, 10000, 100000]
     #n_fp_rff_list = [2500, 20000, 200000]
     #n_fp_rff_list = [5000, 50000, 400000]
-    seed_list = [1,2,3]
+    n_fp_rff_list = [20000, ] # to simulate exact kernel approach
+    seed_list = [1,]
     if do_metric == "with_metric":
         lr_list = [5]
     else:
-        lr_list = [10,]
+        lr_list = [10, 50, 100, 5]
 
 data_path = "/dfs/scratch0/zjian/data/lp_kernel_data/" + dataset
 opt = "sgd"
@@ -77,7 +80,7 @@ for seed in seed_list:
 	for l2_reg in l2_reg_list:
 		for n_fp_rff in n_fp_rff_list:
 			for lr in lr_list:
-				for approx_type in ["rff", "nystrom"]:
+				for approx_type in ["nystrom"]:
 					if approx_type == "nystrom" and n_fp_rff > 20000:
 						continue
 					save_suffix = "_type_" + approx_type + "_l2_reg_" + str(l2_reg) + "_n_fp_feat_" + str(n_fp_rff) \
@@ -100,6 +103,8 @@ for seed in seed_list:
 						command += " --cuda"
 					if int(n_subsample) > 0:
 						command += " --n_sample=" + str(n_subsample)
+					if early_stop == "no_early_stop":
+						command += " --fixed_epoch_number"
 					os.system("mkdir -p " + save_path + save_suffix)
 					if cluster == "starcluster":
 						command = "cd /dfs/scratch0/zjian/lp_kernel_code/lp_kernel/models && " + command
@@ -114,7 +119,7 @@ for seed in seed_list:
                                 	        + " -e " + save_path + save_suffix + "/run.err " + save_path + save_suffix + "/job.sh"
 					else:
 						launch_command = "bash " + save_path + save_suffix + "/job.sh"
-					if sys.argv[7] == "dryrun":
+					if run_option == "dryrun":
 						print(launch_command)
 					else:
 						print(launch_command)	

@@ -64,6 +64,7 @@ parser.add_argument("--fixed_design_noise_sigma", type=float, help="label noise 
 parser.add_argument("--fixed_design_auto_l2_reg", action="store_true",
     help="if true, we auto search for the optimal lambda")
 parser.add_argument("--closed_form_sol", action="store_true", help="use closed form solution")
+parser.add_argument("--fixed_epoch_number", action="store_true", help="if false, use early stopping")
 args = parser.parse_args()
 
 
@@ -274,6 +275,8 @@ if __name__ == "__main__":
             np.savetxt(args.save_path + "/monitor_signal.txt", monitor_signal_history)
             # for param in optimizer._z:
             #     print param
-            early_stop = monitor.end_of_epoch(monitor_signal, model, optimizer, epoch)
-            if early_stop:
-                break
+            if not args.fixed_epoch_number:
+                print("using early stopping on lr")
+                early_stop = monitor.end_of_epoch(monitor_signal, model, optimizer, epoch)
+                if early_stop:
+                    break
