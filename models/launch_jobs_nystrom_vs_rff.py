@@ -51,7 +51,7 @@ if dataset == "census":
     else:
         lr_list = [0.5, 0.1, 1.0]
 
-if dataset == "covtype":
+elif dataset == "covtype":
     model = "logistic_regression"
     if do_metric == "with_metric":
         l2_reg_list = [0.0, ]
@@ -69,6 +69,29 @@ if dataset == "covtype":
         lr_list = [5]
     else:
         lr_list = [10, 50, 100, 5]
+
+elif dataset == "adult":
+    model = "logistic_regression"
+    if do_metric == "with_metric":
+        l2_reg_list = [0.0, ]
+    else:
+        l2_reg_list = [1e-5, 5e-5, 1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1]
+    kernel_sigma = math.sqrt(1.0/0.1/2.0)
+    #n_fp_nystrom_list= [1250, 2500, 5000, 10000, 20000]
+    #n_fp_rff_list = [1250, 2500, 5000, 10000, 20000, 50000, 100000, 200000, 400000]
+    #n_fp_rff_list = [1250, 10000, 100000]
+    #n_fp_rff_list = [2500, 20000, 200000]
+    #n_fp_rff_list = [5000, 50000, 400000]
+    n_fp_rff_list = [29304, ] # to simulate exact kernel approach
+    seed_list = [1,]
+    if do_metric == "with_metric":
+        lr_list = [5]
+    else:
+        lr_list = [10, 5, 50, 1]
+    print("right branch")
+
+else:
+    raise Exception("dataset not supported")
 
 data_path = "/dfs/scratch0/zjian/data/lp_kernel_data/" + dataset
 opt = "sgd"
