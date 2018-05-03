@@ -26,7 +26,7 @@ class GaussianKernel(object):
   #     -2 * cross) )
   #   return torch.DoubleTensor(kernel)
   
-  def get_kernel_matrix(self, X1, X2, quantizer1=None, quantizer2=None, dtype="float", use_cpu_comp=False):
+  def get_kernel_matrix(self, X1, X2, quantizer1=None, quantizer2=None, dtype="float"):
     '''
     the input value has shape [n_sample, n_dim]
     quantizer is dummy here
@@ -47,30 +47,35 @@ class GaussianKernel(object):
       else:
           return torch.Tensor(kernel).double()
     else:
-      # to prevent memory explosion on GPU, we do the following operations on CPU and move results
-      # back to GPU
-      is_cuda_tensor = X1.is_cuda      
-      if is_cuda_tensor and use_cpu_comp:
-          X1 = X1.cpu()
-          X2 = X2.cpu()
+      ## to prevent memory explosion on GPU, we do the following operations on CPU and move results
+      ## back to GPU
+      #is_cuda_tensor = X1.is_cuda      
+      #if is_cuda_tensor and use_cpu_comp:
+      #    X1 = X1.cpu()
+      #    X2 = X2.cpu()
       norms_X1 = (X1**2).sum(1).view(-1, 1)
       norms_X2 = (X2**2).sum(1).view(-1, 1)
       norms_X1 = norms_X1.repeat(1, int(X2.size(0) ) )
       norms_X2 = torch.transpose(norms_X2.repeat(1, int(X1.size(0) ) ), 0, 1)
       cross = torch.mm(X1, torch.transpose(X2, 0, 1) )
       kernel = torch.exp(-0.5 / float(self.sigma)**2 * (norms_X1 + norms_X2 - 2* cross) )
-      if is_cuda_tensor and use_cpu_comp:
-          return kernel.cuda()
-      else:
-          return kernel
-#      return kernel
+      #if is_cuda_tensor and use_cpu_comp:
+      #    return kernel.cuda()
+      #else:
+      #    return kernel
+      return kernel
 
   def torch(self, cuda=False):
     '''
     adapt the interface to the model launching wrapper
     '''
     pass
-
+  
+  def cpu(self):
+    '''
+    adapt the interface when switch parameter of some kernels back to cpu mode
+    '''
+    pass
 
 
 class RFF(object):
@@ -96,6 +101,10 @@ class RFF(object):
     if cuda:
       self.w = self.w.cuda()
       self.b = self.b.cuda()
+
+  def cpu(self):
+    self.w = self.w.cpu()
+    self.b = self.b.cpu()
 
   def get_cos_feat(self, input_val, dtype="double"):
     # input are original representaiton with the shape [n_sample, n_dim]
@@ -134,6 +143,10 @@ class RFF(object):
     '''
     X1 shape is [n_sample, n_dim]
     '''
+    #is_cuda_tensor = (not isinstance(X1, np.ndarray) ) and X1.is_cuda
+    #if use_cpu_comp and is_cuda_tensor:
+    #    X1 = X1.cpu()
+    #    X2 = X2.cpu()
     rff_x1 = self.get_cos_feat(X1)
     rff_x2 = self.get_cos_feat(X2)
     if quantizer1 != None:
@@ -149,6 +162,10 @@ class RFF(object):
       # print("quantizer 2 scale", quantizer2.scale)
       rff_x2 = quantizer2.quantize(rff_x2)
     self.rff_x1, self.rff_x2 = rff_x1, rff_x2
+    #if use_cpu_comp and is_cuda_tensor:
+    #  return torch.mm(rff_x1, torch.transpose(rff_x2, 0, 1) ).cuda()
+    #else:
+    #  return torch.mm(rff_x1, torch.transpose(rff_x2, 0, 1) )
     return torch.mm(rff_x1, torch.transpose(rff_x2, 0, 1) )
     
 
