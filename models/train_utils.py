@@ -218,7 +218,7 @@ class ProgressMonitor(object):
         if (self.prev_best is not None) \
             and ( (self.min_metric_better and (metric > self.decay_thresh * self.prev_best) ) \
             or ( (not self.min_metric_better) and (metric < (1.0 + 1.0 - self.decay_thresh) * self.prev_best) ) ):
-            self.lr /= 2.0
+            self.lr /= self.lr_decay_fac
             for g in optimizer.param_groups:
                 g['lr'] = self.lr
             print("lr drop to ", self.lr)
