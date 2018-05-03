@@ -174,8 +174,8 @@ def get_sample_kernel_metrics(X, kernel, kernel_approx, quantizer):
     metric_dict = {"F_norm_error": float(F_norm_error),
                    "spectral_norm_error": float(spectral_norm_error) }
     if is_cuda_tensor:
-        kernel.torch(use_cuda=True)
-        kernel_approx.torch(use_cuda=True)
+        kernel.torch(cuda=True)
+        kernel_approx.torch(cuda=True)
 #    error_matrix = kernel_mat_approx - kernel_mat
 #    F_norm_error = torch.sum(error_matrix**2)
 ##    spectral_norm_error = np.max(np.abs(get_matrix_spectrum(error_matrix) ) )
