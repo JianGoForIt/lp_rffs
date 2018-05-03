@@ -32,7 +32,7 @@ def load_data(path="../../data/census/census"):
   #X_train = X_train[s, :]
   #Y_train = Y_train[s]
   #X_train, Y_train, X_test, Y_test = \
-  #X_train[:(s.size * 1 / 5), :], Y_train[:(s.size * 1 / 5)], X_test[:(s.size * 1 / 5), :], Y_test[:(s.size * 1 / 5)]
+  #X_train[:int(s.size * 1 / 5), :], Y_train[:int(s.size * 1 / 5)], X_test[:int(s.size * 1 / 5), :], Y_test[:int(s.size * 1 / 5)]
   assert X_train.shape[0] == Y_train.shape[0]
   assert X_test.shape[0] == Y_test.shape[0]
   assert X_train.shape[0] != X_test.shape[0]

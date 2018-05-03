@@ -64,6 +64,9 @@ class Nystrom(object):
 			self.A_d = self.A_d.cuda()
 			self.landmark = self.landmark.cuda()
 
+	def cpu(self):
+		self.A_d = self.A_d.cpu()
+		self.landmark = self.landmark.cpu()
 
 # test full dimension almost match exact kernel results
 def test_nystrom_full():

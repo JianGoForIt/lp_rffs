@@ -223,9 +223,9 @@ if __name__ == "__main__":
         # print metric_dict_sample_train, metric_dict_sample_val
         # print spectrum_sample_train, spectrum_sample_val
         print("Sample metric collection done!")
-        if not (args.fixed_design or args.closed_form_sol):
+        #if not (args.fixed_design or args.closed_form_sol):
             # for closed form solution, we need to carry out closed form training
-            exit(0)
+        #    exit(0)
 
     if args.fixed_design or args.closed_form_sol:
         # for fixed design experiments and closed form solution form real setting

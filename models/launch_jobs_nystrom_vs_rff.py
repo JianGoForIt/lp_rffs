@@ -6,6 +6,7 @@ from copy import deepcopy
 #python launch_jobs_nystrom_vs_rff.py census nystrom_vs_rff dawn with_metric cuda -1 run &
 #python launch_jobs_nystrom_vs_rff.py covtype nystrom_vs_rff_covtype_no_metric dawn without_metric cuda -1 run &
 #for search lamda star for covtype in closeness experiments: python launch_jobs_nystrom_vs_rff.py covtype closeness/classification_real_setting starcluster without_metric cuda 20000 dryrun no_early_stop &
+# for sweeping n feat with lambda star for covtype in closeness experiments: python launch_jobs_nystrom_vs_rff.py covtype closeness/classification_real_setting dawn with_metric cuda 20000 dryrun no_early_stop &
 
 #dataset = "census"
 #exp_name = "nystrom_vs_rff"
@@ -54,19 +55,19 @@ if dataset == "census":
 elif dataset == "covtype":
     model = "logistic_regression"
     if do_metric == "with_metric":
-        l2_reg_list = [0.0, ]
+        l2_reg_list = [5e-5, ]
     else:
         l2_reg_list = [1e-5, 5e-5, 1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1]
     kernel_sigma = math.sqrt(1.0/0.6/2.0)
     #n_fp_nystrom_list= [1250, 2500, 5000, 10000, 20000]
-    #n_fp_rff_list = [1250, 2500, 5000, 10000, 20000, 50000, 100000, 200000, 400000]
+    n_fp_rff_list = [1250, 2500, 5000, 10000, 20000, 50000, 100000, 200000, 400000]
     #n_fp_rff_list = [1250, 10000, 100000]
     #n_fp_rff_list = [2500, 20000, 200000]
     #n_fp_rff_list = [5000, 50000, 400000]
-    n_fp_rff_list = [20000, ] # to simulate exact kernel approach
+    #n_fp_rff_list = [20000, ] # to simulate exact kernel approach
     seed_list = [1,]
     if do_metric == "with_metric":
-        lr_list = [5]
+        lr_list = [10]
     else:
         lr_list = [10, 50, 100, 5]
 
@@ -95,8 +96,10 @@ else:
 
 data_path = "/dfs/scratch0/zjian/data/lp_kernel_data/" + dataset
 opt = "sgd"
-epoch = 300
+epoch = 150
 save_path = "/dfs/scratch0/zjian/lp_kernel/" + exp_name + "/" + dataset
+if do_metric:
+	save_path = save_path + "_with_metric"
 
 cnt = 0
 for seed in seed_list:

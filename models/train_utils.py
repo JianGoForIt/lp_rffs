@@ -156,18 +156,26 @@ def get_matrix_spectrum(X):
 
 def get_sample_kernel_metrics(X, kernel, kernel_approx, quantizer):
     # X = sample_data(X_all, n_sample)
+    is_cuda_tensor = X.is_cuda
+    if is_cuda_tensor:
+        kernel.cpu()
+        kernel_approx.cpu()
+        X = X.cpu()    
     kernel_mat = kernel.get_kernel_matrix(X, X)
     kernel_mat_approx = kernel_approx.get_kernel_matrix(X, X, quantizer, quantizer)
     # # need to use double for XXT if we want the torch equal to hold.
     # if not torch.equal(kernel_mat_approx, torch.transpose(kernel_mat_approx, 0, 1) ):
     #     raise Exception("Kernel matrix is not symetric!")
-    error_matrix = kernel_mat_approx - kernel_mat
+    error_matrix = kernel_mat_approx.cpu() - kernel_mat.cpu()
     F_norm_error = torch.sum(error_matrix**2)
     spectral_norm_error = np.max(np.abs(get_matrix_spectrum(error_matrix) ) )
     spectrum = get_matrix_spectrum(kernel_mat_approx)
     spectrum_exact = get_matrix_spectrum(kernel_mat)
     metric_dict = {"F_norm_error": float(F_norm_error),
                    "spectral_norm_error": float(spectral_norm_error) }
+    if is_cuda_tensor:
+        kernel.torch(cuda=True)
+        kernel_approx.torch(cuda=True)
 #    error_matrix = kernel_mat_approx - kernel_mat
 #    F_norm_error = torch.sum(error_matrix**2)
 ##    spectral_norm_error = np.max(np.abs(get_matrix_spectrum(error_matrix) ) )
