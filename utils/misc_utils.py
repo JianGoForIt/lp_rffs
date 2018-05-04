@@ -72,3 +72,7 @@ class Args(object):
         self.data_path = data_path
         self.do_fp = do_fp
         self.test_var_reduce = test_var_reduce
+
+
+if __name__ == "__main__":
+    delta_approximation_test()
