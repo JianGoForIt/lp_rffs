@@ -258,9 +258,9 @@ if __name__ == "__main__":
         eval_metric = []
         monitor_signal_history = []
         if args.model == "logistic_regression":
-            monitor = ProgressMonitor(init_lr=args.learning_rate, lr_decay_fac=2.0, min_lr=0.00001, min_metric_better=True, decay_thresh=0.999)
+            monitor = ProgressMonitor(init_lr=args.learning_rate, lr_decay_fac=2.0, min_lr=0.00001, min_metric_better=True, decay_thresh=0.99)
         elif args.model == "ridge_regression":
-            monitor = ProgressMonitor(init_lr=args.learning_rate, lr_decay_fac=2.0, min_lr=0.00001, min_metric_better=True, decay_thresh=0.999)
+            monitor = ProgressMonitor(init_lr=args.learning_rate, lr_decay_fac=2.0, min_lr=0.00001, min_metric_better=True, decay_thresh=0.99)
         else:
             raise Exception("model not supported!")
         for epoch in range(args.epoch):  
