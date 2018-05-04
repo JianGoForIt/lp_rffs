@@ -65,6 +65,8 @@ parser.add_argument("--fixed_design_auto_l2_reg", action="store_true",
     help="if true, we auto search for the optimal lambda")
 parser.add_argument("--closed_form_sol", action="store_true", help="use closed form solution")
 parser.add_argument("--fixed_epoch_number", action="store_true", help="if false, use early stopping")
+parser.add_argument("--exit_after_collect_metric", action="store_true", help="if yes, \
+    we only do metric collection on kernel matrix without doing trainining")
 args = parser.parse_args()
 
 
@@ -202,30 +204,32 @@ if __name__ == "__main__":
         print("start doing sample metric collection with ", X_train.size(0), " training samples")
         if use_cuda:
             metric_dict_sample_train, spectrum_sample_train, spectrum_sample_train_exact = \
-                get_sample_kernel_metrics(X_train.cuda(), kernel, kernel_approx, quantizer)
-            metric_dict_sample_val, spectrum_sample_val, spectrum_sample_val_exact = \
-                get_sample_kernel_metrics(X_val.cuda(), kernel, kernel_approx, quantizer)  
+                get_sample_kernel_metrics(X_train.cuda(), kernel, kernel_approx, quantizer, args.l2_reg)
+            # metric_dict_sample_val, spectrum_sample_val, spectrum_sample_val_exact = \
+            #     get_sample_kernel_metrics(X_val.cuda(), kernel, kernel_approx, quantizer, args.l2_reg)  
         else:
             metric_dict_sample_train, spectrum_sample_train, spectrum_sample_train_exact = \
-                get_sample_kernel_metrics(X_train, kernel, kernel_approx, quantizer)
-            metric_dict_sample_val, spectrum_sample_val, spectrum_sample_val_exact = \
-                get_sample_kernel_metrics(X_val, kernel, kernel_approx, quantizer) 
+                get_sample_kernel_metrics(X_train, kernel, kernel_approx, quantizer, args.l2_reg)
+            # metric_dict_sample_val, spectrum_sample_val, spectrum_sample_val_exact = \
+            #     get_sample_kernel_metrics(X_val, kernel, kernel_approx, quantizer, args.l2_reg) 
         if not os.path.isdir(args.save_path):
             os.makedirs(args.save_path)
         with open(args.save_path + "/metric_sample_train.txt", "wb") as f:
             cp.dump(metric_dict_sample_train, f)
         np.save(args.save_path + "/spectrum_train.npy", spectrum_sample_train)
         np.save(args.save_path + "/spectrum_train_exact.npy", spectrum_sample_train_exact)
-        with open(args.save_path + "/metric_sample_eval.txt", "wb") as f:
-            cp.dump(metric_dict_sample_val, f)
-        np.save(args.save_path + "/spectrum_eval.npy", spectrum_sample_val)
-        np.save(args.save_path + "/spectrum_eval_exact.npy", spectrum_sample_val_exact)
+        # with open(args.save_path + "/metric_sample_eval.txt", "wb") as f:
+        #     cp.dump(metric_dict_sample_val, f)
+        # np.save(args.save_path + "/spectrum_eval.npy", spectrum_sample_val)
+        # np.save(args.save_path + "/spectrum_eval_exact.npy", spectrum_sample_val_exact)
         # print metric_dict_sample_train, metric_dict_sample_val
         # print spectrum_sample_train, spectrum_sample_val
         print("Sample metric collection done!")
         #if not (args.fixed_design or args.closed_form_sol):
             # for closed form solution, we need to carry out closed form training
-        #    exit(0)
+        if args.exit_after_collect_metric:
+            print("exit after collect metric")
+            exit(0)
 
     if args.fixed_design or args.closed_form_sol:
         # for fixed design experiments and closed form solution form real setting
@@ -254,9 +258,9 @@ if __name__ == "__main__":
         eval_metric = []
         monitor_signal_history = []
         if args.model == "logistic_regression":
-            monitor = ProgressMonitor(init_lr=args.learning_rate, lr_decay_fac=2.0, min_lr=0.00001, min_metric_better=True, decay_thresh=0.999)
+            monitor = ProgressMonitor(init_lr=args.learning_rate, lr_decay_fac=2.0, min_lr=0.00001, min_metric_better=True, decay_thresh=0.99)
         elif args.model == "ridge_regression":
-            monitor = ProgressMonitor(init_lr=args.learning_rate, lr_decay_fac=2.0, min_lr=0.00001, min_metric_better=True, decay_thresh=0.999)
+            monitor = ProgressMonitor(init_lr=args.learning_rate, lr_decay_fac=2.0, min_lr=0.00001, min_metric_better=True, decay_thresh=0.99)
         else:
             raise Exception("model not supported!")
         for epoch in range(args.epoch):  
