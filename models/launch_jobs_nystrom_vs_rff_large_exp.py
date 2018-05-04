@@ -7,7 +7,7 @@ from copy import deepcopy
 #python launch_jobs_nystrom_vs_rff.py covtype nystrom_vs_rff_covtype_no_metric dawn without_metric cuda -1 run &
 #for search lamda star for covtype in closeness experiments: python launch_jobs_nystrom_vs_rff.py covtype closeness/classification_real_setting starcluster without_metric cuda 20000 dryrun no_early_stop &
 # for sweeping n feat with lambda star for covtype in closeness experiments: python launch_jobs_nystrom_vs_rff.py covtype closeness/classification_real_setting dawn with_metric cuda 20000 dryrun no_early_stop &
-# tuning sweep for lr with 20k sampled data: python launch_jobs_nystrom_vs_rff_large_exp.py census nystrom_vs_rff/lr_tuning_run starcluster without_metric cuda 20000 dryrun early_stop &
+# tuning sweep for lr : python launch_jobs_nystrom_vs_rff_large_exp.py census nystrom_vs_rff_large_exp/lr_tuning_run starcluster without_metric cuda -1 dryrun early_stop &
 
 
 #dataset = "census"
@@ -91,7 +91,7 @@ else:
 
 data_path = "/dfs/scratch0/zjian/data/lp_kernel_data/" + dataset
 opt = "sgd"
-epoch = 1000
+epoch = 100 
 save_path = "/dfs/scratch0/zjian/lp_kernel/" + exp_name + "/" + dataset
 
 cnt = 0
