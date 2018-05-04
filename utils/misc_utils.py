@@ -20,8 +20,6 @@ def expected_loss(lam, U, S, Y, noise):
 def delta_approximation(K, K_tilde, lambda_=1e-3):
     """ Compute the smallest D such that (1 - D)(K + lambda_ I) <= K_tilde + lambda_ I <= (1 + D)(K + lambda_ I),
     where the inequalities are in semidefinite order.
-    We won't check that the kernel matrices are positive semidefinite, so the
-    result might be wrong if K and K_tilde aren't PSD.
     As in the proof of Lemma 8 of https://arxiv.org/pdf/1804.09893.pdf, if K + lambda_ I has
     the eigen-decomposition V Sigma^2 V.T, then
     D = ||Sigma^{-1} V.T K_tilde V Sigma^{-1} - Sigma^{-1} V.T K V Sigma^{-1}||
@@ -29,7 +27,6 @@ def delta_approximation(K, K_tilde, lambda_=1e-3):
         K: kernel matrix (PSD), n x n numpy array.
         K_tile: approximate kernel matrix (PSD), n x n numpy array.
         lambda_: real number.
-        precision: precision of the returned D.
     Return:
         D: real number.
     """
