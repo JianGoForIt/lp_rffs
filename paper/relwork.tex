@@ -1,0 +1,8 @@
+\begin{itemize}
+	\item Give an overview of kernel approximation generalization bounds.  Note that the central object they generally use to bound the generalization error is $\|K-\tK\|$.  Discuss the more recent results which approach the problem differently \avner{We should read recent papers closely.}
+	\item Discuss Nystrom vs. RFF paper.  Our main differentiators: 1) we consider larger/more challenging datasets, 2) we consider much larger numbers of features, 3) we consider memory budget.
+	\item Discuss low-precision, and recent interest in doing low-precision training.
+	\item Discuss fastfood/circulant RFF, and other attempts at reducing memory footprint of projection matrix.  Note that this doesn't address the memory of the features themselves, which can take a ton of space for moderate size mini-batches. Furthermore, our method can be combined with these methods in order to reduce the memory footprint even further (in fact, that is what we do!).
+	\item Discuss other attempts at improving RFF (orthogonal RFF, Spherical Structured Feature Maps, Gaussian quadrature, quasi-monte carlo, etc.), and why we are different.  Discuss that while these methods often improve the kernel approximation error for a fixed number of features, they do not increase the rank for a fixed amount of memory.
+	\item Perhaps discuss methods of improving Nystrom?  Sampling distributions, etc.
+\end{itemize}

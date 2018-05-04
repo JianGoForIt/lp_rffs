@@ -1,0 +1,21 @@
+\begin{itemize}
+	\item We introduce low-precision RFF \avner{Should we do this earlier, in a ``Methods'' section?}.
+	\item We present our theoretical results about LP-RFF, bounding it's approximation error (maybe push this to appendix), and bounding it's $\Delta$, as a function of the number of quantized features, and the precision being used.
+	\item We show our experiments, which have three parts: (1) Explore the performance on big tasks, (2) Explain trends on big experiments by doing detailed analysis on small tasks, (3) show low-precision training doesn't degrade performance much relative to FP training.
+\end{itemize}
+
+\subsection{LP-RFF: Method}
+\begin{itemize}
+	\item Present LP-RFF method in detail.
+\end{itemize}
+\subsection{LP-RFF: Theory}
+\begin{itemize}
+	\item Discuss bounds on kernel approximation performance (if we have space).
+	\item Discuss bounds on $\Delta$.
+\end{itemize}
+\subsection{LP-RFF: Experiments}
+\begin{itemize}
+	\item We show performance on the ``big tasks''.
+	\item We explain these results in terms of the ``small tasks'', where we measure $\Delta$, showing that below a certain number of bits, $\Delta$ can increase a lot.  If we have space, we explain the trade-offs here a bit, showing in the fixed design setting that higher noise means higher $\lambda^*$, which means fewer bits can be used until $\Delta$ increases a lot.
+	\item We briefly present low-precision training, showing that performance doesn't degrade much relative to full-precision training.
+\end{itemize}

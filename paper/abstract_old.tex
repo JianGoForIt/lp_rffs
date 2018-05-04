@@ -1,0 +1,49 @@
+%Building on the same regression theory, as well as through experiments, we show that there are important regimes in which lowering precision does not degrade performance.  
+%Furthermore, We show that we can incorporate these low-precision features in low-precision training algorithms, which allows us to (1) perform training with a smaller memory footprint, and (2) learn more compact models.  
+
+
+%We analyze the generalization performance of LP-RFF, proving that performance decays as \todo{...make formal statement}. Empirically, we validate the theory, and demonstrate that we are able to get within \todo{xx\%} of the performance of full-precision RFF models, using \todo{xx} times less memory during training.
+
+%Motivated by these insights, we propose using low-precision RFFs to cover even more of the spectrum, under a fixed budget.  Through the same regression theory, as well as through experiments, we show that there are important regimes in which lowering precision does not degrade performance.  Furthermore, We show that we can incorporate these low-precision features in low-precision training algorithms, which allows us to (1) perform training with a smaller memory footprint, and (2) learn more compact models.
+
+
+
+
+
+%Intuitively, by using more features, the RFF method is able to approximate a larger portion of the true spectrum of the kernel matrix, and this allows it to attain a lower $\Delta$.  
+
+
+%Empirically, we demonstrate across a number of classification and regression tasks that this metric is much more predictive of generalization performance than the spectral or Frobenius norms of the kernel approximation error. 
+%Motivated by these insights, we propose using low-precision RFFs to cover even more of the spectrum, under a fixed budget.  Through the same regression theory, as well as through experiments, we show that there are important regimes in which lowering precision does not degrade performance.  Furthermore, We show that we can incorporate these low-precision features in low-precision training algorithms, which allows us to (1) perform training with a smaller memory footprint, and (2) learn more compact models.
+
+%Make it upfront that why we don’t play with low precision Nystrom.
+%We demonstrate that we can attain strong empirical performance by using these low-precision features in low-precision training algorithms.  
+
+
+%-bit features together with \todo{xx}-bit training algorithms. This allows us to both reduce the memory footprint of the training algorithm, and learn more compact models.
+%is due to the fact that attaining a low value of $\Delta$ requires approximating 
+
+%of an  ridge kernel regression model trained using an approximation $\tK$ to a kernel $K$ in terms of 
+
+
+%, in which they bound the generalization performance of the kernel approximtaion  novel metric measuring the distance between a kernel approximation matrix $\tK$ and the exact kernel matrix $K$, and bound the generalization performance in terms of this metric.  Letting $\sigma_i$ and $\tsigma_i$ be the eigenvalues of $K$ and $\tK$, and $\eps > 0$, we define the ``$\eps$-log-spectral distance'' $D_{\eps}(K,\tK) =  \max_i |\log(\sigma_i + \eps)-\log(\tsigma_i+\eps)|$. In order for $\tK$ to be close to $K$ under this metric, all its eigenvalues $\tsigma_i > \eps$ must have similar order of magnitude to those of $K$; in particular, the rank $m$ of $\tK$ must be large enough such that $\log(\sigma_{m+1} + \eps) \approx \log(\eps)$.
+%Because RFFs are more memory efficient than \Nystrom features, the RFF approximation will be higher rank than the \Nystrom approximation, when under a memory constraint.  As a result, under the proposed metric, the RFF kernel approximation is \emph{closer} to the exact kernel matrix than the \Nystrom approximation is. Empirically, we demonstrate across a number of classification and regression tasks that this metric is much more predictive of generalization performance than the spectral or Frobenius norms of the kernel approximation error. 
+%Taking inspiration from these results, we propose using \emph{low-precision} random Fourier features in order to generate an even higher-rank approximation under the same memory budget. We demonstrate that we are able to match the performance of full-precision RFF models, using low-precision features and low-precision training algorithms; this allows us to both reduce the memory footprint of the training algorithm, and learn more compact models.
+
+
+%Using this metric, we are able to explain the superior performance of the RFF models discussed above; in particular we demonstrate that under this metric, the RFF kernel approximation is \emph{closer} to the exact kernel matrix than the \Nystrom approximation is. 
+
+%VERSION 2: In this work, we bound the generalization performance of kernel approximation methods in terms of a novel metric measuring the distance between a kernel approximation matrix $\tK$ and the exact kernel matrix $K$.  Letting $\sigma_i$ and $\tsigma_i$ be the eigenvalues of $K$ and $\tK$, and $\eps > 0$, we define the ``$\eps$-log-spectral distance'' $D_{\eps}(K,\tK) =  \|\log(\sigma + \eps)-\log(\tsigma+\eps)\|_{\infty}$.  We use the insight provided by this metric to (1) explain our intriguing observation that under a fixed memory budget, random Fourier features (RFFs) \citep{rahimi07random} outperform \Nystrom features \citep{nystrom}, and to (2) propose using \emph{low-precision} random Fourier features in order to get even better performance under the same memory budget. We demonstrate that we are able to match the performance of full-precision RFF models, using low-precision features and low-precision training algorithms.  Across all of these experiments, we show a very strong correspondence between the ``$\eps$-log-spectral distance'', and the generalization performance of a model.
+
+
+
+
+%In order for a kernel approximation matrix to have small distance under this metric to the exact kernel matrix, its eigenvalues must generally be on the same order of magnitude as those of the exact kernel matrix;
+%In this paper, we argue that training performant kernel approximation models requires high-rank decompositions of the original kernel matrix, even if the error of these decompositions have larger spectral or Frobenius norm. 
+
+
+%If a kernel approximation matrix $\tK$ has rank $m$, then $D_{\eps}(K,\tK) \geq |\log(\sigma_{m+1} + \eps) - \log(\eps)|$; 
+
+%thus, in order to get a tight bound using this metric, we would need an $m$ large enough so that $\log(\sigma_{m+1}+\eps) \approx \log(\eps)$.  
+
+%This insight has important practical implications: (1) It predicts that under a fixed memory budget, random Fourier features (RFF) \citep{rahimi07random} should outperform the \Nystrom method \citep{nystrom}, given that more RFFs can be used under the same budget.

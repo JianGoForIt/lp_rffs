@@ -1,11 +1,15 @@
-
-
-
 \begin{itemize}
-	\item Kernel approximation methods are used in order to scale kernel methods to large datasets.  Two leading methods are the \Nystrom method and random Fourier features.
-	\item We provide a thorough empirical comparison between these methods
-	\item Provide a brief survey of kernel approximation generalization bounds.
-	\item Shortcomings of these bounds: (1) Computation/memory is generally ignored in these bounds, (2) they often depend on the Frobenius/spectral norm of error matrix, and thus cannot explain differences in performance between two kernel approximations with the same error norm.
-	\item Both of these shortcoming generally lead to the simplistic conclusion ``\Nystrom is better''.
-	\item We show that the truth is much more complicated. 
+	\item Kernel methods are powerful, but don't scale well.  Need kernel approximation methods.
+	\item For kernel approximation methods to do well, generally need lots of features.  When performing GPU training (limited memory), or when considering model deployment, the memory requirement for these models becomes a large bottleneck.  An example of this is the recent work in large-scale kernel methods for speech recognition, which are constrained in terms of the number of features they can fit on GPU.
+	\item As a result, we perform a thorough empirical comparison of Nystrom and RFF, two leading kernel approximation methods, in the memory constrained setting.  Surprisingly, we find that although the Nystrom method often has lower kernel approximation error (Frobenius/Spectral norm), it performs worse than RFF in this setting.  We note that this runs counter to the common belief that Nystrom is better than RFF.
+	\item We explain these observations using the recent theoretical results of Avron et al.  We note that the bounds in this paper differ in important ways from prior bounds which are generally based on the kernel approximation error (and thus useless to explain the observed phenomenon).
+	\item We note that the primary insight provided by these recent bounds is that it is crucial to have a high-rank decomposition whose spectrum roughly aligns with the exact spectrum, even if it has high kernel approximation error.  Note that this runs contrary to a lot of the literature kernel approximation literature, which is often narrowly concerned with reducing the kernel approximation error.  Furthermore, we consider the computational cost, in terms of memory, of computing these features, another aspect which is generally not considered when comparing Nystrom and RFF.
+	\item We leverage this insight to propose LP-RFF.
+	\item We analyze LP-RFF theoretically, showing that you can upper bound the value $\Delta$ for LP-RFF in terms of the number of bits per feature used.
+	\item We show that LP-RFF are able to perform on par with full-precision features, at a fraction of the memory.
+	\item This opens the door for training kernel approximation models with many more features than are currently being used.  To fully leverage these insights to attain faster, lower-memory, and lower-energy training, it will be necessary to implement efficient version of our algorithm (mention TPUs, GPUs, FPGAs, etc). \avner{Are TPUs already being used for neural net training in low-precision?}
+	\item Include sexy plot in intro summarizing the main results of the paper?  Generalization performance vs. memory usage on TIMIT, for \Nystrom, RFF, and LP-RFF?
 \end{itemize}
+
+
+% Kernel methods are a powerful family of machine learning methods.  Unfortunately, they do not scale well to large datasets, typically requiring time and memory that are at least quadratic in the number of training points. Two important methods which address these scalability issues using approximation techniques are the \Nystrom method \cite{nystrom} and the random Fourier feature (RFF) method \cite{rahimi07random}.
