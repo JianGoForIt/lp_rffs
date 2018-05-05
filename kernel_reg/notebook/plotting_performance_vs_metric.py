@@ -52,3 +52,35 @@ def average_results_array(results_array):
     results = np.vstack(results_array)
 #     print results, results.shape
     return np.mean(results, axis=0)
+
+def get_nystrom_memory(n, m, r):
+    '''
+    let n be the number of kernel approximation features, m be the minibatch size.
+    r is the original number of raw features. Assume for nystrom n landmark equals n kernel
+    approximation features. 
+    memory consumption for Nystrom
+    n * n + n * r + m * n
+    memory consumption for RFF
+    n * r + m * n
+    '''
+    return n * r + n * n + m * n
+
+def get_rff_memory(n, m, r):
+    '''
+    let n be the number of kernel approximation features, m be the minibatch size.
+    r is the original number of raw features. Assume for nystrom n landmark equals n kernel
+    approximation features. 
+    memory consumption for Nystrom
+    n * n + n * r + m * n
+    memory consumption for RFF
+    n * r + m * n
+    '''
+    return n * r + m * n
+
+def median_results_array(results_array):
+    # average list of 1d np array results
+#     print results_array
+    results_array = [np.reshape(x, x.size) for x in results_array]
+    results = np.vstack(results_array)
+#     print results, results.shape
+    return np.median(results, axis=0)

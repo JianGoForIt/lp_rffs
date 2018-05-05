@@ -55,9 +55,9 @@ if dataset == "census":
 elif dataset == "covtype":
     model = "logistic_regression"
     if do_metric == "with_metric":
-        l2_reg_list = [5e-5, ]
+        l2_reg_list = [1e-5, ]
     else:
-        l2_reg_list = [1e-5, 5e-5, 1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1]
+        l2_reg_list = [5e-7, 1e-6, ] #[1e-5, 5e-5, 1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1]
     kernel_sigma = math.sqrt(1.0/0.6/2.0)
     #n_fp_nystrom_list= [1250, 2500, 5000, 10000, 20000]
     n_fp_rff_list = [1250, 2500, 5000, 10000, 20000, 50000, 100000, 200000, 400000]
@@ -69,7 +69,7 @@ elif dataset == "covtype":
     if do_metric == "with_metric":
         lr_list = [10]
     else:
-        lr_list = [10, 50, 100, 5]
+        lr_list = [10, 5, 50, 100]
 
 elif dataset == "adult":
     model = "logistic_regression"
@@ -98,7 +98,7 @@ data_path = "/dfs/scratch0/zjian/data/lp_kernel_data/" + dataset
 opt = "sgd"
 epoch = 150
 save_path = "/dfs/scratch0/zjian/lp_kernel/" + exp_name + "/" + dataset
-if do_metric:
+if do_metric == "with_metric":
 	save_path = save_path + "_with_metric"
 
 cnt = 0
@@ -106,9 +106,11 @@ for seed in seed_list:
 	for l2_reg in l2_reg_list:
 		for n_fp_rff in n_fp_rff_list:
 			for lr in lr_list:
-				for approx_type in ["nystrom"]:
+				for approx_type in ["rff", "nystrom"]:
 					if approx_type == "nystrom" and n_fp_rff > 20000:
 						continue
+					#if approx_type == "rff" and n_fp_rff < 200000:
+					#	continue
 					save_suffix = "_type_" + approx_type + "_l2_reg_" + str(l2_reg) + "_n_fp_feat_" + str(n_fp_rff) \
 					 	+ "_opt_" + opt + "_lr_" + str(lr) + "_seed_" + str(seed)
 					command = deepcopy(template)
