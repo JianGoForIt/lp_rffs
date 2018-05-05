@@ -6,7 +6,7 @@ from copy import deepcopy
 #python launch_jobs_nystrom_vs_rff.py census nystrom_vs_rff dawn with_metric cuda -1 run &
 #python launch_jobs_nystrom_vs_rff.py covtype nystrom_vs_rff_covtype_no_metric dawn without_metric cuda -1 run &
 #for search lamda star for covtype in closeness experiments: python launch_jobs_nystrom_vs_rff.py covtype closeness/classification_real_setting starcluster without_metric cuda 20000 dryrun no_early_stop &
-# for sweeping n feat with lambda star for covtype in closeness experiments: python launch_jobs_nystrom_vs_rff.py covtype closeness/classification_real_setting dawn with_metric cuda 20000 dryrun no_early_stop &
+# for sweeping n feat with lambda star for covtype in closeness experiments: python launch_jobs_nystrom_vs_rff_delta.py covtype closeness/classification_real_setting dawn with_metric cuda 20000 dryrun no_early_stop &
 
 #dataset = "census"
 #exp_name = "nystrom_vs_rff"
@@ -65,7 +65,7 @@ elif dataset == "covtype":
     #n_fp_rff_list = [2500, 20000, 200000]
     #n_fp_rff_list = [5000, 50000, 400000]
     #n_fp_rff_list = [20000, ] # to simulate exact kernel approach
-    seed_list = [1,]
+    seed_list = [2,]
     if do_metric == "with_metric":
         lr_list = [10]
     else:
