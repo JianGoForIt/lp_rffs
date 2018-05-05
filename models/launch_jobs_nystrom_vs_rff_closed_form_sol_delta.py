@@ -3,7 +3,7 @@ import math
 from copy import deepcopy
 
 # example
-#python launch_jobs_nystrom_vs_rff_closed_form_sol.py census closeness/regression_real_settting starcluster with_metric cpu dryrun &
+#python launch_jobs_nystrom_vs_rff_closed_form_sol_delta.py census delta/regression_real_settting dawn with_metric cpu dryrun &
 
 #dataset = "census"
 #exp_name = "nystrom_vs_rff"
@@ -35,7 +35,7 @@ if dataset == "census":
     n_fp_rff_list = [1250, 2500, 5000, 10000, 20000, 50000, 100000, 200000, 400000]
 #    n_fp_rff_list = [1250, 5000, 20000, 100000, 400000, 1600000]
 #    n_fp_rff_list = [2500, 10000, 50000, 200000, 800000]    
-    seed_list = [1, 2, 3]
+    seed_list = [2, ]
 
 data_path = "/dfs/scratch0/zjian/data/lp_kernel_data/" + dataset
 save_path = "/dfs/scratch0/zjian/lp_kernel/" + exp_name + "/" + dataset
