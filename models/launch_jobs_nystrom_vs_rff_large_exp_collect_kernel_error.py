@@ -3,7 +3,7 @@ import math
 from copy import deepcopy
 
 # example
-# for collecting kernel approximation error for large runs: python launch_jobs_nystrom_vs_rff_large_exp.py census nystrom_vs_rff_large_exp/full_tuning_run_kernel_approx_error starcluster with_metric cuda -1 dryrun early_stop &
+# for collecting kernel approximation error for large runs: python launch_jobs_nystrom_vs_rff_large_exp_collect_kernel_error.py census nystrom_vs_rff_large_exp/full_tuning_run_kernel_approx_error starcluster with_metric cpu 20000 dryrun early_stop &
 
 #dataset = "census"
 #exp_name = "nystrom_vs_rff"
