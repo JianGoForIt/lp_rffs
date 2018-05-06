@@ -102,8 +102,13 @@
 #   --collect_sample_metrics --closed_form_sol
 
 # test new measurement on delta
+# python run_model.py --model=ridge_regression  \
+#   --kernel_sigma=28.8675134595 --random_seed=1  \
+#   --data_path=../../data/census/census --save_path=./test/123 --approx_type=rff --do_fp_feat --n_fp_rff=8192 \
+#   --collect_sample_metrics --fixed_design --fixed_design_auto_l2_reg --fixed_design_noise_sigma=1e4
+
+# test only collecting kernel approximation error
 python run_model.py --model=ridge_regression  \
   --kernel_sigma=28.8675134595 --random_seed=1  \
-  --data_path=../../data/census/census --save_path=./test/123 --approx_type=rff --do_fp_feat --n_fp_rff=8192 \
-  --collect_sample_metrics --fixed_design --fixed_design_auto_l2_reg --fixed_design_noise_sigma=1e4
-
+  --data_path=../../data/census/census --save_path=./test/123 --approx_type=rff --do_fp_feat --n_fp_rff=128 \
+  --collect_sample_metrics --exit_after_collect_metric --only_collect_kernel_approx_error
