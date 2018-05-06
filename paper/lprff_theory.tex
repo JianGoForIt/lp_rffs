@@ -1,0 +1,233 @@
+Let $K \in \mathbb{R}^{n \times n}$ be the kernel matrix.
+Let $Z \in \mathbb{R}^{n \times m}$ be the random Fourier feature matrix, where $n$ is
+the number of data points and $m$ is the number of features.
+We can write $Z = \frac{1}{\sqrt{m}} \begin{bmatrix} z_1, \dots,
+  z_m \end{bmatrix}$ where $z_i$ are the (scaled) columns of $Z$.
+Each entry of $Z$ has the form $\sqrt{2} \cos(w^T x + b)$ for some $w, x \in
+\mathbb{R}^{d}$ and $b \in \mathbb{R}^{m}$, where $d$ is the dimension of the
+original dataset.
+Then $\E[z_i z_i^\top] = K$, so $\E [Z Z^\top] = K$ as we have discussed.
+
+Now suppose we quantize $Z$ to $b$ bits, for some fixed $b \geq 1$.
+Then the quantized feature matrix is $Z + C$ for some random $C \in \mathbb{R}^{n
+  \times m}$ whose entries are independent conditioned on $Z$ (but not identically
+distributed) with $\E[C \mid Z] = 0$.
+We can write $C = \frac{1}{\sqrt{m}} \begin{bmatrix} c_1, \dots,
+  c_m \end{bmatrix}$ where $c_i$ are the (scaled) columns of $C$.
+Moreover, the $c_i$ are independent conditioned on $Z$.
+We also showed that the entries $C_{ij}$ have variance $\E[C_{ij}^2 \mid Z] \leq \frac{2}{(2^b - 1)^2}$.
+Call this variance $\delta^2_b \defeq \frac{2}{(2^b - 1)^2}$.
+
+We first analyze the expectation of $(Z + C) (Z + C)^\top$ (over both the
+randomness of $Z$ and of $C$).
+\begin{proposition}
+  $\E[(Z + C)(Z + C)^\top] = K + D$, where $D \defeq \E[C C^\top]$ is a
+  diagonal matrix satisfying $0 \preceq D \preceq \delta^2_b I_n$.
+  \label{prop:expectation_CCstar}
+\end{proposition}
+
+\begin{proof}
+  Since $\E[C \mid Z] = 0$,
+  \begin{equation*}
+    \E[(Z + C) (Z + C)^\top \mid Z] = Z Z^\top + \E[C C^\top \mid Z].
+  \end{equation*}
+  We see that $\E[C C^\top \mid Z] = \frac{1}{m} \sum_{i=1}^{m} \E[c_i c_i^\top \mid Z]$.
+  For each $i$, $\E[c_i c_i^\top \mid Z] = \diag(\E[(c_i)_1^2 \mid Z], \dots,
+  \E[(c_i)_n^2 \mid Z])$.
+  We already showed that $\E[(c_i)_j^2 \mid Z] \leq \delta^2_b$, so $\E[C C^\top \mid Z] \preceq \delta^2_b I_n$.
+  Taking expectation wrt $Z$ yields
+  \begin{equation*}
+    \E[(Z + C)(Z + C)^\top] = \E[Z Z^\top] + \E[\E[C C^\top \mid Z]] = K + D,
+  \end{equation*}
+  where $D \defeq \E[C C^\top]$ is diagonal and $0 \preceq D \preceq \delta^2_b I_n$.
+\end{proof}
+
+With $D \defeq \E[C C^\top]$, we can use matrix concentration to show that the
+quantized kernel matrix $K_\mathrm{lp} \defeq (Z + C)(Z + C)^\top$ is close to its
+expectation $K + D$.
+There are a couple of ways to state this, depending on which basis we want the
+bound to hold.
+To change the basis, we conjugate by a matrix $B \in \mathbb{R}^{n \times n}$.
+Our goal is to show that $\norm{B (Z + C)(Z + C)^\top B^\top - B(K + D)B^\top}$ is small
+with high probability.
+The matrices we will use to conjugate will be $B = (K + \lambda I_n)^{-1/2}$, but the
+following proposition holds for any $B$.
+
+\begin{proposition}
+  Let $L \defeq 2n \norm{B}^2$ and $M \defeq B(K + \delta^2_b I_n) B^\top$,
+  then for any $t \geq \sqrt{\norm{M} / m} + 2L/3m$,
+  \begin{equation*}
+    P(\norm{B(Z + C)(Z + C)^\top B - B(K + D)B} \geq t) \leq \frac{4\tr(M)}{\norm{M}}
+    \exp \left( \frac{-mt^2}{2L(\norm{M} + 2t/3)} \right).
+  \end{equation*}
+  \label{prop:quantized_concentration}
+\end{proposition}
+Concentration is exponential in the number of features $m$, as expected.
+
+\begin{proof}
+  Let $S_i = \frac{1}{m} \left( B (z_i + c_i) (z_i + c_i)^\top B^\top - B (K + D)B^\top
+  \right)$ and $S = \sum_{i=1}^{m} S_i$.
+  We see that $\E[S_i] = 0$.
+  We will bound $\norm{S}$ by applying the matrix Bernstein inequality.
+  Thus we need to bound $\norm{S_i}$ and $\norm{\sum_{i=1}^{m} \E[S_i^2]}$.
+
+  Let $v_i = B(z_i + c_i) \in \mathbb{R}^{n}$, then $S_i = \frac{1}{m} (v_i
+  v_i^\top  - \E[v_i v_i^\top])$.
+  We first bound $\norm{v_i v_i^\top}$.
+  Since this is a rank 1 matrix,
+  \begin{equation*}
+    \norm{v_i v_i^\top} = \norm{v_i}^2 = \norm{B(z_i + c_i)}^2 \leq \norm{B}^2
+    \norm{z_i + c_i}^2 \leq 2n \norm{B}^2,
+  \end{equation*}
+  where we have used the fact that $z_i + c_i$ is a vector of length $n$ whose
+  entries are in $[-\sqrt{2}, \sqrt{2}]$.
+  This gives a bound on $\norm{S_i}$:
+  \begin{equation*}
+    \norm{S_i} = \frac{1}{m} \norm{v_i v_i^\top - \E[v_i v_i^\top]}
+    \leq \frac{1}{m} \norm{v_i v_i^\top} + \frac{1}{m} \E \norm{v_i v_i^\top}
+    \leq \frac{4n \norm{B}^2}{m} = 2L/m.
+  \end{equation*}
+
+  Now it's time to bound $\E[S_i^2]$.
+  \begin{equation*}
+    \E[S_i^2] = \frac{1}{m^2} \var[v_i v_i^\top] \preceq \frac{1}{m^2} \E[(v_i v_i^\top)^2]
+    = \frac{1}{m^2} \E[v_i v_i^\top v_i v_i^\top] = \frac{1}{m^2} \E[\norm{v_i}^2 v_i
+    v_i^\top] \preceq \frac{2n \norm{B}^2}{m^2} \E[v_i v_i^\top].
+  \end{equation*}
+  Thus
+  \begin{equation*}
+    \sum_{i=1}^{m} \E[S_i^2] \preceq \frac{2n \norm{B}^2}{m} \E[v_i v_i^\top] = \frac{2n
+      \norm{B}^2}{m} B(K + D) B^\top \preceq \frac{2n \norm{B}^2}{m} B(K + \delta^2_b I_n)B^\top
+    = LM/m.
+  \end{equation*}
+
+  Applying the matrix Bernstein inequality (symmetric case with intrinsic
+  dimension) (Theorem 7.7.1 in \cite{tropp2015introduction}),
+  for $t \geq \sqrt{L \norm{M}/m} + 2L/3m$,
+  \begin{equation*}
+    P(\norm{B(Z + C)(Z + C)^\top B - B(K + D)B} \geq t) \leq \frac{4\tr(M)}{\norm{M}}
+    \exp \left( \frac{-t^2/2}{L \norm{M}/m + 2Lt/3m} \right).
+  \end{equation*}
+\end{proof}
+
+Now we are ready to show that low precision features yield close spectral
+approximation to the kernel matrix.
+
+\begin{theorem}
+
+  Suppose that $\norm{K} \geq \lambda$ and $\delta^2_b \leq \lambda$.
+  Then for any $1/2 \geq \Delta_0 \geq \sqrt{\frac{2n}{\lambda m}} + \frac{4n/\lambda}{3m}$, with $\Delta =
+  \Delta_0 + \delta^2_b / \lambda$,
+  \begin{equation*}
+    P((1 - \Delta)(K + \lambda I_n) \preceq (Z + C) (Z + C)^\top + \lambda I_n \preceq (1 + \Delta)(K + \lambda I_n)) \geq 1 - 8 \tr((K +
+    \lambda I_n)^{-1} (K + \delta^2_b I_n)) \exp \left( -\frac{3m \Delta^2}{16n/\lambda} \right).
+  \end{equation*}
+  Thus if we use $m \geq \frac{16}{3 \Delta^2} n/\lambda \log (8 \tr((K + \lambda I_n)^{-1} (K +
+  \delta^2_b I_n)) / \rho)$
+  features, then $(Z + C) (Z + C)^\top + \lambda I_n$ is a $\Delta$-spectral approximation of $K + \lambda I_n$,
+  with probability at least $1 - \rho$.
+\end{theorem}
+
+\begin{proof}
+  Consider the condition $(1 - \Delta)(K + \lambda I_n) \preceq (Z + C) (Z + C)^\top + \lambda I_n \preceq (1 +
+  \Delta)(K + \lambda I_n)$.
+  Let $B \defeq (K + \lambda I_n)^{-1/2}$, which is symmetric, then $\norm{B}^2 =
+  \norm{K + \lambda I_n}^{-1} \leq 1/\lambda$.
+  Conjugating by $B \defeq (K + \lambda I_n)^{-1/2}$ (i.e.\ multiplying by $B$ on the
+  left and right) yields an equivalent condition (as $B$ is
+  invertible):
+  \begin{equation*}
+    (1 - \Delta) I_n \preceq (K + \lambda I_n)^{-1/2} ((Z + C) (Z + C)^\top + \lambda I_n) (K + \lambda I_n)^{-1/2} \preceq (1 +
+    \Delta) I_n.
+  \end{equation*}
+  Subtracting $I_n$ from both sides:
+  \begin{equation*}
+    \Delta I_n \preceq (K + \lambda I_n)^{-1/2} ((Z + C) (Z + C)^\top + \lambda I_n - (K + \lambda I_n)) (K + \lambda I_n)^{-1/2}.
+  \end{equation*}
+  This is equivalent to
+  \begin{equation*}
+    \norm{(K + \lambda I_n)^{-1/2} ((Z + C) (Z + C)^\top - K) (K + \lambda I_n)^{-1/2}} \leq \Delta.
+  \end{equation*}
+  Suppose that $\norm{B((Z + C)(Z + C)^\top - (K + D))B} \leq \Delta_0$.
+  Then since $0 \preceq D \preceq \delta^2_b I_n$, $\norm{B(K + D - K) B} = \norm{B D B} \leq \delta^2_b
+  \norm{B}^2$, and the triangle inequality yields
+  \begin{align*}
+    \norm{B((Z + C)(Z + C)^\top - K)B}
+    &\leq \norm{B((Z + C)(Z + C)^\top - (K + D))B} + \norm{B (K + D - D)B} \\
+    &\leq \Delta_0 + \delta^2_b \norm{B}^2 \\
+    &\leq \Delta_0 + \delta^2_b/\lambda \\
+    &= \Delta.
+  \end{align*}
+  Thus it suffices to show that
+  \begin{equation*}
+    P(\norm{B((Z + C)(Z + C)^\top - (K + D))B} \geq \Delta) \leq 8 \tr((K + \lambda I_n)^{-1} (K +
+    \delta^2_b I)) \exp \left( -\frac{3m \Delta^2}{16n/\lambda} \right).
+  \end{equation*}
+
+  We have $L \defeq 2n \norm{B}^2 \leq 2n/\lambda$.
+  Let $\lambda_1, \dots, \lambda_n$ be the eigenvalues of $K$.
+  We have
+  \begin{equation*}
+    M \defeq B(K + \delta^2_b I_n) B =  (K + \lambda I_n)^{-1/2} (K + \delta^2_b I_n) (K + \lambda
+    I_n)^{-1/2} = \diag((\lambda_1 + \delta^2_b)/(\lambda_1 + \lambda), \dots,
+    (\lambda_n + \delta^2_b) / (\lambda_n + \lambda)).
+  \end{equation*}
+  By assumption, $\norm{K} \geq \lambda$, so $\norm{M} = \frac{\lambda_1 + \delta^2_b}{\lambda_1 + \lambda} \geq
+  1/2$.
+  We also assume that $\delta^2_b \leq \lambda$, so $\norm{M} \leq 1$.
+  Moreover, $\tr(M) = \tr((K + \lambda I_n)^{-1/2} (K + \delta^2_b I) (K + \lambda I_n)^{-1/2}) =
+  \tr((K + \lambda I_n)^{-1} (K + \delta^2_b I_n))$.
+  The condition of $\Delta \geq \sqrt{L \norm{M} / m} + 2L/3m$ becomes $\Delta \geq \sqrt{\frac{2n}{\lambda m}} + \frac{2n/\lambda}{3m}$.
+  The bound of Proposition~\ref{prop:quantized_concentration} becomes:
+  \begin{align*}
+    &P(\norm{(K + \lambda I_n)^{-1/2} ((Z + C) (Z + C)^\top - (K + D)) (K + \lambda
+      I_n)^{-1/2}} \geq \Delta) \\
+    \leq&\ \frac{4 \tr((K + \lambda I_n)^{-1} (K + \delta^2_b I_n))}{1/2} \exp \left( -\frac{m
+      \Delta^2}{4\frac{n}{\lambda} (1 + 2\Delta/3)} \right) \\
+    \leq&\ 8 \tr((K + \lambda I_n)^{-1} (K + \delta^2_b I_n)) \exp \left( -\frac{3m\Delta^2}{16n/\lambda} \right)
+  \end{align*}
+  where we get the last inequality from the assumption that $\Delta \leq 1/2$.
+
+  Letting this probability be $\rho$ and solving for $m$ yields
+  \begin{equation*}
+    m \geq \frac{16}{3 \Delta^2} n/\lambda \log (8 \tr((K + \lambda I_n)^{-1} (K + \delta^2_b I_n)) / \rho).
+  \end{equation*}
+
+\end{proof}
+
+There is a bias--variance trade-off: as we decrease the number of bits $b$, under
+a fixed memory budget, we can use more features, and $(Z + C)(Z + C)^\top$
+concentrates more strongly (lower variance) around the expectation $K + D$ with
+$0 \preceq D \preceq \delta^2_b I_n$, but this expectation is further away from the true kernel
+matrix $K$ (larger bias).
+Thus there should be an optimal number of bits $b^*$ that balances the bias and
+the variance.
+
+As a sanity check, if we let the number of bits $b$ goes to $\infty$, we recover the
+result of \citet{avron17}.
+\begin{corollary}
+  Suppose that $\norm{K} \geq \lambda$.
+  Then for any $1/2 \geq \Delta \geq \sqrt{\frac{2n}{\lambda m}} + \frac{4n/\lambda}{3m}$,
+  \begin{equation*}
+    P((1 - \Delta)(K + \lambda I_n) \preceq Z Z^\top + \lambda I_n \preceq (1 + \Delta)(K + \lambda I_n)) \geq 1 - 8 \tr((K +
+    \lambda I_n)^{-1} K) \exp \left( -\frac{3m \Delta^2}{16n/\lambda} \right).
+  \end{equation*}
+  Thus if we use $m \geq \frac{16}{3 \Delta^2} n/\lambda \log (8 \tr((K + \lambda I_n)^{-1} K) / \rho)$
+  features, then $Z Z^\top + \lambda I_n$ is a $\Delta$-spectral approximation of $K + \lambda I_n$,
+  with probability at least $1 - \rho$.
+\end{corollary}
+The constants are slightly different from that of \citet{avron17} as we use the
+real features $\sqrt{2} \cos(w^T x + b)$ instead of the complex features $\exp(i
+w^T x)$, and we applied the symmetric version of matrix Bernstein inequality
+instead of the non-symmetric version.
+
+The number of features depend linearly on $n/ \lambda$.
+\citet{avron17} provided a lower bound, showing that the number of random Fourier features
+must depend linearly on $n / \lambda$.
+For optimal minimax rate, the value of $\lambda$ is of order $\sqrt{n}$ (\todo{check
+  this}), so the number of features is still sublinear in $n$.
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "nips_2018"
+%%% End:

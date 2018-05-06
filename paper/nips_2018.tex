@@ -27,11 +27,24 @@
 % ADDED BY ME
 \usepackage{xcolor}
 \usepackage{bbm}
-%\usepackage{amsmath}
+\usepackage{amsmath}
 %\usepackage{mathspec}
-
+\usepackage{amsthm}
 
 \input{__macros}
+
+% \theoremstyle{definition}
+% \newtheorem{definition}{Definition}
+% \newtheorem{mycondition}{Condition}
+% \theoremstyle{plain}
+% \newtheorem{lemma}{Lemma}
+% \newtheorem{theorem}{Theorem}
+% \newtheorem{corollary}{Corollary}
+\newtheorem{proposition}{Proposition}
+% \newtheorem{statement}{Statement}
+
+\newcommand{\E}{\mathbb{E}} % Expectation symbol
+
 \title{On the Importance of High-Rank Kernel Approximation}
 
 % The \author macro works with any number of authors. There are two
@@ -113,4 +126,13 @@
 %\bibliographystyle{usrnat}
 %\bibliographystyle{plainnat}
 \bibliographystyle{abbrv}
+
+\clearpage
+
+\appendix
+
+\section{Theoretical guarantee for low precision features}
+\label{sec:lprff_theory}
+\input{lprff_theory}
+
 \end{document}
