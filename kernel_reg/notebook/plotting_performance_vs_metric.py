@@ -5,8 +5,19 @@ import cPickle as cp
 def get_closeness(spectrum, spectrum_baseline, lamb):
     return np.linalg.norm(spectrum / (spectrum + lamb) - spectrum_baseline / (spectrum_baseline + lamb) )**2 
 
+#def get_log_closeness(spectrum, spectrum_baseline, lamb):
+#    return np.linalg.norm(np.log(spectrum + lamb) - np.log(spectrum_baseline + lamb) )**2
+
 def get_log_closeness(spectrum, spectrum_baseline, lamb):
-    return np.linalg.norm(np.log(spectrum + lamb) - np.log(spectrum_baseline + lamb) )**2
+#     print "right version"
+    assert np.all(spectrum >= 0.0)
+    assert np.all(spectrum_baseline >= 0.0)
+    val1 = (spectrum + lamb) / (spectrum_baseline + lamb)
+    val2 = (spectrum_baseline + lamb) / (spectrum + lamb)
+    Delta = np.max( (np.max(val1), np.max(val2) ) ) - 1.0
+    log_closeness = np.linalg.norm(np.log(spectrum + lamb) - np.log(spectrum_baseline + lamb) )**2
+#     print Delta, log_closeness
+    return Delta
 
 def get_spectrum(folder_name, file_name):
     if os.path.isfile(folder_name + "/" + file_name):
