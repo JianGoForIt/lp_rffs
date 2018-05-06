@@ -37,9 +37,16 @@ def get_performance_metric(folder_name, file_name, min_best=True):
 def get_measurement_metric(folder_name, file_name, metric_name):
 #     print folder_name
     if os.path.isfile(folder_name + "/" + file_name):
-        with open(folder_name + "/" + file_name, "r") as f:
-            metrics = cp.load(f)
-        metric = metrics[metric_name]
+	try:
+            with open(folder_name + "/" + file_name, "r") as f:
+                metrics = cp.load(f)
+        except:
+            with open(folder_name + "/" + file_name, "rb") as f:
+                metrics = cp.load(f)
+        if metric_name is not None:
+            metric = metrics[metric_name]
+        else:
+            metric = metrics
     else:
         print folder_name, file_name, " is not found."
         metric = None
