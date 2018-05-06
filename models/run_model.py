@@ -216,8 +216,10 @@ if __name__ == "__main__":
                 approx_val_error_list.append(approx_error_val)
             print("approx train kernel error list ", approx_train_error_list)
             print("approx val kernel error list ", approx_val_error_list)
-            kernel_approx_error_dict_train = {"F_norm_error": np.mean(approx_train_error_list) }
-            kernel_approx_error_dict_val = {"F_norm_error": np.mean(approx_val_error_list) }
+            kernel_approx_error_dict_train = np.mean(approx_train_error_list)
+            kernel_approx_error_dict_val = np.mean(approx_val_error_list)
+            #kernel_approx_error_dict_train = {"F_norm_error": np.mean(approx_train_error_list) }
+            #kernel_approx_error_dict_val = {"F_norm_error": np.mean(approx_val_error_list) }
             with open(args.save_path + "/metric_sample_train.txt", "wb") as f:
                 cp.dump(kernel_approx_error_dict_train, f, protocol=2)
             with open(args.save_path + "/metric_sample_eval.txt", "wb") as f:
