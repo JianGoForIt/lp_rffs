@@ -22,7 +22,8 @@ from data_loader import load_data
 import halp
 import halp.optim
 import halp.quantize
-from train_utils import train, evaluate, ProgressMonitor, get_sample_kernel_metrics, sample_data
+from train_utils import train, evaluate, ProgressMonitor
+from train_utils import get_sample_kernel_metrics, get_sample_kernel_F_norm, sample_data
 # imports for fixed design runs
 from misc_utils import expected_loss
 from scipy.optimize import minimize
@@ -67,6 +68,8 @@ parser.add_argument("--closed_form_sol", action="store_true", help="use closed f
 parser.add_argument("--fixed_epoch_number", action="store_true", help="if false, use early stopping")
 parser.add_argument("--exit_after_collect_metric", action="store_true", help="if yes, \
     we only do metric collection on kernel matrix without doing trainining")
+parser.add_argument("--only_collect_kernel_approx_error", action="store_true", 
+    help="if True, we only calculate F norm kernel approximation error to save computation")
 args = parser.parse_args()
 
 
@@ -202,28 +205,46 @@ if __name__ == "__main__":
     # collect metrics
     if args.collect_sample_metrics:
         print("start doing sample metric collection with ", X_train.size(0), " training samples")
-        if use_cuda:
-            metric_dict_sample_train, spectrum_sample_train, spectrum_sample_train_exact = \
-                get_sample_kernel_metrics(X_train.cuda(), kernel, kernel_approx, quantizer, args.l2_reg)
-            metric_dict_sample_val, spectrum_sample_val, spectrum_sample_val_exact = \
-                get_sample_kernel_metrics(X_val.cuda(), kernel, kernel_approx, quantizer, args.l2_reg)  
+        if args.only_collect_kernel_approx_error:
+            approx_train_error_list = []
+            approx_val_error_list = []
+            # as the data is sampled and fixed here, we only need to do 1 calculation within here
+            for i in range(1):
+                approx_error_train = get_sample_kernel_F_norm(X_train, kernel, kernel_approx, quantizer, args.l2_reg)
+                approx_error_val = get_sample_kernel_F_norm(X_val, kernel, kernel_approx, quantizer, args.l2_reg)
+                approx_train_error_list.append(approx_error_train)
+                approx_val_error_list.append(approx_error_val)
+            print("approx train kernel error list ", approx_train_error_list)
+            print("approx val kernel error list ", approx_val_error_list)
+            kernel_approx_error_dict_train = np.mean(approx_train_error_list)
+            kernel_approx_error_dict_val = np.mean(approx_val_error_list)
+            with open(args.save_path + "/metric_sample_train.txt", "wb") as f:
+                cp.dump(kernel_approx_error_dict_train, f, protocol=2)
+            with open(args.save_path + "/metric_sample_eval.txt", "wb") as f:
+                cp.dump(kernel_approx_error_dict_val, f, protocol=2)
         else:
-            metric_dict_sample_train, spectrum_sample_train, spectrum_sample_train_exact = \
-                get_sample_kernel_metrics(X_train, kernel, kernel_approx, quantizer, args.l2_reg)
-            metric_dict_sample_val, spectrum_sample_val, spectrum_sample_val_exact = \
-                get_sample_kernel_metrics(X_val, kernel, kernel_approx, quantizer, args.l2_reg) 
-        if not os.path.isdir(args.save_path):
-            os.makedirs(args.save_path)
-        with open(args.save_path + "/metric_sample_train.txt", "wb") as f:
-            cp.dump(metric_dict_sample_train, f)
-        np.save(args.save_path + "/spectrum_train.npy", spectrum_sample_train)
-        np.save(args.save_path + "/spectrum_train_exact.npy", spectrum_sample_train_exact)
-        with open(args.save_path + "/metric_sample_eval.txt", "wb") as f:
-            cp.dump(metric_dict_sample_val, f)
-        np.save(args.save_path + "/spectrum_eval.npy", spectrum_sample_val)
-        np.save(args.save_path + "/spectrum_eval_exact.npy", spectrum_sample_val_exact)
-        # print metric_dict_sample_train, metric_dict_sample_val
-        # print spectrum_sample_train, spectrum_sample_val
+            if use_cuda:
+                metric_dict_sample_train, spectrum_sample_train, spectrum_sample_train_exact = \
+                    get_sample_kernel_metrics(X_train.cuda(), kernel, kernel_approx, quantizer, args.l2_reg)
+                metric_dict_sample_val, spectrum_sample_val, spectrum_sample_val_exact = \
+                    get_sample_kernel_metrics(X_val.cuda(), kernel, kernel_approx, quantizer, args.l2_reg)  
+            else:
+                metric_dict_sample_train, spectrum_sample_train, spectrum_sample_train_exact = \
+                    get_sample_kernel_metrics(X_train, kernel, kernel_approx, quantizer, args.l2_reg)
+                metric_dict_sample_val, spectrum_sample_val, spectrum_sample_val_exact = \
+                    get_sample_kernel_metrics(X_val, kernel, kernel_approx, quantizer, args.l2_reg) 
+            if not os.path.isdir(args.save_path):
+                os.makedirs(args.save_path)
+            with open(args.save_path + "/metric_sample_train.txt", "wb") as f:
+                cp.dump(metric_dict_sample_train, f)
+            np.save(args.save_path + "/spectrum_train.npy", spectrum_sample_train)
+            np.save(args.save_path + "/spectrum_train_exact.npy", spectrum_sample_train_exact)
+            with open(args.save_path + "/metric_sample_eval.txt", "wb") as f:
+                cp.dump(metric_dict_sample_val, f)
+            np.save(args.save_path + "/spectrum_eval.npy", spectrum_sample_val)
+            np.save(args.save_path + "/spectrum_eval_exact.npy", spectrum_sample_val_exact)
+            # print metric_dict_sample_train, metric_dict_sample_val
+            # print spectrum_sample_train, spectrum_sample_val
         print("Sample metric collection done!")
         #if not (args.fixed_design or args.closed_form_sol):
             # for closed form solution, we need to carry out closed form training

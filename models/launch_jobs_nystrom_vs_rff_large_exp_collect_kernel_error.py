@@ -3,12 +3,7 @@ import math
 from copy import deepcopy
 
 # example
-#python launch_jobs_nystrom_vs_rff.py census nystrom_vs_rff dawn with_metric cuda -1 run &
-#python launch_jobs_nystrom_vs_rff.py covtype nystrom_vs_rff_covtype_no_metric dawn without_metric cuda -1 run &
-#for search lamda star for covtype in closeness experiments: python launch_jobs_nystrom_vs_rff.py covtype closeness/classification_real_setting starcluster without_metric cuda 20000 dryrun no_early_stop &
-# for sweeping n feat with lambda star for covtype in closeness experiments: python launch_jobs_nystrom_vs_rff.py covtype closeness/classification_real_setting dawn with_metric cuda 20000 dryrun no_early_stop &
-# tuning sweep for lr : python launch_jobs_nystrom_vs_rff_large_exp.py census nystrom_vs_rff_large_exp/lr_tuning_run starcluster without_metric cuda -1 dryrun early_stop &
-# full run for nystrom vs rff: python launch_jobs_nystrom_vs_rff_large_exp.py census nystrom_vs_rff_large_exp/full_tuning_run starcluster without_metric cuda -1 dryrun early_stop &
+# for collecting kernel approximation error for large runs: python launch_jobs_nystrom_vs_rff_large_exp.py census nystrom_vs_rff_large_exp/full_tuning_run_kernel_approx_error starcluster with_metric cuda -1 dryrun early_stop &
 
 #dataset = "census"
 #exp_name = "nystrom_vs_rff"
@@ -28,13 +23,13 @@ if cluster == "starcluster":
     template = "python /dfs/scratch0/zjian/lp_kernel_code/lp_kernel/models/run_model.py --model=unk --minibatch=250 --l2_reg=unk \
         --kernel_sigma=unk --n_fp_rff=unk --random_seed=unk --learning_rate=unk \
         --data_path=unk --opt=unk --epoch=unk \
-        --save_path=unk --approx_type=unk --do_fp_feat"
+        --save_path=unk --approx_type=unk --do_fp_feat --exit_after_collect_metric --only_collect_kernel_approx_error"
 
 else:
     template = "python /lfs/1/zjian/lp_kernel/lp_kernel/models/run_model.py --model=unk --minibatch=250 --l2_reg=unk \
         --kernel_sigma=unk --n_fp_rff=unk --random_seed=unk --learning_rate=unk \
         --data_path=unk --opt=unk --epoch=unk \
-        --save_path=unk --approx_type=unk --do_fp_feat"
+        --save_path=unk --approx_type=unk --do_fp_feat --exit_after_collect_metric --only_collect_kernel_approx_error"
 
 
 if dataset == "census":
