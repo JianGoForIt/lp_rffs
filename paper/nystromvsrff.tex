@@ -1,11 +1,12 @@
 \begin{itemize}
 	\item In this section, we will present a number of experiments comparing the performance of \Nystrom and RFF.  We show that under a fixed memory budget, RFF outperforms \NystromNS, and this is in spite of the fact that \Nystrom often attains lower kernel approximation error (Frobenius/spectral).
-	\item we will explain this using fixed design theory, and the $\Delta$ parameter from \citep{avron17}.
+	\item we will explain this using fixed design theory, and the $\Delta$ parameter from \citep{avron17}. 
+	\item We use Census (regression) and subsampled CovType (classification) for the expository experiments here; on these two small datasets, we are able to get the full spectrum and calculate the $\Delta$ related quantities.
 \end{itemize}
 
 \subsection{\Nystrom vs. RFF: Empirical comparison}
 \begin{itemize}
-	\item Across various classification/regression datasets (TIMIT, yearpred, CovType, Census, Adult), we compare \Nystrom vs. RFF, for a wide range of numbers of features.
+	\item Across various classification/regression datasets (TIMIT, yearpred, CovType, Census), we compare \Nystrom vs. RFF, for a wide range of numbers of features.
 	\item We compare these two methods in various ways: 1) For a fixed \# of features, 2) For a fixed amount of memory, 3) for a fixed kernel approximation error (x-axis = spectral/Frobenius norm).  For the y-axis in these plots, we consider kernel approximation error, and downstream performance.
 	\item We observe that RFF outperforms \Nystrom for a fixed memory budget, and for a fixed kernel approximation error.
 \end{itemize}
