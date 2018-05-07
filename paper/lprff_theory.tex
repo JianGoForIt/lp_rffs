@@ -119,7 +119,7 @@ approximation to the kernel matrix.
   \Delta_0 + \delta^2_b / \lambda$,
   \begin{equation*}
     P((1 - \Delta)(K + \lambda I_n) \preceq (Z + C) (Z + C)^\top + \lambda I_n \preceq (1 + \Delta)(K + \lambda I_n)) \geq 1 - 16 \tr((K +
-    \lambda I_n)^{-1} (K + \delta^2_b I_n)) \exp \left( -\frac{3m \Delta^2}{16n/\lambda} \right).
+    \lambda I_n)^{-1} (K + \delta^2_b I_n)) \exp \left( -\frac{3m \Delta_0^2}{16n/\lambda} \right).
   \end{equation*}
   Thus if we use $m \geq \frac{16}{3 \Delta^2} n/\lambda \log (16 \tr((K + \lambda I_n)^{-1} (K +
   \delta^2_b I_n)) / \rho)$
@@ -153,15 +153,15 @@ approximation to the kernel matrix.
   \norm{B}^2$, and the triangle inequality yields
   \begin{align*}
     \norm{B((Z + C)(Z + C)^\top - K)B}
-    &\leq \norm{B((Z + C)(Z + C)^\top - (K + D))B} + \norm{B (K + D - D)B} \\
+    &\leq \norm{B((Z + C)(Z + C)^\top - (K + D))B} + \norm{B (K + D - K)B} \\
     &\leq \Delta_0 + \delta^2_b \norm{B}^2 \\
     &\leq \Delta_0 + \delta^2_b/\lambda \\
     &= \Delta.
   \end{align*}
   Thus it suffices to show that
   \begin{equation*}
-    P(\norm{B((Z + C)(Z + C)^\top - (K + D))B} \geq \Delta) \leq 8 \tr((K + \lambda I_n)^{-1} (K +
-    \delta^2_b I)) \exp \left( -\frac{3m \Delta^2}{16n/\lambda} \right).
+    P(\norm{B((Z + C)(Z + C)^\top - (K + D))B} \geq \Delta_0) \leq 8 \tr((K + \lambda I_n)^{-1} (K +
+    \delta^2_b I)) \exp \left( -\frac{3m \Delta_0^2}{16n/\lambda} \right).
   \end{equation*}
 
   We have $L \defeq 2n \norm{B}^2 \leq 2n/\lambda$.
@@ -177,20 +177,20 @@ approximation to the kernel matrix.
   We also assume that $\delta^2_b \leq \lambda$, so $\norm{M} \leq 1$.
   Moreover, $\tr(M) = \tr((K + \lambda I_n)^{-1/2} (K + \delta^2_b I) (K + \lambda I_n)^{-1/2}) =
   \tr((K + \lambda I_n)^{-1} (K + \delta^2_b I_n))$.
-  The condition of $\Delta \geq \sqrt{L \norm{M} / m} + 2L/3m$ becomes $\Delta \geq \sqrt{\frac{2n/\lambda}{m}} + \frac{2n/\lambda}{3m}$.
+  The condition of $\Delta_0 \geq \sqrt{L \norm{M} / m} + 2L/3m$ becomes $\Delta_0 \geq \sqrt{\frac{2n/\lambda}{m}} + \frac{2n/\lambda}{3m}$.
   The bound of Proposition~\ref{prop:quantized_concentration} becomes:
   \begin{align*}
     &P(\norm{(K + \lambda I_n)^{-1/2} ((Z + C) (Z + C)^\top - (K + D)) (K + \lambda
-      I_n)^{-1/2}} \geq \Delta) \\
+      I_n)^{-1/2}} \geq \Delta_0) \\
     \leq&\ \frac{8 \tr((K + \lambda I_n)^{-1} (K + \delta^2_b I_n))}{1/2} \exp \left( -\frac{m
-      \Delta^2}{4\frac{n}{\lambda} (1 + 2\Delta/3)} \right) \\
-    \leq&\ 16 \tr((K + \lambda I_n)^{-1} (K + \delta^2_b I_n)) \exp \left( -\frac{3m\Delta^2}{16n/\lambda} \right)
+      \Delta_0^2}{4\frac{n}{\lambda} (1 + 2\Delta_0/3)} \right) \\
+    \leq&\ 16 \tr((K + \lambda I_n)^{-1} (K + \delta^2_b I_n)) \exp \left( -\frac{3m\Delta_0^2}{16n/\lambda} \right)
   \end{align*}
-  where we get the last inequality from the assumption that $\Delta \leq 1/2$.
+  where we get the last inequality from the assumption that $\Delta_0 \leq 1/2$.
 
   Letting this probability be $\rho$ and solving for $m$ yields
   \begin{equation*}
-    m \geq \frac{16}{3 \Delta^2} n/\lambda \log (16 \tr((K + \lambda I_n)^{-1} (K + \delta^2_b I_n)) / \rho).
+    m \geq \frac{16}{3 \Delta_0^2} n/\lambda \log (16 \tr((K + \lambda I_n)^{-1} (K + \delta^2_b I_n)) / \rho).
   \end{equation*}
 
 \end{proof}
