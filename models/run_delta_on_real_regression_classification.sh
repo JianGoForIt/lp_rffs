@@ -1,2 +1,2 @@
-python launch_jobs_nystrom_vs_rff_closed_form_sol_delta.py census delta/regression_real_setting dawn with_metric cpu run
-python launch_jobs_nystrom_vs_rff_delta.py covtype delta/classification_real_setting dawn with_metric cpu 20000 run no_early_stop 
+python launch_jobs_nystrom_vs_rff_closed_form_sol_delta.py census symmetric_delta/regression_real_setting dawn with_metric cpu dryrun
+python launch_jobs_nystrom_vs_rff_delta.py covtype symmetric_delta/classification_real_setting dawn with_metric cpu 20000 dryrun no_early_stop 
