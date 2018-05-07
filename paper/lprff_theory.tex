@@ -57,7 +57,7 @@ following proposition holds for any $B$.
   Let $L \defeq 2n \norm{B}^2$ and $M \defeq B(K + \delta^2_b I_n) B^\top$,
   then for any $t \geq \sqrt{\norm{M} / m} + 2L/3m$,
   \begin{equation*}
-    P(\norm{B(Z + C)(Z + C)^\top B - B(K + D)B} \geq t) \leq \frac{4\tr(M)}{\norm{M}}
+    P(\norm{B(Z + C)(Z + C)^\top B - B(K + D)B} \geq t) \leq \frac{8\tr(M)}{\norm{M}}
     \exp \left( \frac{-mt^2}{2L(\norm{M} + 2t/3)} \right).
   \end{equation*}
   \label{prop:quantized_concentration}
@@ -101,11 +101,10 @@ Concentration is exponential in the number of features $m$, as expected.
     = LM/m.
   \end{equation*}
 
-  Applying the matrix Bernstein inequality (symmetric case with intrinsic
-  dimension) (Theorem 7.7.1 in \cite{tropp2015introduction}),
-  for $t \geq \sqrt{L \norm{M}/m} + 2L/3m$,
+  Applying the matrix Bernstein inequality (with intrinsic dimension) (Theorem
+  7.3.1 in \cite{tropp2015introduction}), for $t \geq \sqrt{L \norm{M}/m} + 2L/3m$,
   \begin{equation*}
-    P(\norm{B(Z + C)(Z + C)^\top B - B(K + D)B} \geq t) \leq \frac{4\tr(M)}{\norm{M}}
+    P(\norm{B(Z + C)(Z + C)^\top B - B(K + D)B} \geq t) \leq \frac{8\tr(M)}{\norm{M}}
     \exp \left( \frac{-t^2/2}{L \norm{M}/m + 2Lt/3m} \right).
   \end{equation*}
 \end{proof}
@@ -116,13 +115,13 @@ approximation to the kernel matrix.
 \begin{theorem}
 
   Suppose that $\norm{K} \geq \lambda$ and $\delta^2_b \leq \lambda$.
-  Then for any $1/2 \geq \Delta_0 \geq \sqrt{\frac{2n}{\lambda m}} + \frac{4n/\lambda}{3m}$, with $\Delta =
+  Then for any $1/2 \geq \Delta_0 \geq \sqrt{\frac{2n/\lambda}{m}} + \frac{4n/\lambda}{3m}$, with $\Delta =
   \Delta_0 + \delta^2_b / \lambda$,
   \begin{equation*}
-    P((1 - \Delta)(K + \lambda I_n) \preceq (Z + C) (Z + C)^\top + \lambda I_n \preceq (1 + \Delta)(K + \lambda I_n)) \geq 1 - 8 \tr((K +
+    P((1 - \Delta)(K + \lambda I_n) \preceq (Z + C) (Z + C)^\top + \lambda I_n \preceq (1 + \Delta)(K + \lambda I_n)) \geq 1 - 16 \tr((K +
     \lambda I_n)^{-1} (K + \delta^2_b I_n)) \exp \left( -\frac{3m \Delta^2}{16n/\lambda} \right).
   \end{equation*}
-  Thus if we use $m \geq \frac{16}{3 \Delta^2} n/\lambda \log (8 \tr((K + \lambda I_n)^{-1} (K +
+  Thus if we use $m \geq \frac{16}{3 \Delta^2} n/\lambda \log (16 \tr((K + \lambda I_n)^{-1} (K +
   \delta^2_b I_n)) / \rho)$
   features, then $(Z + C) (Z + C)^\top + \lambda I_n$ is a $\Delta$-spectral approximation of $K + \lambda I_n$,
   with probability at least $1 - \rho$.
@@ -177,20 +176,20 @@ approximation to the kernel matrix.
   We also assume that $\delta^2_b \leq \lambda$, so $\norm{M} \leq 1$.
   Moreover, $\tr(M) = \tr((K + \lambda I_n)^{-1/2} (K + \delta^2_b I) (K + \lambda I_n)^{-1/2}) =
   \tr((K + \lambda I_n)^{-1} (K + \delta^2_b I_n))$.
-  The condition of $\Delta \geq \sqrt{L \norm{M} / m} + 2L/3m$ becomes $\Delta \geq \sqrt{\frac{2n}{\lambda m}} + \frac{2n/\lambda}{3m}$.
+  The condition of $\Delta \geq \sqrt{L \norm{M} / m} + 2L/3m$ becomes $\Delta \geq \sqrt{\frac{2n/\lambda}{m}} + \frac{2n/\lambda}{3m}$.
   The bound of Proposition~\ref{prop:quantized_concentration} becomes:
   \begin{align*}
     &P(\norm{(K + \lambda I_n)^{-1/2} ((Z + C) (Z + C)^\top - (K + D)) (K + \lambda
       I_n)^{-1/2}} \geq \Delta) \\
-    \leq&\ \frac{4 \tr((K + \lambda I_n)^{-1} (K + \delta^2_b I_n))}{1/2} \exp \left( -\frac{m
+    \leq&\ \frac{8 \tr((K + \lambda I_n)^{-1} (K + \delta^2_b I_n))}{1/2} \exp \left( -\frac{m
       \Delta^2}{4\frac{n}{\lambda} (1 + 2\Delta/3)} \right) \\
-    \leq&\ 8 \tr((K + \lambda I_n)^{-1} (K + \delta^2_b I_n)) \exp \left( -\frac{3m\Delta^2}{16n/\lambda} \right)
+    \leq&\ 16 \tr((K + \lambda I_n)^{-1} (K + \delta^2_b I_n)) \exp \left( -\frac{3m\Delta^2}{16n/\lambda} \right)
   \end{align*}
   where we get the last inequality from the assumption that $\Delta \leq 1/2$.
 
   Letting this probability be $\rho$ and solving for $m$ yields
   \begin{equation*}
-    m \geq \frac{16}{3 \Delta^2} n/\lambda \log (8 \tr((K + \lambda I_n)^{-1} (K + \delta^2_b I_n)) / \rho).
+    m \geq \frac{16}{3 \Delta^2} n/\lambda \log (16 \tr((K + \lambda I_n)^{-1} (K + \delta^2_b I_n)) / \rho).
   \end{equation*}
 
 \end{proof}
@@ -207,19 +206,18 @@ As a sanity check, if we let the number of bits $b$ goes to $\infty$, we recover
 result of \citet{avron17}.
 \begin{corollary}
   Suppose that $\norm{K} \geq \lambda$.
-  Then for any $1/2 \geq \Delta \geq \sqrt{\frac{2n}{\lambda m}} + \frac{4n/\lambda}{3m}$,
+  Then for any $1/2 \geq \Delta \geq \sqrt{\frac{2n/\lambda}{m}} + \frac{4n/\lambda}{3m}$,
   \begin{equation*}
-    P((1 - \Delta)(K + \lambda I_n) \preceq Z Z^\top + \lambda I_n \preceq (1 + \Delta)(K + \lambda I_n)) \geq 1 - 8 \tr((K +
+    P((1 - \Delta)(K + \lambda I_n) \preceq Z Z^\top + \lambda I_n \preceq (1 + \Delta)(K + \lambda I_n)) \geq 1 - 16 \tr((K +
     \lambda I_n)^{-1} K) \exp \left( -\frac{3m \Delta^2}{16n/\lambda} \right).
   \end{equation*}
-  Thus if we use $m \geq \frac{16}{3 \Delta^2} n/\lambda \log (8 \tr((K + \lambda I_n)^{-1} K) / \rho)$
+  Thus if we use $m \geq \frac{16}{3 \Delta^2} n/\lambda \log (16 \tr((K + \lambda I_n)^{-1} K) / \rho)$
   features, then $Z Z^\top + \lambda I_n$ is a $\Delta$-spectral approximation of $K + \lambda I_n$,
   with probability at least $1 - \rho$.
 \end{corollary}
 The constants are slightly different from that of \citet{avron17} as we use the
 real features $\sqrt{2} \cos(w^T x + b)$ instead of the complex features $\exp(i
-w^T x)$, and we applied the symmetric version of matrix Bernstein inequality
-instead of the non-symmetric version.
+w^T x)$.
 
 The number of features depend linearly on $n/ \lambda$.
 \citet{avron17} provided a lower bound, showing that the number of random Fourier features
