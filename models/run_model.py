@@ -226,21 +226,21 @@ if __name__ == "__main__":
                 cp.dump(kernel_approx_error_dict_val, f, protocol=2)
         else:
             if use_cuda:
-                metric_dict_sample_train, spectrum_sample_train, spectrum_sample_train_exact = \
-                    get_sample_kernel_metrics(X_train.cuda(), kernel, kernel_approx, quantizer, args.l2_reg)
+                # metric_dict_sample_train, spectrum_sample_train, spectrum_sample_train_exact = \
+                #     get_sample_kernel_metrics(X_train.cuda(), kernel, kernel_approx, quantizer, args.l2_reg)
                 metric_dict_sample_val, spectrum_sample_val, spectrum_sample_val_exact = \
                     get_sample_kernel_metrics(X_val.cuda(), kernel, kernel_approx, quantizer, args.l2_reg)  
             else:
-                metric_dict_sample_train, spectrum_sample_train, spectrum_sample_train_exact = \
-                    get_sample_kernel_metrics(X_train, kernel, kernel_approx, quantizer, args.l2_reg)
+                # metric_dict_sample_train, spectrum_sample_train, spectrum_sample_train_exact = \
+                #     get_sample_kernel_metrics(X_train, kernel, kernel_approx, quantizer, args.l2_reg)
                 metric_dict_sample_val, spectrum_sample_val, spectrum_sample_val_exact = \
                     get_sample_kernel_metrics(X_val, kernel, kernel_approx, quantizer, args.l2_reg) 
             if not os.path.isdir(args.save_path):
                 os.makedirs(args.save_path)
-            with open(args.save_path + "/metric_sample_train.txt", "wb") as f:
-                cp.dump(metric_dict_sample_train, f)
-            np.save(args.save_path + "/spectrum_train.npy", spectrum_sample_train)
-            np.save(args.save_path + "/spectrum_train_exact.npy", spectrum_sample_train_exact)
+            # with open(args.save_path + "/metric_sample_train.txt", "wb") as f:
+            #     cp.dump(metric_dict_sample_train, f)
+            # np.save(args.save_path + "/spectrum_train.npy", spectrum_sample_train)
+            # np.save(args.save_path + "/spectrum_train_exact.npy", spectrum_sample_train_exact)
             with open(args.save_path + "/metric_sample_eval.txt", "wb") as f:
                 cp.dump(metric_dict_sample_val, f)
             np.save(args.save_path + "/spectrum_eval.npy", spectrum_sample_val)
