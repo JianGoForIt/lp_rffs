@@ -91,9 +91,9 @@ def get_rff_memory(n, m, r):
     memory consumption for Nystrom
     n * n + n * r + m * n
     memory consumption for RFF
-    n * r + m * n
+    n * r + m * n + n
     '''
-    return n * r + m * n
+    return n * r + m * n + n
 
 def median_results_array(results_array):
     # average list of 1d np array results
