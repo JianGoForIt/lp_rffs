@@ -56,9 +56,9 @@ for seed in seed_list:
 	for l2_reg in l2_reg_list:
 		for n_fp_rff in n_fp_rff_list:
 			for approx_type in ["cir_rff", "rff"]:
-				if approx_type == "cir_rff" and n_fp_rff > 200000:
+				if approx_type == "cir_rff" and n_fp_rff > 50000:
 					continue
-				if approx_type == "rff" and (nbit != "64" or n_fp_rff > 200000):
+				if approx_type == "rff" and (nbit != "64" or n_fp_rff > 50000):
 					continue
 				save_suffix = "_type_" + approx_type + "_l2_reg_" + str(l2_reg) + "_n_feat_" + str(n_fp_rff) + "_n_bit_" + str(nbit) + "_seed_" + str(seed)
 				command = deepcopy(template)
