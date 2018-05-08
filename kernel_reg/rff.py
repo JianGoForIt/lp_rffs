@@ -154,7 +154,7 @@ class RFF(object):
     rff_x1 = self.get_cos_feat(X1)
     rff_x2 = self.get_cos_feat(X2)
 
-    if consistent_quant_seed:
+    if consistent_quant_seed and (quantizer1 is not None) and (quantizer2 is not None):
       assert quantizer1.rand_seed == quantizer2.rand_seed, "quantizer random seed are different under consistent quant seed mode!"
     if quantizer1 != None:
       if consistent_quant_seed:
