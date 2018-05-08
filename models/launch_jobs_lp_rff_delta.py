@@ -3,8 +3,8 @@ import math
 from copy import deepcopy
 
 # example
-# for fp runs: python launch_jobs_nystrom_vs_rff_closed_form_sol_delta.py census delta/regression_real_settting dawn with_metric cpu dryrun 64 closed_form &
-# for fp runs: python launch_jobs_nystrom_vs_rff_closed_form_sol_delta.py census delta/regression_real_settting dawn with_metric cpu dryrun 8 closed_form &
+# for fp runs closed form real setting: python launch_jobs_lp_rff_delta.py census lp_rff/regression_real_setting dawn with_metric cpu dryrun 64 real closed_form_sol &
+# for lp runs closed form real setting: python launch_jobs_lp_rff_delta.py census lp_rff/regression_real_setting dawn with_metric cpu dryrun 8 real closed_form_sol &
 
 #dataset = "census"
 #exp_name = "nystrom_vs_rff"
@@ -60,7 +60,7 @@ for seed in seed_list:
 					continue
 				if approx_type == "rff" and (nbit != "64" or n_fp_rff > 200000):
 					continue
-				save_suffix = "_type_" + approx_type + "_l2_reg_" + str(l2_reg) + "_n_fp_feat_" + str(n_fp_rff) + "_seed_" + str(seed)
+				save_suffix = "_type_" + approx_type + "_l2_reg_" + str(l2_reg) + "_n_feat_" + str(n_fp_rff) + "_n_bit_" + str(nbit) + "_seed_" + str(seed)
 				command = deepcopy(template)
 				command = command.replace("--l2_reg=unk", "--l2_reg="+str(l2_reg) )
 				command = command.replace("--kernel_sigma=unk", "--kernel_sigma="+str(kernel_sigma) )

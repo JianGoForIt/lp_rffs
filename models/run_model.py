@@ -16,6 +16,7 @@ sys.path.append("../kernel_reg")
 sys.path.append("../utils")
 sys.path.append("../..")
 from rff import RFF, GaussianKernel
+from circulant_rff import  CirculantRFF
 from nystrom import Nystrom
 from kernel_regressor import Quantizer, KernelRidgeRegression
 from data_loader import load_data
@@ -162,7 +163,7 @@ if __name__ == "__main__":
             rand_seed=args.random_seed, use_cuda=use_cuda)
         print("feature quantization scale, bit ", quantizer.scale, quantizer.nbit)
     elif args.approx_type == "cir_rff" and args.do_fp_feat == True:
-        print("fp rff feature mode")
+        print("fp circulant rff feature mode")
         kernel_approx = CirculantRFF(args.n_fp_rff, n_input_feat, kernel, rand_seed=args.random_seed)
         quantizer = None
     else:
@@ -274,11 +275,12 @@ if __name__ == "__main__":
     if args.fixed_design or args.closed_form_sol:
         # for fixed design experiments and closed form solution form real setting
         if use_cuda:
-            X_train = X_train.cuda()
-            X_val = X_val.cuda()
-            Y_train = Y_train.cuda()
-            Y_val = Y_val.cuda()
-        print("fixed design using kernel type", type(kernel_approx) )
+            raise Exception("closed from solution does not support cuda mode")
+            #X_train = X_train.cuda()
+            #X_val = X_val.cuda()
+            #Y_train = Y_train.cuda()
+            #Y_val = Y_val.cuda()
+        print("closed form using kernel type", type(kernel_approx) )
         regressor = KernelRidgeRegression(kernel_approx, reg_lambda=args.l2_reg)
         print("start to do regression!")
         # print("test quantizer", quantizer)
