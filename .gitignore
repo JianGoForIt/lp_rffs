@@ -4,18 +4,15 @@
 !*/
 # And all the file types you're interested in.
 !*.tex
-!*.pdf
 !*.jpg
 !*.sty
 !*.bib
-!*.bbl
 !*.bst
 !.gitignore
 !*.docx
 !*.txt
 !*.xlsx
 !*.mat
-!*.pdf
 !*.eps
 !*.m
 !*.pptx

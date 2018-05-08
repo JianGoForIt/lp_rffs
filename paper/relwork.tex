@@ -5,4 +5,5 @@
 	\item Discuss fastfood/circulant RFF, and other attempts at reducing memory footprint of projection matrix.  Note that this doesn't address the memory of the features themselves, which can take a ton of space for moderate size mini-batches. Furthermore, our method can be combined with these methods in order to reduce the memory footprint even further (in fact, that is what we do!).
 	\item Discuss other attempts at improving RFF (orthogonal RFF, Spherical Structured Feature Maps, Gaussian quadrature, quasi-monte carlo, etc.), and why we are different.  Discuss that while these methods often improve the kernel approximation error for a fixed number of features, they do not increase the rank for a fixed amount of memory.
 	\item Perhaps discuss methods of improving Nystrom?  Sampling distributions, etc.
+	\item \avner{Address the block coordinate descent paper, which doesn't compute SVD of landmark kernel matrix.}
 \end{itemize}
