@@ -16,6 +16,7 @@ sys.path.append("../kernel_reg")
 sys.path.append("../utils")
 sys.path.append("../..")
 from rff import RFF, GaussianKernel
+from circulant_rff import  CirculantRFF
 from nystrom import Nystrom
 from kernel_regressor import Quantizer, KernelRidgeRegression
 from data_loader import load_data
@@ -43,7 +44,6 @@ parser.add_argument("--random_seed", type=int, default=1)
 parser.add_argument("--n_bit_feat", type=int, default=32)
 parser.add_argument("--n_bit_model", type=int, default=32)
 parser.add_argument("--scale_model", type=float, default=0.00001)
-parser.add_argument("--do_fp_model", action="store_true")
 parser.add_argument("--do_fp_feat", action="store_true")
 parser.add_argument("--learning_rate", type=float, default=0.1)
 parser.add_argument("--data_path", type=str, default="../data/census/")
@@ -137,7 +137,9 @@ if __name__ == "__main__":
     elif args.approx_type == "rff" and args.do_fp_feat == False:
         print("lp rff feature mode")
         assert args.n_bit_feat >= 1
-        n_quantized_rff = int(np.floor(args.n_fp_rff / float(args.n_bit_feat) * 32.0) )
+        # n_quantized_rff = int(np.floor(args.n_fp_rff / float(args.n_bit_feat) * 32.0) )
+        # To simplified the interface, we take args.n_fp_rff as the number of low precision features directly
+        n_quantized_rff = args.n_fp_rff
         kernel_approx = RFF(n_quantized_rff, n_input_feat, kernel, rand_seed=args.random_seed)
         min_val = -np.sqrt(2.0/float(n_quantized_rff) )
         max_val = np.sqrt(2.0/float(n_quantized_rff) )
@@ -147,6 +149,22 @@ if __name__ == "__main__":
     elif args.approx_type == "rff" and args.do_fp_feat == True:
         print("fp rff feature mode")
         kernel_approx = RFF(args.n_fp_rff, n_input_feat, kernel, rand_seed=args.random_seed)
+        quantizer = None
+    elif args.approx_type == "cir_rff" and args.do_fp_feat == False:
+        print("lp circulant rff feature mode")
+        assert args.n_bit_feat >= 1
+        # n_quantized_rff = int(np.floor(args.n_fp_rff / float(args.n_bit_feat) * 32.0) )
+        # To simplified the interface, we take args.n_fp_rff as the number of low precision features directly
+        n_quantized_rff = args.n_fp_rff
+        kernel_approx = CirculantRFF(n_quantized_rff, n_input_feat, kernel, rand_seed=args.random_seed)
+        min_val = -np.sqrt(2.0/float(n_quantized_rff) )
+        max_val = np.sqrt(2.0/float(n_quantized_rff) )
+        quantizer = Quantizer(args.n_bit_feat, min_val, max_val, 
+            rand_seed=args.random_seed, use_cuda=use_cuda)
+        print("feature quantization scale, bit ", quantizer.scale, quantizer.nbit)
+    elif args.approx_type == "cir_rff" and args.do_fp_feat == True:
+        print("fp circulant rff feature mode")
+        kernel_approx = CirculantRFF(args.n_fp_rff, n_input_feat, kernel, rand_seed=args.random_seed)
         quantizer = None
     else:
         raise Exception("kernel approximation type not specified!")
@@ -257,11 +275,12 @@ if __name__ == "__main__":
     if args.fixed_design or args.closed_form_sol:
         # for fixed design experiments and closed form solution form real setting
         if use_cuda:
-            X_train = X_train.cuda()
-            X_val = X_val.cuda()
-            Y_train = Y_train.cuda()
-            Y_val = Y_val.cuda()
-        print("fixed design using kernel type", type(kernel_approx) )
+            raise Exception("closed from solution does not support cuda mode")
+            #X_train = X_train.cuda()
+            #X_val = X_val.cuda()
+            #Y_train = Y_train.cuda()
+            #Y_val = Y_val.cuda()
+        print("closed form using kernel type", type(kernel_approx) )
         regressor = KernelRidgeRegression(kernel_approx, reg_lambda=args.l2_reg)
         print("start to do regression!")
         # print("test quantizer", quantizer)

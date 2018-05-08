@@ -1,5 +1,8 @@
 import numpy as np
 import torch
+import sys
+sys.path.append("../utils")
+from misc_utils import set_random_seed
 
 class GaussianKernelSpec(object):
   def __init__(self, sigma):
@@ -139,9 +142,10 @@ class RFF(object):
   def get_sin_cos_feat(self, input_val):
     pass
 
-  def get_kernel_matrix(self, X1, X2, quantizer1=None, quantizer2=None):
+  def get_kernel_matrix(self, X1, X2, quantizer1=None, quantizer2=None, consistent_quant_seed=True):
     '''
-    X1 shape is [n_sample, n_dim]
+    X1 shape is [n_sample, n_dim], if force_consistent_random_seed is True
+    the quantization will use the same random seed for quantizing rff_x1 and rff_x2
     '''
     #is_cuda_tensor = (not isinstance(X1, np.ndarray) ) and X1.is_cuda
     #if use_cpu_comp and is_cuda_tensor:
@@ -149,14 +153,19 @@ class RFF(object):
     #    X2 = X2.cpu()
     rff_x1 = self.get_cos_feat(X1)
     rff_x2 = self.get_cos_feat(X2)
+
+    if consistent_quant_seed and (quantizer1 is not None) and (quantizer2 is not None):
+      assert quantizer1.rand_seed == quantizer2.rand_seed, "quantizer random seed are different under consistent quant seed mode!"
     if quantizer1 != None:
-      np.random.seed(quantizer1.rand_seed)
+      if consistent_quant_seed:
+        set_random_seed(quantizer1.rand_seed)
       # print("quantization 1 activated ", X1.shape)
       # print("quantizer 1 bits", quantizer1.nbit)
       # print("quantizer 1 scale", quantizer1.scale)
       rff_x1 = quantizer1.quantize(rff_x1)
     if quantizer2 != None:
-      np.random.seed(quantizer2.rand_seed)
+      if consistent_quant_seed:
+        set_random_seed(quantizer2.rand_seed)
       # print("quantization 2 activated ", X2.shape)
       # print("quantizer 2 bits", quantizer2.nbit)
       # print("quantizer 2 scale", quantizer2.scale)

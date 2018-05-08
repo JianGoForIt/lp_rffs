@@ -1,8 +1,17 @@
 import numpy as np
 from scipy.optimize import minimize
+import torch
 
 # for numerical protection
 EPS = 1e-20
+
+def set_random_seed(seed):
+    np.random.seed(seed)
+    use_cuda = torch.cuda.is_available()
+    torch.manual_seed(seed)
+    if use_cuda:
+        torch.cuda.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)
 
 def expected_loss(lam, U, S, Y, noise):
     m = float(Y.size)

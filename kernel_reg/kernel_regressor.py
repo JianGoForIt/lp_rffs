@@ -136,6 +136,10 @@ class KernelRidgeRegression(object):
     # self.alpha = torch.mm(torch.inverse(self.kernel_mat + self.reg_lambda * torch.eye(n_sample) ), 
     #   torch.DoubleTensor(Y_train) )
 
+  def torch(self, use_cuda):
+    if use_cuda:
+      self.alpha = self.alpha.cuda()
+
   def get_train_error(self):
     prediction = torch.mm(self.kernel_mat, self.alpha)
     error = prediction - torch.DoubleTensor(self.Y_train)
