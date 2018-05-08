@@ -5,6 +5,7 @@ from copy import deepcopy
 # example
 # for fp runs closed form real setting: python launch_jobs_lp_rff_delta.py census lp_rff/regression_real_setting dawn with_metric cpu dryrun 64 real closed_form_sol &
 # for lp runs closed form real setting: python launch_jobs_lp_rff_delta.py census lp_rff/regression_real_setting dawn with_metric cpu dryrun 8 real closed_form_sol &
+# for lp runs closed form real setting: python launch_jobs_lp_rff_delta.py census lp_rff/fixed_design starcluster with_metric cpu dryrun 8 fixed_design closed_form_sol &
 
 #dataset = "census"
 #exp_name = "nystrom_vs_rff"
@@ -78,6 +79,8 @@ for seed in seed_list:
 					command = command + " --closed_form_sol"
 				else:
 					command = command + " --opt=sgd"
+				if fixed_design == "fixed_design":
+					command += " --fixed_design --fixed_design_auto_l2_reg --fixed_design_noise_sigma=1e4 "
 				if do_metric == "with_metric":
 					command += " --collect_sample_metrics"
 				if do_cuda == "cuda":
