@@ -168,7 +168,7 @@ def test_random_quantizer():
   shift = 1/3.0
   value = np.ones( (1000, 1000) ) * (lower + shift)
   value = torch.DoubleTensor(value)
-  quant_val = quantizer.quantize(value, test=True)
+  quant_val = quantizer.quantize(value)
   quant_val = quant_val.cpu().numpy()
   assert np.unique(quant_val).size == 2
   assert np.min(np.unique(quant_val) ) == lower
@@ -181,7 +181,7 @@ def test_random_quantizer():
   shift = 2/3.0
   value = np.ones( (1000, 1000) ) * (lower + shift)
   value = torch.DoubleTensor(value)
-  quant_val = quantizer.quantize(value, test=True)
+  quant_val = quantizer.quantize(value)
   quant_val = quant_val.cpu().numpy()
   assert np.unique(quant_val).size == 2
   assert np.min(np.unique(quant_val) ) == lower
@@ -194,7 +194,7 @@ def test_random_quantizer():
   shift = 0.5
   value = np.ones( (1000, 1000) ) * (lower + shift)
   value = torch.DoubleTensor(value)
-  quant_val = quantizer.quantize(value, test=True)
+  quant_val = quantizer.quantize(value)
   quant_val = quant_val.cpu().numpy()
   assert np.unique(quant_val).size == 2
   assert np.min(np.unique(quant_val) ) == lower
@@ -214,7 +214,7 @@ def test_random_quantizer_fast_impl():
   # value = np.ones( (1000, 1000) ) * (lower + shift)
   value = np.random.uniform((1000, 1000)) * 2**14
   value = torch.DoubleTensor(value)
-  quant_val = quantizer.quantize(value, test=True)
+  quant_val = quantizer.quantize(value)
   quant_val_old = quantizer.quantize_old(value)
   quant_val = quant_val.cpu().numpy()
   quant_val_old = quant_val_old.cpu().numpy()
@@ -231,10 +231,10 @@ def test_auto_scale_random_quantizer():
   value[-1, :] = 1.0
   value = torch.DoubleTensor(value)
   np.random.seed(quantizer.rand_seed)
-  quant_val = quantizer.quantize(value, test=True)
+  quant_val = quantizer.quantize(value)
   quant_val = quant_val.cpu().numpy()
   np.random.seed(quantizer.rand_seed)
-  auto_quant_val = quantizer_auto.quantize(value, test=True)
+  auto_quant_val = quantizer_auto.quantize(value)
   auto_quant_val = auto_quant_val.cpu().numpy()
   np.testing.assert_array_almost_equal(auto_quant_val, quant_val, decimal=7)
 
@@ -245,7 +245,7 @@ def test_auto_scale_random_quantizer():
   value[-1, :] = 1.0
   value = torch.DoubleTensor(value)
   # np.random.seed(quantizer.rand_seed)
-  auto_quant_val = quantizer_auto.quantize(value, test=True)
+  auto_quant_val = quantizer_auto.quantize(value)
   auto_quant_val = auto_quant_val.cpu().numpy()
   np.testing.assert_array_almost_equal(np.max(auto_quant_val, axis=0), 
     np.percentile(value.cpu().numpy(), q=90, axis=0) )
@@ -331,9 +331,9 @@ def test_kernel_ridge_regression2():
 if __name__ == "__main__":
   test_random_quantizer_fast_impl()
   test_random_quantizer()
-  test_auto_scale_random_quantizer()
-  test_kernel_ridge_regression1()
-  test_kernel_ridge_regression2()
+  #test_auto_scale_random_quantizer()
+  #test_kernel_ridge_regression1()
+  #test_kernel_ridge_regression2()
 
 
 
