@@ -157,14 +157,18 @@ class RFF(object):
     if consistent_quant_seed and (quantizer1 is not None) and (quantizer2 is not None):
       assert quantizer1.rand_seed == quantizer2.rand_seed, "quantizer random seed are different under consistent quant seed mode!"
     if quantizer1 != None:
-      if consistent_quant_seed:
+      if consistent_quant_seed and list(rff_x1.size() ) == list(rff_x2.size() ):
+        print("quantizing rff_x1 with random seed", quantizer1.rand_seed)
         set_random_seed(quantizer1.rand_seed)
+      else:
+        print("quantizing rff_x1 without fixed random seed")
       # print("quantization 1 activated ", X1.shape)
       # print("quantizer 1 bits", quantizer1.nbit)
       # print("quantizer 1 scale", quantizer1.scale)
       rff_x1 = quantizer1.quantize(rff_x1)
     if quantizer2 != None:
       if consistent_quant_seed:
+        print("quantizing rff_x2 with random seed", quantizer2.rand_seed)
         set_random_seed(quantizer2.rand_seed)
       # print("quantization 2 activated ", X2.shape)
       # print("quantizer 2 bits", quantizer2.nbit)
