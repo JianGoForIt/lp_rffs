@@ -289,6 +289,7 @@ if __name__ == "__main__":
         train_error = regressor.get_train_error()
         pred = regressor.predict(X_val, quantizer_train=quantizer, quantizer_test=quantizer)
         test_error = regressor.get_test_error(Y_val)
+        print("test error ", test_error)
         if not os.path.isdir(args.save_path):
             os.makedirs(args.save_path)
         np.savetxt(args.save_path + "/train_loss.txt", np.array(train_error).reshape( (1, ) ) )
