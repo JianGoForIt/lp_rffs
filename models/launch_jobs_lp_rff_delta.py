@@ -4,7 +4,7 @@ from copy import deepcopy
 
 # example
 # for fp runs closed form real setting: python launch_jobs_lp_rff_delta.py census lp_rff/regression_real_setting dawn with_metric cpu dryrun 64 real closed_form_sol &
-# for lp runs closed form real setting: python launch_jobs_lp_rff_delta.py census lp_rff/regression_real_setting dawn with_metric cpu dryrun 8 real closed_form_sol &
+# for lp runs closed form real setting: python launch_jobs_lp_rff_delta.py census lp_rff/regression_real_setting_independent_quant_seed dawn with_metric cpu dryrun 8 real closed_form_sol -1 &
 # for lp runs closed form real setting: python launch_jobs_lp_rff_delta.py census lp_rff/fixed_design starcluster with_metric cpu dryrun 8 fixed_design closed_form_sol &
 # for covtype runs with lp rff setting: python launch_jobs_lp_rff_delta.py covtype lp_rff/real_classification dawn with_metric cuda dryrun 8 real iterative 20000 &
 
@@ -23,6 +23,7 @@ closed_form = sys.argv[9]
 n_subsample = sys.argv[10]
 
 # /dfs/scratch0/zjian/data/lp_kernel_data/census
+# for small covtype metric run
 #if cluster == "starcluster":
 #	template = "python /dfs/scratch0/zjian/lp_kernel_code/lp_kernel/models/run_model.py --model=unk \
 #		--l2_reg=unk  --kernel_sigma=unk --random_seed=unk \
@@ -31,14 +32,23 @@ n_subsample = sys.argv[10]
 #	template = "python /lfs/1/zjian/lp_kernel/lp_kernel/models/run_model.py --model=unk \
 #  		--l2_reg=unk  --kernel_sigma=unk --random_seed=unk \
 #  		--data_path=unk --save_path=unk --approx_type=unk --n_fp_rff=unk --exit_after_collect_metric"
+#if cluster == "starcluster":
+#        template = "python /dfs/scratch0/zjian/lp_kernel_code/lp_kernel/models/run_model.py --model=unk \
+#                --l2_reg=unk  --kernel_sigma=unk --random_seed=unk \
+#                --data_path=unk --save_path=unk --approx_type=unk --n_fp_rff=unk --fixed_epoch_number"
+#else:
+#        template = "python /lfs/1/zjian/lp_kernel/lp_kernel/models/run_model.py --model=unk \
+#                --l2_reg=unk  --kernel_sigma=unk --random_seed=unk \
+#                --data_path=unk --save_path=unk --approx_type=unk --n_fp_rff=unk --fixed_epoch_number"
+
 if cluster == "starcluster":
         template = "python /dfs/scratch0/zjian/lp_kernel_code/lp_kernel/models/run_model.py --model=unk \
                 --l2_reg=unk  --kernel_sigma=unk --random_seed=unk \
-                --data_path=unk --save_path=unk --approx_type=unk --n_fp_rff=unk --fixed_epoch_number"
+                --data_path=unk --save_path=unk --approx_type=unk --n_fp_rff=unk "
 else:
         template = "python /lfs/1/zjian/lp_kernel/lp_kernel/models/run_model.py --model=unk \
                 --l2_reg=unk  --kernel_sigma=unk --random_seed=unk \
-                --data_path=unk --save_path=unk --approx_type=unk --n_fp_rff=unk --fixed_epoch_number"
+                --data_path=unk --save_path=unk --approx_type=unk --n_fp_rff=unk "
 
 
 if dataset == "census":
@@ -92,7 +102,10 @@ for seed in seed_list:
 						continue
 					if approx_type == "rff" and (nbit != "64" or n_fp_rff > 50000):
 						continue
-					save_suffix = "_type_" + approx_type + "_l2_reg_" + str(l2_reg) + "_n_feat_" + str(n_fp_rff) + "_n_bit_" + str(nbit) + "_opt_sgd_lr_" + str(lr) + "_seed_" + str(seed)
+					if closed_form == "closed_form_sol":
+						save_suffix = "_type_" + approx_type + "_l2_reg_" + str(l2_reg) + "_n_feat_" + str(n_fp_rff) + "_n_bit_" + str(nbit) + "_seed_" + str(seed)
+					else:
+						save_suffix = "_type_" + approx_type + "_l2_reg_" + str(l2_reg) + "_n_feat_" + str(n_fp_rff) + "_n_bit_" + str(nbit) + "_opt_sgd_lr_" + str(lr) + "_seed_" + str(seed)
 					command = deepcopy(template)
 					command = command.replace("--model=unk", "--model="+model)
 					command = command.replace("--l2_reg=unk", "--l2_reg="+str(l2_reg) )
@@ -115,7 +128,7 @@ for seed in seed_list:
 					#	command = command + " --opt=sgd"
 					if fixed_design == "fixed_design":
 						command += " --fixed_design --fixed_design_auto_l2_reg --fixed_design_noise_sigma=1e4 "
-					else:
+					if closed_form == "iterative":	
 						command += " --opt=sgd --learning_rate=" + str(lr) + " --epoch=" + str(epoch) + " --minibatch=" + str(minibatch)
 					if do_metric == "with_metric":
 						command += " --collect_sample_metrics"
