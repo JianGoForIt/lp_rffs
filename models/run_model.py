@@ -140,6 +140,7 @@ if __name__ == "__main__":
         # n_quantized_rff = int(np.floor(args.n_fp_rff / float(args.n_bit_feat) * 32.0) )
         # To simplified the interface, we take args.n_fp_rff as the number of low precision features directly
         n_quantized_rff = args.n_fp_rff
+        print("# feature ", n_quantized_rff)
         kernel_approx = RFF(n_quantized_rff, n_input_feat, kernel, rand_seed=args.random_seed)
         min_val = -np.sqrt(2.0/float(n_quantized_rff) )
         max_val = np.sqrt(2.0/float(n_quantized_rff) )
@@ -156,6 +157,7 @@ if __name__ == "__main__":
         # n_quantized_rff = int(np.floor(args.n_fp_rff / float(args.n_bit_feat) * 32.0) )
         # To simplified the interface, we take args.n_fp_rff as the number of low precision features directly
         n_quantized_rff = args.n_fp_rff
+        print("# feature ", n_quantized_rff)
         kernel_approx = CirculantRFF(n_quantized_rff, n_input_feat, kernel, rand_seed=args.random_seed)
         min_val = -np.sqrt(2.0/float(n_quantized_rff) )
         max_val = np.sqrt(2.0/float(n_quantized_rff) )

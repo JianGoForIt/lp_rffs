@@ -19,7 +19,7 @@ def train(args, model, epoch, train_loader, optimizer, quantizer, kernel):
             # We need to add this function to models when we want to use SVRG
             def closure(data=X, target=Y):
                 # print "test 123", type(data), type(target)
-                if args.approx_type == "rff":
+                if args.approx_type == "rff" or args.approx_type == "cir_rff":
                     data = kernel.get_cos_feat(data)
                 elif args.approx_type == "nystrom":
                     data = kernel.get_feat(data)
@@ -43,7 +43,7 @@ def train(args, model, epoch, train_loader, optimizer, quantizer, kernel):
             loss = optimizer.step(closure)
             train_loss.append(loss[0].data.cpu().numpy() )
         else:
-            if args.approx_type == "rff":
+            if args.approx_type == "rff" or args.approx_type == "cir_rff":
                 X = kernel.get_cos_feat(X)
             elif args.approx_type == "nystrom":
                 X = kernel.get_feat(X)
@@ -73,7 +73,7 @@ def evaluate(args, model, epoch, val_loader, quantizer, kernel):
             if use_cuda:
                 X = X.cuda()
                 Y = Y.cuda()
-            if args.approx_type == "rff":
+            if args.approx_type == "rff" or args.approx_type == "cir_rff":
                 X = kernel.get_cos_feat(X)
             elif args.approx_type == "nystrom":
                 X = kernel.get_feat(X)
@@ -102,7 +102,7 @@ def evaluate(args, model, epoch, val_loader, quantizer, kernel):
             if use_cuda:
                 X = X.cuda()
                 Y = Y.cuda()
-            if args.approx_type == "rff":
+            if args.approx_type == "rff" or args.approx_type == "cir_rff":
                 X = kernel.get_cos_feat(X)
             elif args.approx_type == "nystrom":
                 X = kernel.get_feat(X)

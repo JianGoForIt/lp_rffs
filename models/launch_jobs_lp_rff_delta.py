@@ -6,7 +6,7 @@ from copy import deepcopy
 # for fp runs closed form real setting: python launch_jobs_lp_rff_delta.py census lp_rff/regression_real_setting dawn with_metric cpu dryrun 64 real closed_form_sol &
 # for lp runs closed form real setting: python launch_jobs_lp_rff_delta.py census lp_rff/regression_real_setting dawn with_metric cpu dryrun 8 real closed_form_sol &
 # for lp runs closed form real setting: python launch_jobs_lp_rff_delta.py census lp_rff/fixed_design starcluster with_metric cpu dryrun 8 fixed_design closed_form_sol &
-# for covtype runs with lp rff setting: python launch_jobs_lp_rff_delta.py covtype lp_rff/real_classification dawn with_metric cuda dryrun 8 real iterative &
+# for covtype runs with lp rff setting: python launch_jobs_lp_rff_delta.py covtype lp_rff/real_classification dawn with_metric cuda dryrun 8 real iterative 20000 &
 
 #dataset = "census"
 #exp_name = "nystrom_vs_rff"
@@ -20,17 +20,25 @@ run_option = sys.argv[6]
 nbit = sys.argv[7]
 fixed_design = sys.argv[8]
 closed_form = sys.argv[9]
+n_subsample = sys.argv[10]
 
 # /dfs/scratch0/zjian/data/lp_kernel_data/census
+#if cluster == "starcluster":
+#	template = "python /dfs/scratch0/zjian/lp_kernel_code/lp_kernel/models/run_model.py --model=unk \
+#		--l2_reg=unk  --kernel_sigma=unk --random_seed=unk \
+#		--data_path=unk --save_path=unk --approx_type=unk --n_fp_rff=unk --exit_after_collect_metric"
+#else:
+#	template = "python /lfs/1/zjian/lp_kernel/lp_kernel/models/run_model.py --model=unk \
+#  		--l2_reg=unk  --kernel_sigma=unk --random_seed=unk \
+#  		--data_path=unk --save_path=unk --approx_type=unk --n_fp_rff=unk --exit_after_collect_metric"
 if cluster == "starcluster":
-	template = "python /dfs/scratch0/zjian/lp_kernel_code/lp_kernel/models/run_model.py --model=unk \
-		--l2_reg=unk  --kernel_sigma=unk --random_seed=unk \
-		--data_path=unk --save_path=unk --approx_type=unk --n_fp_rff=unk"
+        template = "python /dfs/scratch0/zjian/lp_kernel_code/lp_kernel/models/run_model.py --model=unk \
+                --l2_reg=unk  --kernel_sigma=unk --random_seed=unk \
+                --data_path=unk --save_path=unk --approx_type=unk --n_fp_rff=unk --fixed_epoch_number"
 else:
-	template = "python /lfs/1/zjian/lp_kernel/lp_kernel/models/run_model.py --model=unk \
-  		--l2_reg=unk  --kernel_sigma=unk --random_seed=unk \
-  		--data_path=unk --save_path=unk --approx_type=unk --n_fp_rff=unk"
-
+        template = "python /lfs/1/zjian/lp_kernel/lp_kernel/models/run_model.py --model=unk \
+                --l2_reg=unk  --kernel_sigma=unk --random_seed=unk \
+                --data_path=unk --save_path=unk --approx_type=unk --n_fp_rff=unk --fixed_epoch_number"
 
 
 if dataset == "census":
@@ -71,6 +79,8 @@ elif dataset == "covtype":
 
 data_path = "/dfs/scratch0/zjian/data/lp_kernel_data/" + dataset
 save_path = "/dfs/scratch0/zjian/lp_kernel/" + exp_name + "/" + dataset
+epoch = 150
+minibatch = 250
 
 cnt = 0
 for seed in seed_list:
@@ -82,7 +92,7 @@ for seed in seed_list:
 						continue
 					if approx_type == "rff" and (nbit != "64" or n_fp_rff > 50000):
 						continue
-					save_suffix = "_type_" + approx_type + "_l2_reg_" + str(l2_reg) + "_n_feat_" + str(n_fp_rff) + "_n_bit_" + str(nbit) + "_seed_" + str(seed)
+					save_suffix = "_type_" + approx_type + "_l2_reg_" + str(l2_reg) + "_n_feat_" + str(n_fp_rff) + "_n_bit_" + str(nbit) + "_opt_sgd_lr_" + str(lr) + "_seed_" + str(seed)
 					command = deepcopy(template)
 					command = command.replace("--model=unk", "--model="+model)
 					command = command.replace("--l2_reg=unk", "--l2_reg="+str(l2_reg) )
@@ -92,6 +102,8 @@ for seed in seed_list:
 					command = command.replace("--data_path=unk", "--data_path="+str(data_path) )
 					command = command.replace("--save_path=unk", "--save_path="+save_path + save_suffix)
 					command = command.replace("--approx_type=unk", "--approx_type="+approx_type)			
+					if int(n_subsample) > 0:
+						command += " --n_sample=" + str(n_subsample)
 					if nbit == "64":
 						# do full precision
 						command = command + " --do_fp_feat "
@@ -104,7 +116,7 @@ for seed in seed_list:
 					if fixed_design == "fixed_design":
 						command += " --fixed_design --fixed_design_auto_l2_reg --fixed_design_noise_sigma=1e4 "
 					else:
-						command += " --opt=sgd --learning_rate=" + str(lr)
+						command += " --opt=sgd --learning_rate=" + str(lr) + " --epoch=" + str(epoch) + " --minibatch=" + str(minibatch)
 					if do_metric == "with_metric":
 						command += " --collect_sample_metrics"
 					if do_cuda == "cuda":
