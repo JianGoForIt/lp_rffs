@@ -1,9 +1,59 @@
-\begin{itemize}
-	\item Give an overview of kernel approximation generalization bounds.  Note that the central object they generally use to bound the generalization error is $\|K-\tK\|$.  Discuss the more recent results which approach the problem differently \avner{We should read recent papers closely.}
-	\item Discuss Nystrom vs. RFF paper.  Our main differentiators: 1) we consider larger/more challenging datasets, 2) we consider much larger numbers of features, 3) we consider memory budget.
-	\item Discuss low-precision, and recent interest in doing low-precision training.
-	\item Discuss fastfood/circulant RFF, and other attempts at reducing memory footprint of projection matrix.  Note that this doesn't address the memory of the features themselves, which can take a ton of space for moderate size mini-batches. Furthermore, our method can be combined with these methods in order to reduce the memory footprint even further (in fact, that is what we do!).
-	\item Discuss other attempts at improving RFF (orthogonal RFF, Spherical Structured Feature Maps, Gaussian quadrature, quasi-monte carlo, etc.), and why we are different.  Discuss that while these methods often improve the kernel approximation error for a fixed number of features, they do not increase the rank for a fixed amount of memory.
-	\item Perhaps discuss methods of improving Nystrom?  Sampling distributions, etc.
-	\item \avner{Address the block coordinate descent paper, which doesn't compute SVD of landmark kernel matrix.}
-\end{itemize}
+Our work is not the first to attempt to minimize the memory footprint of kernel approximation methods.  One line of work proposes using structured matrices in place of the projection matrix used by random Fourier features \citep{fastfood,yu15,sphereRKS}; these methods generally reduce the storage requirement for the projection matrix from $md$ to $m$, where $d$ is the dimension of the data. This work is orthogonal to ours, and in fact we use circulant projections \citep{yu15} in our implementation of LP-RFFs; importantly, these methods do not reduce the amount of memory occupied by the features themselves, or by the learned model parameters. Another line of work uses feature selection in order to reduce the number of random Fourier features required to attain a specific level of performance \citep{sparseRKS, may2016}; once again, our work is orthogonal to theirs, because feature selection can be performed on the low-precision features.  For the \Nystrom method, there has been extensive work on the best ways of choosing the landmark points \citep{kmeans08,kumar12,gittens13}, which can achieve the same performance with fewer points.  Several other methods reduce the memory requirement for \Nystrom \cite{ensemble09,fastpred14,meka14}; nonetheless, random Fourier features with structured matrices utilize orders of magnitude less memory per feature, so we focus our efforts on those methods.
+
+From a theoretical perspective, there has been a fair amount of recent work analyzing the generalization performance of kernel approximation methods \citep{bach13,alaoui15,rudi15,optrff15,musco17,rudi17,bach17,avron17}. 
+
+
+This work is almost exclusively theoretical, offering very few experiments to provide intuition and validation for the theorems presented.
+
+
+- Discuss theory, Avron et al, arguing that most other work has bounded the generalization performance in terms of kernel approximation error.
+- Discuss Nystrom vs. RFF
+- Discuss low-precision stuff.
+- Discuss block-coordinate descent paper.
+
+
+%ne can also use the ensemble \Nystrom method
+%
+%
+%
+%There is abundant literature about both the \Nystrom method \cite{nystrom} and about random
+%Fourier features \cite{rahimi07random}.  This work is often concerned with either (1) proposing an
+%improvement to the method of interest \cite{fastfood,yu15,sparseRKS,may2016,kmeans08,ensemble09,meka14}, (2) performing a theoretical analysis of the method \cite{rahimi08kitchen,gittens13,kumar12}, or (3) performing an empirical evaluation of the method \cite{huang14kernel,may2017,kumar12}.
+%
+%In spite of the abundant literature analyzing and building on each of these 
+%methods, there has been relatively little work attempting to understand the 
+%important differences between them.  One notable exception is the work of 
+%\citet{nysvsrff12}. This work argues that from both theoretical and 
+%empirical perspectives, the \Nystrom method is preferable to RFFs, for a fixed
+%number of features. They propose that the reason for this is that the \Nystrom 
+%method performs a \emph{data-dependent}
+%transformation, while RFF performs a \emph{data-independent} transformation.
+%In our work, we go beyond this existing work, in the following ways:
+%(1) We perform much larger scale experiments, using up to 
+%%$\num[group-separator={,}]{20000}$ \Nystrom features,
+%%and $\num[group-separator={,}]{1600000}$ random Fourier features,
+%whereas Yang et al. only use up to 1000.  Furthermore, 
+%we run experiments on TIMIT, a significantly larger dataset than those used in
+%Yang et al.
+%(2) We take into consideration the relative computational expense of computing $m$ \Nystrom
+%features compared to $m$ random Fourier features.
+%(3) We make a novel observation, that random Fourier features perform consistently
+%better on classification/regression problems than \Nystrom features with comparable kernel approximation error.
+%(4) We analyze, from both theoretical and empirical perspectives, the differences
+%in the ways \Nystrom features and random Fourier features make approximation errors,
+%and argue that these differences have a dramatic effect on training.
+%
+%Another important difference between this work and existing theoretical analyses
+%of the \Nystrom method \cite{gittens13,kumar12}, is that we analyze the \emph{element-wise} errors made by the \Nystrom method in approximation the kernel matrix, whereas existing work
+%generally analyzes the Frobenius norm or spectral norm of the full error matrix.
+
+
+%\begin{itemize}
+%	\item Give an overview of kernel approximation generalization bounds.  Note that the central object they generally use to bound the generalization error is $\|K-\tK\|$.  Discuss the more recent results which approach the problem differently \avner{We should read recent papers closely.}
+%	\item Discuss Nystrom vs. RFF paper.  Our main differentiators: 1) we consider larger/more challenging datasets, 2) we consider much larger numbers of features, 3) we consider memory budget.
+%	\item Discuss low-precision, and recent interest in doing low-precision training.
+%	\item Discuss fastfood/circulant RFF, and other attempts at reducing memory footprint of projection matrix.  Note that this doesn't address the memory of the features themselves, which can take a ton of space for moderate size mini-batches. Furthermore, our method can be combined with these methods in order to reduce the memory footprint even further (in fact, that is what we do!).
+%	\item Discuss other attempts at improving RFF (orthogonal RFF, Spherical Structured Feature Maps, Gaussian quadrature, quasi-monte carlo, etc.), and why we are different.  Discuss that while these methods often improve the kernel approximation error for a fixed number of features, they do not increase the rank for a fixed amount of memory.
+%	\item Perhaps discuss methods of improving Nystrom?  Sampling distributions, etc.
+%	\item \avner{Address the block coordinate descent paper, which doesn't compute SVD of landmark kernel matrix.}
+%\end{itemize}
