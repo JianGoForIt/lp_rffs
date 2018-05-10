@@ -1,15 +1,12 @@
-\begin{itemize}
-	\item We introduce low-precision RFF \avner{Should we do this earlier, in a ``Methods'' section?}.
-	\item We present our theoretical results about LP-RFF, bounding it's approximation error (maybe push this to appendix), and bounding it's $\Delta$, as a function of the number of quantized features, and the precision being used.
-	\item We show our experiments, which have three parts: (1) Explore the performance on big tasks, (2) Explain trends on big experiments by doing detailed analysis on small tasks, (3) show low-precision training doesn't degrade performance much relative to FP training.
-\end{itemize}
+In this section, we present the details of low-precision random Fourier features (LP-RFFs), and provide our theoretical results, which lower bound the probability of $\tK$
 
 \subsection{LP-RFF: Method}
 \begin{itemize}
-	\item Present LP-RFF method in detail.
+	\item Present LP-RFF method in detail: We use circulant RFF, we quantize features, and we optionally have low-precision model.
+	\item Discuss the details of how we quantize.
 \end{itemize}
 \subsection{LP-RFF: Theory}
 \begin{itemize}
-	\item Discuss bounds on kernel approximation performance (if we have space).
 	\item Discuss bounds on $\Delta$.
+	\item Refer them to appendix for bound on kernel approximation error.
 \end{itemize}
