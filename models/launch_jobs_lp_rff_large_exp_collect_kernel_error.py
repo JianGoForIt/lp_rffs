@@ -43,7 +43,7 @@ else:
 	    template = "python /lfs/1/zjian/lp_kernel/lp_kernel/models/run_model.py --model=unk --minibatch=250 --l2_reg=unk \
 	        --kernel_sigma=unk --n_fp_rff=unk --random_seed=unk --learning_rate=unk \
 	        --data_path=unk --opt=unk --epoch=unk \
-	        --save_path=unk --approx_type=unk --n_bit_feat=nbit" + str(nbit) + " --exit_after_collect_metric --only_collect_kernel_approx_error"
+	        --save_path=unk --approx_type=unk --n_bit_feat=" + str(nbit) + " --exit_after_collect_metric --only_collect_kernel_approx_error"
 
 
 if dataset == "census":
