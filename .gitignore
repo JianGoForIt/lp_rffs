@@ -19,3 +19,4 @@
 !*.png
 !*.zip
 !*.py
+!paper/figures/*.pdf
