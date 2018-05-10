@@ -20,17 +20,30 @@ nbit = sys.argv[9]
 #approx_type = sys.argv[3]
 
 # /dfs/scratch0/zjian/data/lp_kernel_data/census
-if cluster == "starcluster":
-    template = "python /dfs/scratch0/zjian/lp_kernel_code/lp_kernel/models/run_model.py --model=unk --minibatch=250 --l2_reg=unk \
-        --kernel_sigma=unk --n_fp_rff=unk --random_seed=unk --learning_rate=unk \
-        --data_path=unk --opt=unk --epoch=unk \
-        --save_path=unk --approx_type=unk --n_bit_feat=nbit"
-
+if nbit == "64":
+	if cluster == "starcluster":
+	    template = "python /dfs/scratch0/zjian/lp_kernel_code/lp_kernel/models/run_model.py --model=unk --minibatch=250 --l2_reg=unk \
+	        --kernel_sigma=unk --n_fp_rff=unk --random_seed=unk --learning_rate=unk \
+	        --data_path=unk --opt=unk --epoch=unk \
+	        --save_path=unk --approx_type=unk --do_fp_feat"
+	
+	else:
+	    template = "python /lfs/1/zjian/lp_kernel/lp_kernel/models/run_model.py --model=unk --minibatch=250 --l2_reg=unk \
+	        --kernel_sigma=unk --n_fp_rff=unk --random_seed=unk --learning_rate=unk \
+	        --data_path=unk --opt=unk --epoch=unk \
+	        --save_path=unk --approx_type=unk --do_fp_feat"
 else:
-    template = "python /lfs/1/zjian/lp_kernel/lp_kernel/models/run_model.py --model=unk --minibatch=250 --l2_reg=unk \
-        --kernel_sigma=unk --n_fp_rff=unk --random_seed=unk --learning_rate=unk \
-        --data_path=unk --opt=unk --epoch=unk \
-        --save_path=unk --approx_type=unk --n_bit_feat=nbit"
+	if cluster == "starcluster":
+	    template = "python /dfs/scratch0/zjian/lp_kernel_code/lp_kernel/models/run_model.py --model=unk --minibatch=250 --l2_reg=unk \
+	        --kernel_sigma=unk --n_fp_rff=unk --random_seed=unk --learning_rate=unk \
+	        --data_path=unk --opt=unk --epoch=unk \
+	        --save_path=unk --approx_type=unk --n_bit_feat=" + str(nbit)
+	
+	else:
+	    template = "python /lfs/1/zjian/lp_kernel/lp_kernel/models/run_model.py --model=unk --minibatch=250 --l2_reg=unk \
+	        --kernel_sigma=unk --n_fp_rff=unk --random_seed=unk --learning_rate=unk \
+	        --data_path=unk --opt=unk --epoch=unk \
+	        --save_path=unk --approx_type=unk --n_bit_feat=nbit" + str(nbit)
 
 
 if dataset == "census":
@@ -99,13 +112,13 @@ for seed in seed_list:
 	for l2_reg in l2_reg_list:
 		for n_fp_rff in n_fp_rff_list:
 			for lr in lr_list:
-				for approx_type in ["rff", "cir_rff"]:
+				for approx_type in ["cir_rff"]:
 					# if approx_type == "nystrom" and n_fp_rff > 20000:
 					# 	continue
-                    if approx_type == "rff" and nbit != 64:
-                        continue
+					#if approx_type == "rff" and nbit != 64:
+					#	continue
 					save_suffix = "_type_" + approx_type + "_l2_reg_" + str(l2_reg) + "_n_fp_feat_" + str(n_fp_rff) \
-					 	+ "_opt_" + opt + "_lr_" + str(lr) + "_seed_" + str(seed)
+					 	+ "_opt_" + opt + "_lr_" + str(lr) + "_nbit_" + str(nbit) + "_seed_" + str(seed)
 					command = deepcopy(template)
 					command = command.replace("--model=unk", "--model="+model)
 					command = command.replace("--l2_reg=unk", "--l2_reg="+str(l2_reg) )
