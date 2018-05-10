@@ -230,8 +230,12 @@ if __name__ == "__main__":
             approx_val_error_list = []
             # as the data is sampled and fixed here, we only need to do 1 calculation within here
             for i in range(1):
-                approx_error_train = get_sample_kernel_F_norm(X_train, kernel, kernel_approx, quantizer, args.l2_reg)
-                approx_error_val = get_sample_kernel_F_norm(X_val, kernel, kernel_approx, quantizer, args.l2_reg)
+                if use_cuda:
+                    approx_error_train = get_sample_kernel_F_norm(X_train.cuda(), kernel, kernel_approx, quantizer, args.l2_reg)
+                    approx_error_val = get_sample_kernel_F_norm(X_val.cuda(), kernel, kernel_approx, quantizer, args.l2_reg)
+                else:
+                    approx_error_train = get_sample_kernel_F_norm(X_train, kernel, kernel_approx, quantizer, args.l2_reg)
+                    approx_error_val = get_sample_kernel_F_norm(X_val, kernel, kernel_approx, quantizer, args.l2_reg)
                 approx_train_error_list.append(approx_error_train)
                 approx_val_error_list.append(approx_error_val)
             print("approx train kernel error list ", approx_train_error_list)
