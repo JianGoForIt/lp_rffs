@@ -31,6 +31,9 @@
 \usepackage{bbm}
 \usepackage{amsmath}
 \usepackage{amsthm}
+%\usepackage{footnote}
+%\makesavenoteenv{tabular}
+%\makesavenoteenv{table}
 
 % ADDED BY JIAN
 \usepackage{graphicx}
@@ -98,13 +101,10 @@
 \label{sec:relwork}
 \input{relwork}
 
-\section{Background and Notation}
-\label{sec:background}
-\input{background}
+\section{Preliminaries and Notation}
+\label{sec:prelim}
+\input{prelim}
 
-%\section{\Nystrom vs. Random Fourier Features}
-%\label{sec:nystromvsrff}
-%\input{nystromvsrff}
 
 \section{Low-Precision Random Fourier Features (LP-RFF)}
 \label{sec:lprff}
@@ -126,7 +126,7 @@
 
 \clearpage
 
-\appendix
+\appendix5
 
 \section{Theoretical guarantee for low precision features}
 \label{sec:lprff_theory_appendix}
