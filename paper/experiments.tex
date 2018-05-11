@@ -45,20 +45,38 @@ In Figure~\ref{fig:generalizatio_col}, we can observe LP-RFF can achieve signifi
 	\label{fig:generalizatio_col}
 \end{figure}
 
+%% version with out model memory
+%\begin{table}
+%	\centering
+%	\begin{tabular}{c c c c}
+%		\hline
+%		& FP RFF & FP circulant RFF & \Nystrom \\
+%		\hline
+%		\hline
+%		Census & 5.56x & 30.32x & 122.52x \\
+%		YearPred & 19.35x & 14.30x & 829.15x \\ 
+%		Covtype & 9.17x & 7.57x & 460.80x \\ 
+%		TIMIT & 70.42x & 25.68x & 843.41x \\ 
+%		\hline
+%	\end{tabular}
+%	\caption{The memory savings from LP RFF to achieve within $1e^{-4}$ relative difference from the best generalization performance of baselines. We measure heldout L2 loss and heldout accuracy as the generalization performance respectively for regression and classification problems.}
+%	\label{fig:mem_saving}
+%\end{table}
 
-\begin{figure}
+% version with model memory
+\begin{table}
 	\centering
 	\begin{tabular}{c c c c}
 		\hline
 		& FP RFF & FP circulant RFF & \Nystrom \\
 		\hline
 		\hline
-		Census & 5.56x & 30.32x & 122.52x \\
-		YearPred & 19.35x & 14.30x & 829.15x \\ 
-		Covtype & 9.17x & 7.57x & 460.80x \\ 
-		TIMIT & 70.42x & 25.68x & 843.41x \\ 
+		Census & 2.8x & 30.7x & 62.2x \\
+		YearPred & 9.99x & 14.7x & 436.9x \\ 
+		Covtype & 4.6x & 7.6x & 230.4x \\ 
+		TIMIT & 5.1x & 3.9x & 50.6x \\ 
 		\hline
 	\end{tabular}
 	\caption{The memory savings from LP RFF to achieve within $1e^{-4}$ relative difference from the best generalization performance of baselines. We measure heldout L2 loss and heldout accuracy as the generalization performance respectively for regression and classification problems.}
 	\label{fig:mem_saving}
-\end{figure}
+\end{table}
