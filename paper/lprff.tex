@@ -1,12 +1,39 @@
-In this section, we present the details of low-precision random Fourier features (LP-RFFs), and provide our theoretical results, which lower bound the probability of $\tK$
+In this section, we present the details of low-precision random Fourier features (LP-RFFs), and provide our theoretical results, which lower bound the probability that $D_{\lambda}(K,\tK) \leq \Delta$, where $\tK$ is the kernel approximation matrix corresponding to $m$ LP-RFFs.
 
-\subsection{LP-RFF: Method}
-\begin{itemize}
-	\item Present LP-RFF method in detail: We use circulant RFF, we quantize features, and we optionally have low-precision model.
-	\item Discuss the details of how we quantize.
-\end{itemize}
-\subsection{LP-RFF: Theory}
-\begin{itemize}
-	\item Discuss bounds on $\Delta$.
-	\item Refer them to appendix for bound on kernel approximation error.
-\end{itemize}
+\subsection{Method details}
+As discussed in the introduction, LP-RFFs provides ways of saving space across all three memory-intensive parts of the mini-batch training pipeline: (1) feature generation, (2) mini-batch storage, and (3) learned model parameters.
+
+\paragraph{Feature generation} We leverage circulant random Fourier features \citep{yu15} in order for the RFF random projection matrix to occupy less space. This brings the space used by the projection matrix down from $32md$ to $32m$.
+
+\paragraph{Mini-batch storage} The core savings provided by our proposed method comes from this component.  Instead of occupying $32ms$ bits to store the mini-batch of $s$ $m$-dimensional random feature vectors, LP-RFFs uses $bms$, where the number of bits $b$ per feature is a tunable parameter.  We attain these savings by simply quantizing each feature $z_i(x) = \sqrt{2/m}\cos(w_i^T x + b_i) \in [-\sqrt{2/m},\sqrt{2/m}]$ using $b$ bits.  This allows us to represent $2^b$ possible values, which we choose to space evenly in the interval $[-\sqrt{2/m},\sqrt{2/m}]$ (with the first and last value corresponding to $-\sqrt{2/m}$ and $\sqrt{2/m}$, respectively). We will denote this quantized feature map by $z^{lp}$, in place of $z$. In order to retain the property that $\expect{}{z^{lp}(x)^T z^{lp}(x')} = k(x,x')$, we choose to quantize the random Fourier features \textit{randomly}.  More formally, if we let $\olq$ and $\ulq$ denote the closest representable values above and below a full-precision feature $z_i(x)$, we set $z^{lp}_i(x) = z_i(x) + \eps$; $\eps$ is a random variable equal to $\olq - z_i(x)$ with probability $\frac{z_i(x)-\ulq}{\olq-\ulq}$, and equal to $\ulq - z_i(x)$ with probability $\frac{\olq-z_i(x)}{\olq-\ulq}$.  We note that $\var[\eps] \leq \frac{2}{m(2^b-1)^2} = \delta_b^2/m$, for $\delta_b^2 \defeq \frac{2}{(2^b-1)^2}$.
+
+\paragraph{Learned parameters} For binary classification and regression models, the cost of storing the full-precision model parameters is $32m$, which is essentially negligible relative to the cost of storing the mini-batch of features. As such, we do not quantize the parameters in these cases. However, for multi-class classification problems where the number if classes $c$ is not a negligible fraction of the mini-batch size $s$, it becomes important to use low-precision for these parameters as well. In order training with low-precision parameters, we propose using LM-HALP \citep{halp18}, a recently proposed algorithm for low-precision training of linear models.
+
+\avner{Discuss how different precisions mix in this system? Discuss low-precision SGD updates?}
+
+\subsection{Theoretical results}
+We now lower bound the probably that $D_{\lambda}(K,\tK) \leq \Delta$, for the LP-RFF approximation $\tK$ using $m$ features and $b$ bits per feature.
+
+\begin{theorem}
+	Let $\tK$ be the LP-RFF approximation of a kernel matrix $K$, using $m$ random features, and $b$ bits per feature. Suppose that $\norm{K} \geq \lambda$ and $\delta^2_b \leq \lambda$.
+	Then for any $1/2 \geq \Delta_0 \geq \sqrt{\frac{2n/\lambda}{m}} + \frac{4n/\lambda}{3m}$, with $\Delta =
+	\Delta_0 + \delta^2_b / \lambda$,
+	\begin{equation*}
+	\Prob\Big[D_{\lambda}(K,\tK) \leq \Delta\Big] \geq 1 - 16 \tr\Big((K +
+	\lambda I_n)^{-1} (K + \delta^2_b I_n)\Big) \exp \left( -\frac{3m \Delta_0^2}{16n/\lambda} \right).
+	\end{equation*}
+	Thus if we use 
+	\begin{equation*}
+	m \geq \frac{16\, n/\lambda}{3(\Delta - \delta_b^2/\lambda)^{2}} \log \bigg(\frac{16}{\rho} \tr\Big((K + \lambda I_n)^{-1} (K + \delta^2_b I_n)\Big) \bigg)
+	\end{equation*}
+	features, then $D_{\lambda}(K,\tK) \leq \Delta$	with probability at least $1 - \rho$.
+\end{theorem}
+\avner{Fix this bound to be in terms of OUR definition of $\Delta$}
+
+%The choice of precision has two important effects in this theorem: (1) it increases the number of features
+%While the choice of precision $b$ has an effect 
+At a high-level, this theorem shows that whenever $\delta_b^2/\lambda << \Delta$, using low-precision will have a negligible effect on the number of features needed in order for $D_{\lambda}(K,\tK) \leq \Delta$ with high probability.  Given the tight connection between $D_{\lambda}(K,\tK)$ and generalization performance in the context of kernel ridge regression, this suggests that one could likely switch from using full-precision computations, to using $b$ bit computations, and see minimal drop in generalization performance.
+
+To make this more concrete, we can calculate how many bits would be needed in order for $\delta^2_b/\lambda \leq \gamma\Delta$, for some small $\gamma > 0$. Using $\delta_b^2 = 2/(2^b-1)^2 \approx 2/2^{2b}$, this gives $b \gtrsim (1-\log_2(\lambda \gamma \Delta))/2$.  This shows that the number of bits needed grows as the product $\lambda \gamma \Delta$ decreases.
+
+For the proof of this theorem, as well as for further theoretical results on the kernel approximation performance of LP-RFFs, please see Appendix \todo{XX}.

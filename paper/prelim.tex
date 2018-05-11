@@ -1,10 +1,10 @@
 \subsection{Notation}
-We use $\{(x_i,y_i)\}_{i=1}^n$ denote a training set, for $x_i \in RR^d$, and $y_i \in \cY$, where $\cY = \RR$ for regression, $\cY = {1,\ldots,c}$ for classification.  We let $K$ denote the kernel matrix corresponding to a kernel function $k:\RR^d\times\RR^d$, and let $\tK$ denote an approximation to $K$. We let $z:\RR^d\rightarrow\RR^m$ denote a feature map for approximation a kernel function, such that $\tK_{ij} = z(x_i)^T z(x_j)$.  We let $s$ denote the size of the mini-batches during training, $b$ denote the precision used for the random features, and $\hb$ denote the precision used for the model.
+We use $\{(x_i,y_i)\}_{i=1}^n$ to denote a training set, for $x_i \in \RR^d$, and $y_i \in \cY$, where $\cY = \RR$ for regression, $\cY = {1,\ldots,c}$ for classification.  We let $K$ denote the kernel matrix corresponding to a kernel function $k:\RR^d\times\RR^d$, and let $\tK$ denote an approximation to $K$. We let $z:\RR^d\rightarrow\RR^m$ denote a feature map for approximation a kernel function, such that $\tK_{ij} = z(x_i)^T z(x_j)$.  We let $s$ denote the size of the mini-batches during training, $b$ denote the precision used for the random features, and $\hb$ denote the precision used for the model.  We let $\|K\|_2$ and $\|K\|_F$ denote the spectral and Frobenius norms of a matrix $K$, respectively; if the subscript is not specified, $\|K\|$ denotes the spectral norm.
 
 \subsection{Random Fourier features (RFFs)}
-For shift-invariant kernels ($k(x,y) = \hat{k}(x-y)$), the random Fourier 
+For shift-invariant kernels ($k(x,x') = \hat{k}(x-x')$), the random Fourier 
 feature method \citep{rahimi07random} constructs a random feature representation 
-$z(x) \in \RR^m$ such that in expectation, $z(x)^T z(y) = k(x,y)$. This construction 
+$z(x) \in \RR^m$ such that in expectation, $z(x)^T z(x') = k(x,x')$. This construction 
 is based on Bochner's Theorem, which states that any positive definite kernels is 
 equal to the Fourier transform of a non-negative measure. This allows for performing
 Monte Carlo approximations of this Fourier transform in order to approximate the 
@@ -16,7 +16,7 @@ transform of the kernel function $\hat{k}$, and $b_i$ is drawn uniformly from $[
 
 \subsection{\Nystrom method}
 The \Nystrom method constructs a finite dimensional feature representation
-$z(x) \in \RR^m$ such that $\Dotp{z(x),z(y)} \approx k(x,y)$.  It does this
+$z(x) \in \RR^m$ such that $\Dotp{z(x),z(x')} \approx k(x,x')$.  It does this
 by picking a set of landmark points $\{\hx_1,\ldots,\hx_m\} \in \cX$,
 and taking the SVD $\hK = U\Lambda U^T$ of the $m$ by $m$ 
 kernel matrix $\hK$ corresponding to these landmark points 
@@ -42,7 +42,7 @@ The core resource we optimize for in this work is memory.  As discussed in the i
 		Approximation Method & Feature generation & Mini-batch storage & Learned parameters \\
 		\midrule
 		\Nystrom \citep{nystrom} & $32(md + m^2)$ & $32ms$ & $32mc$ \\
-		Random Fourier features (RFFs) \citep{rahimi07random} &  $32md$ & $32ms$ & $32mc$ \\
+		RFFs \citep{rahimi07random} &  $32md$ & $32ms$ & $32mc$ \\
 		Circulant RFFs \citep{yu15} & $32m$ & $32ms$ & $32mc$ \\
 		Low-precision RFFs (ours)& $32m$ & $bms$ & $\hb mc$ \\
 		\bottomrule
@@ -53,7 +53,6 @@ The core resource we optimize for in this work is memory.  As discussed in the i
 In fixed design linear regression, you are given a set of labeled points $\{(x_i,y_i)\}_{i=1}^n$, where $x_i \in \RR^d$, $y_i = \by_i + \eps_i \in \RR$, and the $\eps_i$ are uncorrelated random variables with shared variance $\sigma^2 > 0$.  Given such a sample, the goal is to learn a regressor $f(x) = \beta^T x$ such that $\frac{1}{n}\sum_{i=1}^n (f(x_i) - \by_i)^2$ is small. Note that for a fixed learning method the learned regressor $f$ seen as a random function, based on the random label noise $\eps_i$.  Thus, the goal is to design a training algorithm such that $\cR(f) = \expect{\eps}{\frac{1}{n}\sum_{i=1}^n (f(x_i) - \by_i)^2}$ is small.
 
 One approach to solving this problem is kernel ridge regression (KRR).  In kernel ridge regression, you choose a kernel function $k:\RR^d\times\RR^d\rightarrow \RR$, and a regularizing constant $\lambda$, and learn a function of the form $f(x) = \sum_i \alpha_i k(x,x_i)$.  Letting $K\in\RR^{n\times n}$ denote the kernel matrix such that $K_{ij} = k(x_i,x_j)$, and $y = (y_1,\ldots,y_n)$, the closed form solution for this problem is $\alpha = (K+\lambda I)^{-1}y$. It can then be shown that the expected error of this regressor $f$, under the fixed design setting, is:
-
 \begin{eqnarray}
 \cR(f_K) = \frac{1}{n}\lambda^2 \by^T(K+\lambda I)^{-2}\by + \frac{1}{n}\sigma^2 Tr\Big(K^2(K+\lambda \id)^{-2}\Big),
 \end{eqnarray}
@@ -69,17 +68,24 @@ A matrix $A$ is a \textbf{$\Delta$-spectral approximation} of another matrix $B$
 \end{eqnarray}
 We can then define the \textbf{$\lambda$-spectral distance} $D_{\lambda}(K,\tK)\geq 0$ between $K$ and $\tK$ to be the minimum value of $\Delta \geq 0$ for which $\tK+\lambda I$ is a $\Delta$-spectral approximation of $K+\lambda I$:
 $$D_{\lambda}(K,\tK) = \min \Big\{\Delta \;\;\Big|\;\; \frac{1}{1+\Delta}(K+\lambda I) \preceq \tK + \lambda I \preceq (1+\Delta)(K+\lambda I)\Big\}.$$
+Thus, $D_{\lambda}(K,\tK) \leq \Delta$ is equivalent to stating that $\tK+\lambda I$ is a $\Delta$-spectral approximation of $K+\lambda I$.
 \end{definition}
 
-Following \citet{avron17}, if we then define $\hcR(f_K) = \frac{1}{n}\lambda \by^T(K+\lambda I)^{-1}\by + \frac{1}{n}\sigma^2 Tr\Big(K(K+\lambda)^{-1}\Big) \geq \cR(f_K)$, we can bound the expected loss of $f_{\tK}$ as follows:
+Following \citet{avron17}, if we then define 
+$$\hcR(f_K) = \frac{1}{n}\lambda \by^T(K+\lambda I)^{-1}\by + \frac{1}{n}\sigma^2 Tr\Big(K(K+\lambda)^{-1}\Big) \geq \cR(f_K),$$ 
+we can bound the expected loss of $f_{\tK}$ as follows:
 
 \begin{proposition}{Adapted from \citep{avron17}:}
-Suppose $\tK+\lambda I$ is a $\Delta$-spectral approximation of $K+\lambda I$ for some $\Delta \geq 0$, and $f_{K}$ and $f_{\tK}$ are the KRR estimators learned using these matrices, with regularizing constant $\lambda$ and label noise variance $\sigma^2$.  Then the following bound holds:
+%Suppose $\tK+\lambda I$ is a $\Delta$-spectral approximation of $K+\lambda I$ for some $\Delta \geq 0$, and $f_{K}$ and $f_{\tK}$ are the KRR estimators learned using these matrices, with regularizing constant $\lambda$ and label noise variance $\sigma^2$. Then the following bound holds:
+Suppose $\tK$ is an approximation to a kernel matrix $K$, and $f_{K}$ and $f_{\tK}$ are the KRR estimators learned using these matrices, with regularizing constant $\lambda$ and label noise variance $\sigma^2$. Then the following bound holds:
 \begin{eqnarray}
-\cR(f_{\tK}) \leq (1+\Delta)\cdot \hcR(f_K) + \frac{\Delta}{1+\Delta}\cdot \frac{rank(\tK)}{n}\cdot\sigma^2.
+\cR(f_{\tK}) \leq \Big(1+D_{\lambda}(K,\tK)\Big)\cdot \hcR(f_K) + \frac{D_{\lambda}(K,\tK)}{1+D_{\lambda}(K,\tK)}\cdot \frac{rank(\tK)}{n}\cdot\sigma^2.
 \end{eqnarray}
 \end{proposition}
 We include a proof in Appendix \todo{XX}.
 
-An important consequence of the above definitions, is that if $\tK$ is a rank $r$ matrix, in order for $\tK+\lambda I$ to be a $\Delta$-spectral approximation of $K+\lambda I$, it must hold that $\lambda_{r+1}(K) \leq \Delta \lambda$, where $\lambda_i(K)$ denote the $i^{th}$ largest eigenvalues of $A$.  This follows from $A\preceq B \Rightarrow \lambda_i(A) \leq \lambda_i(B)$, $(\lambda_i(K) + \lambda)/(1+\Delta) \leq \lambda_i(\tK) + \lambda$, and $\lambda_{r+1}(\tK) = 0$.  This sets a lower bound on the rank necessary for $\tK+\lambda I$ to be a $\Delta$-spectral approximation of $K+\lambda I$, which holds regardless of the approximation method used.  This observation provides motivation for our proposed method, low-precision random Fourier features, which generates high-rank approximations to a kernel matrix, under a fixed memory budget.
+An important consequence of the above definitions, is that if $\tK$ is a rank $r$ matrix, 
+%in order for $\tK+\lambda I$ to be a $\Delta$-spectral approximation of $K+\lambda I$, 
+in order for $D_{\lambda}(K,\tK) \leq \Delta$, it must hold that $\lambda_{r+1}(K) \leq \Delta \lambda$, where $\lambda_i(K)$ denote the $i^{th}$ largest eigenvalues of $A$.  This follows from $A\preceq B \Rightarrow \lambda_i(A) \leq \lambda_i(B)$, $(\lambda_i(K) + \lambda)/(1+\Delta) \leq \lambda_i(\tK) + \lambda$, and $\lambda_{r+1}(\tK) = 0$.  This sets a lower bound on the rank necessary for $D_{\lambda}(K,\tK) \leq \Delta$, which holds regardless of the approximation method used.  This observation provides motivation for our proposed method, low-precision random Fourier features, which generates high-rank approximations to a kernel matrix, under a fixed memory budget.
 
+\avner{Should we add a section about low-precision training? LM-HALP?}
