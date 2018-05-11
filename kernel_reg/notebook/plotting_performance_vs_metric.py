@@ -73,7 +73,7 @@ def plot_figure(data_list, color_dict, ave_x=False):
 
 def get_results_for_one_precision(n_rff_feat, general_folder_measurement, 
                                   general_folder_performance, general_folder_delta,
-                                  folder_pattern, seeds=[1,], min_best=True):
+                                  folder_pattern, seeds=[1,], min_best=True, y_reverse=False):
     f_norm_list_rff = []
     l2_loss_list_rff = []
     delta_list_rff = []
@@ -112,7 +112,7 @@ def get_results_for_one_precision(n_rff_feat, general_folder_measurement,
             f_norm_list.append(f_norm_error)
         
         f_norm_list_rff.append(np.array(deepcopy(f_norm_list) ) )
-        l2_loss_list_rff.append(np.array(deepcopy(l2_loss_list) ) )
+        l2_loss_list_rff.append(1.0 - np.array(deepcopy(l2_loss_list) ) )
         delta_list_rff.append(np.array(deepcopy(delta_list) ) )
         
 #     f_norm_list_rff = average_results_array(f_norm_list_rff)
