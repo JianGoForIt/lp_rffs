@@ -3,26 +3,28 @@
 %	\item We explain these results in terms of the ``small tasks'' (Census and Subsampled CovType), where we measure $\Delta$, showing that below a certain number of bits, $\Delta$ can increase a lot.  If we have space, we explain the trade-offs here a bit, showing in the fixed design setting that higher noise means higher $\lambda^*$, which means fewer bits can be used until $\Delta$ increases a lot.
 %	\item We briefly present low-precision training, showing that performance doesn't degrade much relative to full-precision training.
 %\end{itemize}
-In this section, we empirically evaluate our generalization theory on low-precision RFF, and demonstrate the empirical generalization performance of low-precision RFF under memory budgets. On the Census dataset and subsampled Covtype, we first demonstrate the strong correlation of generalization performance and $\Delta$, which aligns with our $\Delta$ based bounds of generalization bound for low-precision RFF. We then extend to four different datasets, including the Census, YearPred dataset for kernel ridge regression and the Covtype, TIMIT dataset for kernel logistic regression. Across our experiment results, we compute the memory utilization as described in Section~\ref{subsec:memory_utils}. Across all our experiments, we use the Gaussian kernel with the kernel width value recommended by~\citet{may2017kernel}. We discuss our empirical validation results in this section, and refer to Section~\ref{sec:exp_details} for more details in the experiment settings.
+In this section, we empirically evaluate our generalization theory on low-precision RFF, and demonstrate the empirical generalization performance of low-precision RFF under memory budgets. On the Census dataset and subsampled Covtype, we first demonstrate the strong correlation of generalization performance and $\lambda$-spectral distance $D_{\lambda}(K,\tK)$, where $K$ and $\tK$ are the exact and approximated kernel respectively; this aligns with our $\lambda$-spectral distance based bounds of generalization bound for low-precision RFF. We then extend to four different datasets, including the Census, YearPred dataset for kernel ridge regression and the Covtype, TIMIT dataset for kernel logistic regression. Across our experiment results, we compute the memory utilization as described in Section~\ref{subsec:memory_utils}. Across all our experiments, we use the Gaussian kernel with the kernel width value recommended by~\citet{may2017kernel}. We discuss our empirical validation results in this section, and refer to Section~\ref{sec:exp_details} for more details in the experiment settings.
 
-\subsection{Strong correlation between generalization and $\Delta$\todo{Jian: need a english name for $\Delta$}}
-Our theory in Section~\ref{sec:lprff} claims that in fixed design kernel ridge regression, the generalization performance strongly depends on the quantity $\Delta$.
-To validate the strong correlation between generalization performance and the central quantity $\Delta$ in our generalization bound, we empirically show that the number of bits generating smaller $\Delta$ demonstrates better generalization performance. 
+\subsection{Strong correlation between generalization and $\lambda$-spectral distance}
+Our theory in Section~\ref{sec:lprff} claims that in fixed design kernel ridge regression, the generalization performance strongly depends on $\lambda$-spectral distance $D_{\lambda}(K,\tK)$.
+To validate the strong correlation between generalization performance and the central quantity $D_{\lambda}(K,\tK)$ in our generalization bound, we empirically show that the number of bits generating smaller $D_{\lambda}(K,\tK)$ demonstrates better generalization performance. 
 Specifically, we analyze the correlation on the Census dataset for kernel ridge regression. In addition, we demonstrate that this correlation from kernel ridge regression theory empirically generalize to kernel logistic regression. 
 
-We solve the regression problem with closed form solution. In our experiment, we grid search the best-performing regularizer strength for the exact kernel; this best-performing regularizer strength is uniformly applied to all the different runs. For kernel logistic regression, we subsample 20k data points for both training and heldout set of the Covtype dataset to tractably compute $\Delta$. As there is no closed-form solution for logistic regression, we train with SGD using minibatch 250. We grid search the best performing learning rate and regularizer strength using 20k dimensional \Nystrom approximation as proxy to the optimal values for the exact kernel; the 20k dimensional \Nystrom approximation and the exact kernel share the same training kernel matrix. We grid search the regularizer strength from grid $\{1e^{-5}, 5e^{-5}, 1e^{-4}, 1e^{-3}, 5e^{-3}, 1e^{-2}, 5e^{-2}, 1e^{-1}\}$ for both task. The learning rate in logistic regression experiment is from the grid $\{5, 10, 50, 100\}$. We report the average $\Delta$ and the average generalization performance, along with the standard deviation, from 5 different random seeds.
+We solve the regression problem with closed form solution. In our experiment, we grid search the best-performing regularizer strength for the exact kernel; this best-performing regularizer strength is uniformly applied to all the different runs. For kernel logistic regression, we subsample 20k data points for both training and heldout set of the Covtype dataset to tractably compute $D_{\lambda}(K,\tK)$. As there is no closed-form solution for logistic regression, we train with SGD using minibatch 250. We grid search the best performing learning rate and regularizer strength using 20k dimensional \Nystrom approximation as proxy to the optimal values for the exact kernel; the 20k dimensional \Nystrom approximation and the exact kernel share the same training kernel matrix. We grid search the regularizer strength from grid $\{1e^{-5}, 5e^{-5}, 1e^{-4}, 1e^{-3}, 5e^{-3}, 1e^{-2}, 5e^{-2}, 1e^{-1}\}$ for both task. The learning rate in logistic regression experiment is from the grid $\{5, 10, 50, 100\}$. We report the average $D_{\lambda}(K,\tK)$ and the average generalization performance, along with the standard deviation, from 5 different random seeds.
 
-In Figure~\ref{fig:generalizatio_col}, we can observe LP-RFF can achieve significantly smaller $\Delta$ and generalization performance than full precision RFF and \Nystrom. Specifically, 8 bits and 2 bit LP-RFF attains the optimal generalization performance for Census and Covtype respectively. Noticeably, on both the Census and the Covtype dataset, approximation configurations which have low $\Delta$ value also shows better generalization performance. The ordering with respect to $\Delta$ aligns well with the one with respect to generalization performance, demonstrating a strong correlation between $\Delta$ and generalization performance for approximated kernels.
+In Figure~\ref{fig:generalizatio_col}, we can observe LP-RFF can achieve significantly smaller $\lambda$-spectral distance $D_{\lambda}(K,\tK)$ and generalization performance than full precision RFF and \Nystrom. Specifically, 8 bits and 2 bit LP-RFF attains the optimal generalization performance for Census and Covtype respectively. Noticeably, on both the Census and the Covtype dataset, approximation configurations which have low $D_{\lambda}(K,\tK)$ value also shows better generalization performance. The ordering with respect to $D_{\lambda}(K,\tK)$ aligns well with the one with respect to generalization performance, demonstrating a strong correlation between $D_{\lambda}(K,\tK)$ and generalization performance for approximated kernels.
 
 \begin{figure}
 	\centering
-	\begin{tabular}{c c c c}
-		\includegraphics[width=0.24\linewidth]{figures/regression_delta_vs_mem.pdf} &
-		\includegraphics[width=0.24\linewidth]{figures/regression_l2_vs_mem.pdf} &
-		\includegraphics[width=0.24\linewidth]{figures/classification_delta_vs_mem.pdf} &
-		\includegraphics[width=0.24\linewidth]{figures/classification_acc_vs_mem.pdf} 
+	\begin{tabular}{c c c}
+		\includegraphics[width=0.33\linewidth]{figures/regression_delta_vs_mem.pdf} &
+		\includegraphics[width=0.33\linewidth]{figures/regression_l2_vs_mem.pdf} &
+		\includegraphics[width=0.33\linewidth]{figures/regression_l2_vs_delta.pdf} \\
+		\includegraphics[width=0.33\linewidth]{figures/classification_delta_vs_mem.pdf} &
+		\includegraphics[width=0.33\linewidth]{figures/classification_acc_vs_mem.pdf} &
+		\includegraphics[width=0.33\linewidth]{figures/classification_acc_vs_delta.pdf} \\
 	\end{tabular}
-	\caption{The strong correlation between generalization performance and $\Delta$ under memory budgets. Under different memory budget, the precision demonstrates smaller $\Delta$ tends to have better generalization performance.}
+	\caption{The strong correlation between generalization performance and $\lambda$-spectral distance $D_{\lambda}(K,\tK)$ under memory budgets. Under different memory budget, the precision demonstrates smaller $D_{\lambda}(K,\tK)$ tends to have better generalization performance.}
 	\label{fig:generalizatio_col}
 \end{figure}
 
@@ -81,10 +83,10 @@ As shown in Table~\ref{fig:mem_saving}, we can observe that LP RFF demonstrate s
 		& FP RFF (best/median) & FP circulant RFF (best/median) & \Nystrom (best/median) \\
 		\hline
 		\hline
-		Census & 2.8x/ & 30.7x/ & 62.2x/ \\
-		YearPred & 10.0x/ & 14.7x/ & 436.9x/ \\ 
-		Covtype & 4.6x/ & 7.6x/ & 230.4x/ \\ 
-		TIMIT & 5.1x/ & 3.9x/ & 50.6x/ \\ 
+		Census & 2.8x / 2.8x & 30.7x / 7.7x & 62.2x / 4.09x \\
+		YearPred & 10.0x / 7.3x & 14.7x / 10.8x & 436.9x / 78.0x \\ 
+		Covtype & 4.6x / 4.6x & 7.6x / 7.6x & 230.4x / 75.26x \\ 
+		TIMIT & 5.1x / 2.0x & 3.9x / 3.6x & 50.6x / 8.9x \\ 
 		\hline
 	\end{tabular}
 	\caption{The memory savings from LP RFF to achieve within $1e^{-4}$ relative difference from reference performance of baselines. We measure heldout L2 loss and heldout accuracy as the generalization performance respectively for regression and classification problems. The memory saving is reported with respect to both the best and median performance from the feature number grid of a baseline; this avoids the gain being inflated from the performance plateau near the best heldout metric. }
