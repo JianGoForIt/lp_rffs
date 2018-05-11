@@ -31,6 +31,7 @@ $z_r(x) = \Lambda_r^{-1/2} U_r^T k_x \in \RR^r$, where only the top $r$ eigenval
 eigenvectors of $\hK$ are used, instead of all $m$.
 
 \subsection{Memory utilization}
+\label{subsec:memory_utils}
 The core resource we optimize for in this work is memory.  As discussed in the introduction, we consider the setting of large-scale mini-batch training for kernel approximation methods.  We summarize the memory utilization of the different parts of the training pipeline in Table \ref{table:mem-usage}, assuming full-precision numbers are stored in 32 bits. We note that unless $c$ is large, we generally use full-precision $\hb = 32$ for the model parameters, given that when $c=1$ the relative gain of using low-precision for the model parameters is minimal.  We note that in practice, in order to avoid the risk of numerical precision issues (kernel ridge regression requires matrix inversion), we do all our full-precision experiments in 64 bits---however, we report memory utilization as if we used 32 bits, to avoid inflating the relative gains from our method.
 
 \begin{table}
