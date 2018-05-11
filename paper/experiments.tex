@@ -3,7 +3,7 @@
 %	\item We explain these results in terms of the ``small tasks'' (Census and Subsampled CovType), where we measure $\Delta$, showing that below a certain number of bits, $\Delta$ can increase a lot.  If we have space, we explain the trade-offs here a bit, showing in the fixed design setting that higher noise means higher $\lambda^*$, which means fewer bits can be used until $\Delta$ increases a lot.
 %	\item We briefly present low-precision training, showing that performance doesn't degrade much relative to full-precision training.
 %\end{itemize}
-In this section, we empirically evaluate our generalization theory on low-precision RFF, and demonstrate the empirical generalization performance of low-precision RFF under memory budgets. On the Census dataset and subsampled Covtype, we first demonstrate the strong correlation of generalization performance and $\lambda$-spectral distance $D_{\lambda}(K,\tK)$, where $K$ and $\tK$ are the exact and approximated kernel respectively; this aligns with our $\lambda$-spectral distance based bounds of generalization bound for low-precision RFF. We then extend to four different datasets, including the Census, YearPred dataset for kernel ridge regression and the Covtype, TIMIT dataset for kernel logistic regression. Across our experiment results, we compute the memory utilization as described in Section~\ref{subsec:memory_utils}. Across all our experiments, we use the Gaussian kernel with the kernel width value recommended by~\citet{may2017kernel}. We discuss our empirical validation results in this section, and refer to Section~\ref{sec:exp_details} for more details in the experiment settings.
+In this section, we empirically evaluate our generalization theory on low-precision RFF, and demonstrate the empirical generalization performance of low-precision RFF under memory budgets. On the Census dataset and subsampled Covtype, we first demonstrate the strong correlation of generalization performance and $\lambda$-spectral distance $D_{\lambda}(K,\tK)$, where $K$ and $\tK$ are the exact and approximated kernel respectively; this aligns with our $\lambda$-spectral distance based bounds of generalization bound for low-precision RFF. We then extend to four different datasets, including the Census, YearPred dataset for kernel ridge regression and the Covtype, TIMIT dataset for kernel logistic regression. Across our experiment results, we compute the memory utilization as described in Section~\ref{subsec:memory_utils}. Across all our experiments, we use the Gaussian kernel with the kernel width value recommended by~\citet{may2017}. We discuss our empirical validation results in this section, and refer to Section~\ref{sec:exp_details} for more details in the experiment settings.
 
 \subsection{Strong correlation between generalization and $\lambda$-spectral distance}
 Our theory in Section~\ref{sec:lprff} claims that in fixed design kernel ridge regression, the generalization performance strongly depends on $\lambda$-spectral distance $D_{\lambda}(K,\tK)$.
@@ -42,15 +42,15 @@ As shown in Table~\ref{fig:mem_saving}, we can observe that LP RFF demonstrate s
 
 \begin{figure}
 	\centering
-	\begin{tabular}{c c c c}
-		\includegraphics[width=0.24\linewidth]{figures/census_L2_loss_vs_n_memory.pdf} &
-		\includegraphics[width=0.24\linewidth]{figures/yearpred_L2_loss_vs_n_memory.pdf} &
-		\includegraphics[width=0.24\linewidth]{figures/covtype_accuracy_vs_n_memory.pdf} &
-		\includegraphics[width=0.24\linewidth]{figures/timit_accuracy_vs_n_memory.pdf} \\
-		\includegraphics[width=0.24\linewidth]{figures/census_L2_loss_vs_n_feat.pdf} &
-		\includegraphics[width=0.24\linewidth]{figures/yearpred_L2_loss_vs_n_feat.pdf} &
-		\includegraphics[width=0.24\linewidth]{figures/covtype_accuracy_vs_n_feat.pdf} &
-		\includegraphics[width=0.24\linewidth]{figures/timit_accuracy_vs_n_feat.pdf} \\
+	\begin{tabular}{c@{\hskip 0in}c@{\hskip 0in}c@{\hskip 0in}c}
+		\includegraphics[width=0.3\linewidth]{figures/census_L2_loss_vs_n_memory.pdf} &
+		\includegraphics[width=0.3\linewidth]{figures/yearpred_L2_loss_vs_n_memory.pdf} &
+		\includegraphics[width=0.3\linewidth]{figures/covtype_accuracy_vs_n_memory.pdf} &
+		\includegraphics[width=0.3\linewidth]{figures/timit_accuracy_vs_n_memory.pdf} \\
+		\includegraphics[width=0.3\linewidth]{figures/census_L2_loss_vs_n_feat.pdf} &
+		\includegraphics[width=0.3\linewidth]{figures/yearpred_L2_loss_vs_n_feat.pdf} &
+		\includegraphics[width=0.3\linewidth]{figures/covtype_accuracy_vs_n_feat.pdf} &
+		\includegraphics[width=0.3\linewidth]{figures/timit_accuracy_vs_n_feat.pdf} \\
 		(a) Census & (b) YearPred & (c) Covtype & (d) TIMIT \\
 	\end{tabular}
 	\caption{Generalization performance of low precision RFF, full precision RFF and \Nystrom with respect to number of features and memory budgets.}
