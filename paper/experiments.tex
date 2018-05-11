@@ -3,7 +3,7 @@
 %	\item We explain these results in terms of the ``small tasks'' (Census and Subsampled CovType), where we measure $\Delta$, showing that below a certain number of bits, $\Delta$ can increase a lot.  If we have space, we explain the trade-offs here a bit, showing in the fixed design setting that higher noise means higher $\lambda^*$, which means fewer bits can be used until $\Delta$ increases a lot.
 %	\item We briefly present low-precision training, showing that performance doesn't degrade much relative to full-precision training.
 %\end{itemize}
-In this section, we empirically evaluate our generalization theory on low-precision RFF, and demonstrate the empirical generalization performance of low-precision RFF under memory budgets. On the Census dataset and subsampled Covtype, we first demonstrate the strong correlation of generalization performance and $\Delta$, which aligns with our $\Delta$ based bounds of generalization bound for low-precision RFF. We then extend to four different datasets, including the Census, YearPred dataset for kernel ridge regression and the Covtype, TIMIT dataset for kernel logistic regression. \todo{Jian describe how the memory is calculated}
+In this section, we empirically evaluate our generalization theory on low-precision RFF, and demonstrate the empirical generalization performance of low-precision RFF under memory budgets. On the Census dataset and subsampled Covtype, we first demonstrate the strong correlation of generalization performance and $\Delta$, which aligns with our $\Delta$ based bounds of generalization bound for low-precision RFF. We then extend to four different datasets, including the Census, YearPred dataset for kernel ridge regression and the Covtype, TIMIT dataset for kernel logistic regression. Across our experiment results, we compute the memory utilization as described in Section~\ref{subsec:memory_utils}.
 
 \subsection{Strong correlation between generalization and $\Delta$\todo{Jian: need a english name for $\Delta$}}
 Our theory in Section~\ref{sec:lprff} claims that in fixed design kernel ridge regression, the generalization performance strongly depends on the quantity $\Delta$.
@@ -28,6 +28,14 @@ In Figure~\ref{fig:generalizatio_col}, we can observe LP-RFF can achieve signifi
 
 
 \subsection{Generalization performance of low-precision random Fourier features}
+To validate the generalization performance of LP RFF under memory budget, we compare LP RFF to FP RFF, FP circulant RFF and FP \Nystrom on larger datasets, showing the superior generalization performance of LP RFF under memory budget. 
+
+In our experiments, we run \Nystrom method with up to $20000$ features while FP RFF, FP circulant RFF and LP RFF uses up to $400000$ features; the \Nystrom and FP RFF has similar memory consumption with the largest number of features. In this regime, it is computationally prohibitive to exhaustively grid search learning rate, L2 regularization and manually determine the number of training epochs for every configuration. Instead, we utilize early stopping across our experiments, which serves as regularization~\cite{wei2017early, zhang2005boosting} and determines the number of epochs automatically. Specifically, we use a vanilla early stopping rule. This rule drops the learning rate by a factor of 2 if the latest model can not provide more than $1\%$ improvement over the previous best model on heldout L2 loss for regression or heldout cross entropy for classification. The training process is terminated after the early stopping strategy drops learning rate for 10 ties. To fairly compare all approximation approach on each dataset, we use a uniform initial learning rate for SGD on this dataset for all different number of features. We grid search this uniform learning rate using $20\text{k}$ \Nystrom features, with the picked value optimizes heldout L2 loss for regression and heldout cross entropy for classification. We carry out the learning rate grid search using \Nystrom features to avoid biasing to better performance for RFF-based approximation approaches. 
+
+We collect the generalization performance of LP RFF using $\{1,2,4,8,16\}$ bits, and quantitatively report \emph{memory saving} to measure the memory utilization improvement of LP RFF over baselines. Specifically, with a certain reference generalization performance from one baseline approach, we measure the minimal memory consumption of LP RFF across different number of bits to achieve within $1e^{-4}$ relative degradation to the reference. The \emph{memory saving} is defined as the ratio between the memory consumption of the reference performance and the minimal consumption from LP RFF. We measure the averaged memory saving with 3 runs using different random seeds, eliminating the fluctuation from a specific random seed. We report memory saving with respect to both the best and median heldout L2 loss or heldout accuracy from the feature number grid of baselines; this avoids the gain being inflated from the performance plateau near the best heldout metric.
+
+
+
 \begin{figure}
 	\centering
 	\begin{tabular}{c c c c}
@@ -71,12 +79,12 @@ In Figure~\ref{fig:generalizatio_col}, we can observe LP-RFF can achieve signifi
 		& FP RFF & FP circulant RFF & \Nystrom \\
 		\hline
 		\hline
-		Census & 2.8x & 30.7x & 62.2x \\
-		YearPred & 9.99x & 14.7x & 436.9x \\ 
-		Covtype & 4.6x & 7.6x & 230.4x \\ 
-		TIMIT & 5.1x & 3.9x & 50.6x \\ 
+		Census & 2.8x/ & 30.7x/ & 62.2x/ \\
+		YearPred & 9.99x/ & 14.7x/ & 436.9x/ \\ 
+		Covtype & 4.6x/ & 7.6x/ & 230.4x/ \\ 
+		TIMIT & 5.1x/ & 3.9x/ & 50.6x/ \\ 
 		\hline
 	\end{tabular}
-	\caption{The memory savings from LP RFF to achieve within $1e^{-4}$ relative difference from the best generalization performance of baselines. We measure heldout L2 loss and heldout accuracy as the generalization performance respectively for regression and classification problems.}
+	\caption{The memory savings from LP RFF to achieve within $1e^{-4}$ relative difference from reference performance of baselines. We measure heldout L2 loss and heldout accuracy as the generalization performance respectively for regression and classification problems. The memory saving is reported with respect to both the best and median performance from the feature number grid of a baseline; this avoids the gain being inflated from the performance plateau near the best heldout metric. }
 	\label{fig:mem_saving}
 \end{table}
