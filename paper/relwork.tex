@@ -1,59 +1,9 @@
 Our work is not the first to attempt to minimize the memory footprint of kernel approximation methods.  One line of work proposes using structured matrices in place of the projection matrix used by random Fourier features \citep{fastfood,yu15,sphereRKS}; these methods generally reduce the storage requirement for the projection matrix from $md$ to $m$, where $d$ is the dimension of the data. This work is orthogonal to ours, and in fact we use circulant projections \citep{yu15} in our implementation of LP-RFFs; importantly, these methods do not reduce the amount of memory occupied by the features themselves, or by the learned model parameters. Another line of work uses feature selection in order to reduce the number of random Fourier features required to attain a specific level of performance \citep{sparseRKS, may2016}; once again, our work is orthogonal to theirs, because feature selection can be performed on the low-precision features.  For the \Nystrom method, there has been extensive work on the best ways of choosing the landmark points \citep{kmeans08,kumar12,gittens13}, which can achieve the same performance with fewer points.  Several other methods reduce the memory requirement for \Nystrom \cite{ensemble09,fastpred14,meka14}; nonetheless, random Fourier features with structured matrices utilize orders of magnitude less memory per feature, so we focus our efforts on those methods.
 
-From a theoretical perspective, there has been a fair amount of recent work analyzing the generalization performance of kernel approximation methods \citep{bach13,alaoui15,rudi15,optrff15,musco17,rudi17,bach17,avron17}. 
+On the topic of scaling kernel methods to large datasets, there have been a number of notable recent papers.  From an algorithmic perspective, \citet{block16} propose a distibuted block coordinate descent method for solving large-scale least squares problems using the \Nystrom method or random Fourier features.  Although their computational setting (1024 cores on 128 machines) is very different than the primary one we imagine in this work (a single GPU), our contribution could nonetheless help lower the amount of memory and computation performed by each worker.  The recent work of \citet{may2017} uses single GPU training to scale RFFs to challenging problems in speech recognition with up to 16 million training points and 5000 classes, showing comparable performance to deep neural networks. In that work, they hit a bottleneck for how many features could fit on a single GPU, and thus our work could also help them scale their experiments to even larger numbers of random features.
 
+From a theoretical perspective, there has been a lot of recent work analyzing the generalization performance of kernel approximation methods \citep{bach13,alaoui15,rudi15,optrff15,musco17,rudi17,bach17,avron17}. This work is generally concerned with proving upper bounds on the number of features needed to attain a certain level of generalization performance, or designing new sampling methods for the random features in order to attain stronger bounds. The theoretical work most relevant to ours is that of \citet{avron17}, which bounds the generalization performance of kernel approximation methods in the kernel ridge regression context, in terms of a notion of distance to the exact kernel matrix.  While the theory is informative, the method proposed in the paper for sampling random features scales exponentially with the dimension of the data, making it impractical in most regimes. We build on their theoretical framework to propose a novel method for achieving $4x$ to $30x$ compression at no loss in performance, relative to full-precision RFFs with circulant projections. Furthermore, while they propose a metric to measure the distance between a kernel matrix and an approximation to it, they only measure this metric on a small synthetic dataset. Additionally, their metric, as defined, has a maximum value of $1$ when there exist eigenvalues $\tlambda_i$ of $\tK$ significantly smaller than the corresponding eigenvalues of $\tK$, and a maximum value of $\infty$ when the opposite is true. In experiments, this asymmetry results in their metric only correlating strongly with generalization performance at very small values.  We redefine their metric to correct for this asymmetry, and measure it across four datasets, and for various kernel approximation methods. With our modified definition, we demonstrate that this metric correlates very strongly with generalization performance in practice.
 
-This work is almost exclusively theoretical, offering very few experiments to provide intuition and validation for the theorems presented.
+Our work also provides an important new perspective to the question of which kernel method is best: the \Nystrom method or RFFs. An in-depth comparison of these methods was performed by \citet{nysvsrff12}, and argues that from both theoretical and empirical perspectives, the \Nystrom method is preferable to RFFs, for a fixed number of features. On this topic, the primary differentiator between our work and theirs is that we consider the relative memory utilization of computing $m$ \Nystrom features compared to $m$ random Fourier features. Additionally, we perform experiments using larger datasets, and using up to $\num[group-separator={,}]{20000}$ \Nystrom features, and $\num[group-separator={,}]{400000}$ random Fourier features, whereas \citeauthor{nysvsrff12} only use up to 1000.
 
-
-- Discuss theory, Avron et al, arguing that most other work has bounded the generalization performance in terms of kernel approximation error.
-- Discuss Nystrom vs. RFF
-- Discuss low-precision stuff.
-- Discuss block-coordinate descent paper.
-
-
-%ne can also use the ensemble \Nystrom method
-%
-%
-%
-%There is abundant literature about both the \Nystrom method \cite{nystrom} and about random
-%Fourier features \cite{rahimi07random}.  This work is often concerned with either (1) proposing an
-%improvement to the method of interest \cite{fastfood,yu15,sparseRKS,may2016,kmeans08,ensemble09,meka14}, (2) performing a theoretical analysis of the method \cite{rahimi08kitchen,gittens13,kumar12}, or (3) performing an empirical evaluation of the method \cite{huang14kernel,may2017,kumar12}.
-%
-%In spite of the abundant literature analyzing and building on each of these 
-%methods, there has been relatively little work attempting to understand the 
-%important differences between them.  One notable exception is the work of 
-%\citet{nysvsrff12}. This work argues that from both theoretical and 
-%empirical perspectives, the \Nystrom method is preferable to RFFs, for a fixed
-%number of features. They propose that the reason for this is that the \Nystrom 
-%method performs a \emph{data-dependent}
-%transformation, while RFF performs a \emph{data-independent} transformation.
-%In our work, we go beyond this existing work, in the following ways:
-%(1) We perform much larger scale experiments, using up to 
-%%$\num[group-separator={,}]{20000}$ \Nystrom features,
-%%and $\num[group-separator={,}]{1600000}$ random Fourier features,
-%whereas Yang et al. only use up to 1000.  Furthermore, 
-%we run experiments on TIMIT, a significantly larger dataset than those used in
-%Yang et al.
-%(2) We take into consideration the relative computational expense of computing $m$ \Nystrom
-%features compared to $m$ random Fourier features.
-%(3) We make a novel observation, that random Fourier features perform consistently
-%better on classification/regression problems than \Nystrom features with comparable kernel approximation error.
-%(4) We analyze, from both theoretical and empirical perspectives, the differences
-%in the ways \Nystrom features and random Fourier features make approximation errors,
-%and argue that these differences have a dramatic effect on training.
-%
-%Another important difference between this work and existing theoretical analyses
-%of the \Nystrom method \cite{gittens13,kumar12}, is that we analyze the \emph{element-wise} errors made by the \Nystrom method in approximation the kernel matrix, whereas existing work
-%generally analyzes the Frobenius norm or spectral norm of the full error matrix.
-
-
-%\begin{itemize}
-%	\item Give an overview of kernel approximation generalization bounds.  Note that the central object they generally use to bound the generalization error is $\|K-\tK\|$.  Discuss the more recent results which approach the problem differently \avner{We should read recent papers closely.}
-%	\item Discuss Nystrom vs. RFF paper.  Our main differentiators: 1) we consider larger/more challenging datasets, 2) we consider much larger numbers of features, 3) we consider memory budget.
-%	\item Discuss low-precision, and recent interest in doing low-precision training.
-%	\item Discuss fastfood/circulant RFF, and other attempts at reducing memory footprint of projection matrix.  Note that this doesn't address the memory of the features themselves, which can take a ton of space for moderate size mini-batches. Furthermore, our method can be combined with these methods in order to reduce the memory footprint even further (in fact, that is what we do!).
-%	\item Discuss other attempts at improving RFF (orthogonal RFF, Spherical Structured Feature Maps, Gaussian quadrature, quasi-monte carlo, etc.), and why we are different.  Discuss that while these methods often improve the kernel approximation error for a fixed number of features, they do not increase the rank for a fixed amount of memory.
-%	\item Perhaps discuss methods of improving Nystrom?  Sampling distributions, etc.
-%	\item \avner{Address the block coordinate descent paper, which doesn't compute SVD of landmark kernel matrix.}
-%\end{itemize}
+At the core of our contribution is the idea of using low-precision to use fewer bits, while still retaining the desired statistical properties of the learning algorithm.  There has been much recent interest in the topic of low-precision for accelerating training and/or inference, as well as for compressing models \citep{gupta15,hogwild15,hubara16,halp18,desa17,han15}.  From a hardware perspective, there has also been significant progress in developing chips which support low-precision operations, in order to use less energy, and perform computations faster; notable examples are Google's TPU \citep{tpu17} and Microsoft's Project Brainwave \citep{brainwave17}. Our work benefits enormously from these recent efforts, as these hardware accelerators could dramatically speed up the execution time of the training algorithm described in this work.
