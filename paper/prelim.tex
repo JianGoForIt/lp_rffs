@@ -1,10 +1,10 @@
 \subsection{Notation}
-We use $\{(x_i,y_i)\}_{i=1}^n$ to denote a training set, for $x_i \in \RR^d$, and $y_i \in \cY$, where $\cY = \RR$ for regression, $\cY = {1,\ldots,c}$ for classification.  We let $K$ denote the kernel matrix corresponding to a kernel function $k:\RR^d\times\RR^d$, and let $\tK$ denote an approximation to $K$. We let $z:\RR^d\rightarrow\RR^m$ denote a feature map for approximation a kernel function, such that $\tK_{ij} = z(x_i)^T z(x_j)$.  We let $s$ denote the size of the mini-batches during training, $b$ denote the precision used for the random features, and $\hb$ denote the precision used for the model.  We let $\|K\|_2$ and $\|K\|_F$ denote the spectral and Frobenius norms of a matrix $K$, respectively; if the subscript is not specified, $\|K\|$ denotes the spectral norm.
+We use $\{(x_i,y_i)\}_{i=1}^n$ to denote a training set, for $x_i \in \RR^d$, and $y_i \in \cY$, where $\cY = \RR$ for regression, $\cY = \{1,\ldots,c\}$ for classification.  We let $K$ denote the kernel matrix corresponding to a kernel function $k:\RR^d\times\RR^d$, and let $\tK$ denote an approximation to $K$. We let $z:\RR^d\rightarrow\RR^m$ denote a feature map for approximation a kernel function, such that $\tK_{ij} = z(x_i)^T z(x_j)$.  We use $s$ to denote the size of the mini-batches during training, $b$ to denote the precision used for the random features, and $\hb$ to denote the precision used for the model.  We let $\|K\|_2$ and $\|K\|_F$ denote the spectral and Frobenius norms of a matrix $K$, respectively; if the subscript is not specified, $\|K\|$ denotes the spectral norm.
 
 \subsection{Random Fourier features (RFFs)}
 For shift-invariant kernels ($k(x,x') = \hat{k}(x-x')$), the random Fourier 
 feature method \citep{rahimi07random} constructs a random feature representation 
-$z(x) \in \RR^m$ such that in expectation, $z(x)^T z(x') = k(x,x')$. This construction 
+$z(x) \in \RR^m$ such that $\expect{}{z(x)^T z(x')} = k(x,x')$. This construction 
 is based on Bochner's Theorem, which states that any positive definite kernels is 
 equal to the Fourier transform of a non-negative measure. This allows for performing
 Monte Carlo approximations of this Fourier transform in order to approximate the 
@@ -32,7 +32,7 @@ eigenvectors of $\hK$ are used, instead of all $m$.
 
 \subsection{Memory utilization}
 \label{subsec:memory_utils}
-The core resource we optimize for in this work is memory.  As discussed in the introduction, we consider the setting of large-scale mini-batch training for kernel approximation methods.  We summarize the memory utilization of the different parts of the training pipeline in Table \ref{table:mem-usage}, assuming full-precision numbers are stored in 32 bits. We note that unless $c$ is large, we generally use full-precision $\hb = 32$ for the model parameters, given that when $c=1$ the relative gain of using low-precision for the model parameters is minimal.  We note that in practice, in order to avoid the risk of numerical precision issues (kernel ridge regression requires matrix inversion), we do all our full-precision experiments in 64 bits---however, we report memory utilization as if we used 32 bits, to avoid inflating the relative gains from our method.
+The core resource we optimize for in this work is memory.  As discussed in the introduction, we consider the setting of large-scale mini-batch training for kernel approximation methods.  We summarize the memory utilization of the different parts of the training pipeline in Table \ref{table:mem-usage}, assuming full-precision numbers are stored in 32 bits. We note that unless the number of classes $c$ is large, we generally use full-precision $\hb = 32$ for the model parameters, given that when $c=1$ the relative gain of using low-precision for the model parameters is minimal.  We note that in practice, in order to avoid the risk of numerical precision issues (kernel ridge regression requires matrix inversion), we do all our full-precision experiments in 64 bits---however, we report memory utilization as if we used 32 bits, to avoid inflating the relative gains from our method.
 
 \begin{table}
 	\caption{Kernel approximation method memory utilization}
@@ -51,26 +51,33 @@ The core resource we optimize for in this work is memory.  As discussed in the i
 \end{table}
 
 \subsection{Fixed design kernel ridge regression}
-In fixed design linear regression, you are given a set of labeled points $\{(x_i,y_i)\}_{i=1}^n$, where $x_i \in \RR^d$, $y_i = \by_i + \eps_i \in \RR$, and the $\eps_i$ are uncorrelated random variables with shared variance $\sigma^2 > 0$.  Given such a sample, the goal is to learn a regressor $f(x) = \beta^T x$ such that $\frac{1}{n}\sum_{i=1}^n (f(x_i) - \by_i)^2$ is small. Note that for a fixed learning method the learned regressor $f$ seen as a random function, based on the random label noise $\eps_i$.  Thus, the goal is to design a training algorithm such that $\cR(f) = \expect{\eps}{\frac{1}{n}\sum_{i=1}^n (f(x_i) - \by_i)^2}$ is small.
+In fixed design linear regression, one is given a set of labeled points $\{(x_i,y_i)\}_{i=1}^n$, where $x_i \in \RR^d$, $y_i = \by_i + \eps_i \in \RR$, and the $\eps_i$ are uncorrelated random variables with shared variance $\sigma^2 > 0$.  Given such a sample, the goal is to learn a regressor $f(x) = \beta^T x$ such that $\cR(f) = \expect{\eps}{\frac{1}{n}\sum_{i=1}^n (f(x_i) - \by_i)^2}$ is small. Note that for a fixed learning method the learned regressor $f$ seen as a random function, based on the random label noise $\eps_i$.
 
-One approach to solving this problem is kernel ridge regression (KRR).  In kernel ridge regression, you choose a kernel function $k:\RR^d\times\RR^d\rightarrow \RR$, and a regularizing constant $\lambda$, and learn a function of the form $f(x) = \sum_i \alpha_i k(x,x_i)$.  Letting $K\in\RR^{n\times n}$ denote the kernel matrix such that $K_{ij} = k(x_i,x_j)$, and $y = (y_1,\ldots,y_n)$, the closed form solution for this problem is $\alpha = (K+\lambda I)^{-1}y$. It can then be shown that the expected error of this regressor $f$, under the fixed design setting, is:
+One approach to solving this problem is kernel ridge regression (KRR).  In kernel ridge regression, one chooses a kernel function $k:\RR^d\times\RR^d\rightarrow \RR$, and a regularizing constant $\lambda$, and learns a function of the form $f(x) = \sum_i \alpha_i k(x,x_i)$.  Letting $K\in\RR^{n\times n}$ denote the kernel matrix such that $K_{ij} = k(x_i,x_j)$, and $y = (y_1,\ldots,y_n)$, the closed form solution for this problem is $\alpha = (K+\lambda I)^{-1}y$. It can then be shown that the expected error of this regressor $f_K$, under the fixed design setting, is:
 \begin{eqnarray}
 \cR(f_K) = \frac{1}{n}\lambda^2 \by^T(K+\lambda I)^{-2}\by + \frac{1}{n}\sigma^2 Tr\Big(K^2(K+\lambda \id)^{-2}\Big),
 \end{eqnarray}
-where $\by = (\by_1,\ldots,\by_n)$ is the vector of ``noiseless labels.'' See Appendix \todo{XX} for derivation.
+where $\by = (\by_1,\ldots,\by_n)$ is the vector of ``noiseless labels.'' See Appendix \todo{X} for derivation.
 
 \subsection{Generalization bounds}
+\label{sec:genbound}
 Our goal in this section is to present bounds on the expected loss $\cR(f_{\tK})$ of a kernel ridge regression model $f_{\tK}$ learned using an approximate kernel matrix $\tK$, in place of the exact kernel matrix $K$. To do this, we will leverage the following notion of distance between $K$ and $\tK$:
 
-\begin{definition}{Adapted from \citep{avron17}:}
-A matrix $A$ is a \textbf{$\Delta$-spectral approximation} of another matrix $B$ if 
-\begin{eqnarray}
-\frac{1}{1+\Delta}B \preceq A \preceq (1+\Delta)B.
-\end{eqnarray}
-We can then define the \textbf{$\lambda$-spectral distance} $D_{\lambda}(K,\tK)\geq 0$ between $K$ and $\tK$ to be the minimum value of $\Delta \geq 0$ for which $\tK+\lambda I$ is a $\Delta$-spectral approximation of $K+\lambda I$:
-$$D_{\lambda}(K,\tK) = \min \Big\{\Delta \;\;\Big|\;\; \frac{1}{1+\Delta}(K+\lambda I) \preceq \tK + \lambda I \preceq (1+\Delta)(K+\lambda I)\Big\}.$$
-Thus, $D_{\lambda}(K,\tK) \leq \Delta$ is equivalent to stating that $\tK+\lambda I$ is a $\Delta$-spectral approximation of $K+\lambda I$.
+\begin{definition}
+	Given a kernel matrix $K$ and an approximation to it $\tK$, we define the \textbf{$\lambda$-spectral distance} $D_{\lambda}(K,\tK)\geq 0$ between $K$ and $\tK$ as:
+	$$D_{\lambda}(K,\tK) = \min \Big\{\Delta \in \RR_{+} \;\;\Big|\;\; \frac{1}{1+\Delta}(K+\lambda I) \preceq \tK + \lambda I \preceq (1+\Delta)(K+\lambda I)\Big\}.$$
+	We note that this definition is tightly related to the notion of $\Delta$-spectral approximation from \citet{avron17}.\footnote{\citet{avron17} define $\tK+\lambda I$ to be a $\Delta$-spectral approximation of $K+\lambda I$ if $(1-\Delta)(K+\lambda I) \preceq \tK + \lambda I \preceq (1+\Delta)(K+\lambda I)$. This differs from our definition in two important ways. First, we define the distance as the \textit{minimum} value of $\Delta$ satisfying the bound.  Second of all, we use $(1+\Delta)^{-1}(K+\lambda I)$ in place of $(1-\Delta)(K+\lambda I)$. The definition using $(1-\Delta)$ has the unusual property that the maximum value of $\Delta$ for the ``left inequality'' is 1, while the maximum value is $+\infty$ for the ``right inequality.'' Empirically, this asymmetry results in $\Delta$ only correlating strongly with generalization performance for small values of $\Delta$, at which $1-\Delta\approx (1+\Delta)^{-1}$; our definition, on the other hand, correlates strongly for all $\Delta$, as we show in Section \ref{sec:experiments}.  From a theoretical perspective, our definition also allows us to cleanly extend the generalization bounds to values of $\Delta > 1$.}
 \end{definition}
+
+%\begin{definition}{Adapted from \citep{avron17}:}
+%A matrix $A$ is a \textbf{$\Delta$-spectral approximation} of another matrix $B$ if 
+%\begin{eqnarray}
+%\frac{1}{1+\Delta}B \preceq A \preceq (1+\Delta)B.
+%\end{eqnarray}
+%We can then define the \textbf{$\lambda$-spectral distance} $D_{\lambda}(K,\tK)\geq 0$ between $K$ and $\tK$ to be the minimum value of $\Delta \geq 0$ for which $\tK+\lambda I$ is a $\Delta$-spectral approximation of $K+\lambda I$:
+%$$D_{\lambda}(K,\tK) = \min \Big\{\Delta \;\;\Big|\;\; \frac{1}{1+\Delta}(K+\lambda I) \preceq \tK + \lambda I \preceq (1+\Delta)(K+\lambda I)\Big\}.$$
+%Thus, $D_{\lambda}(K,\tK) \leq \Delta$ is equivalent to stating that $\tK+\lambda I$ is a $\Delta$-spectral approximation of $K+\lambda I$.
+%\end{definition}
 
 Following \citet{avron17}, if we then define 
 $$\hcR(f_K) = \frac{1}{n}\lambda \by^T(K+\lambda I)^{-1}\by + \frac{1}{n}\sigma^2 Tr\Big(K(K+\lambda)^{-1}\Big) \geq \cR(f_K),$$ 
@@ -87,6 +94,6 @@ We include a proof in Appendix \ref{sec:lprff_theory_appendix}. \avner{Include p
 
 An important consequence of the above definitions, is that if $\tK$ is a rank $r$ matrix, 
 %in order for $\tK+\lambda I$ to be a $\Delta$-spectral approximation of $K+\lambda I$, 
-in order for $D_{\lambda}(K,\tK) \leq \Delta$, it must hold that $\lambda_{r+1}(K) \leq \Delta \lambda$, where $\lambda_i(K)$ denote the $i^{th}$ largest eigenvalues of $A$.  This follows from $A\preceq B \Rightarrow \lambda_i(A) \leq \lambda_i(B)$, $(\lambda_i(K) + \lambda)/(1+\Delta) \leq \lambda_i(\tK) + \lambda$, and $\lambda_{r+1}(\tK) = 0$.  This sets a lower bound on the rank necessary for $D_{\lambda}(K,\tK) \leq \Delta$, which holds regardless of the approximation method used.  This observation provides motivation for our proposed method, low-precision random Fourier features, which generates high-rank approximations to a kernel matrix, under a fixed memory budget.
+in order for $D_{\lambda}(K,\tK) \leq \Delta$, it must hold that $\lambda_{r+1}(K) \leq \Delta \lambda$, where $\lambda_i(K)$ denote the $i^{th}$ largest eigenvalues of $A$.  This follows from $A\preceq B \Rightarrow \lambda_i(A) \leq \lambda_i(B)$, $(\lambda_i(K) + \lambda)/(1+\Delta) \leq \lambda_i(\tK) + \lambda$, and $\lambda_{r+1}(\tK) = 0$.  This sets a lower bound on the rank necessary for $D_{\lambda}(K,\tK) \leq \Delta$, which holds regardless of the approximation method used.  This observation provides motivation for our proposed method, low-precision random Fourier features, which generates a high-rank approximation to a kernel matrix, under a fixed memory budget.
 
 \avner{Should we add a section about low-precision training? LM-HALP?}
