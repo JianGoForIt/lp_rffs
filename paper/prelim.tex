@@ -32,10 +32,10 @@ eigenvectors of $\hK$ are used, instead of all $m$.
 
 \subsection{Memory utilization}
 \label{subsec:memory_utils}
-The core resource we optimize for in this work is memory.  As discussed in the introduction, we consider the setting of large-scale mini-batch training for kernel approximation methods.  We summarize the memory utilization of the different parts of the training pipeline in Table \ref{table:mem-usage}, assuming full-precision numbers are stored in 32 bits. We note that unless the number of classes $c$ is large, we generally use full-precision $\hb = 32$ for the model parameters, given that when $c=1$ the relative gain of using low-precision for the model parameters is minimal.  We note that in practice, in order to avoid the risk of numerical precision issues (kernel ridge regression requires matrix inversion), we do all our full-precision experiments in 64 bits---however, we report memory utilization as if we used 32 bits, to avoid inflating the relative gains from our method.
+The core resource we optimize for in this work is memory.  As discussed in the introduction, we consider the setting of large-scale mini-batch training for kernel approximation methods.  We summarize the memory utilization of the different parts of the training pipeline in Table \ref{table:mem-usage}, assuming full-precision numbers are stored in 32 bits. We note that unless the number of classes $c$ is large, we can generally use full-precision $\hb = 32$ for the model parameters, given that when $c=1$ the relative gain of using low-precision for the model parameters is minimal. To further reduce memory consumption when the number of class is large, we discuss optionally combining a recent low memory footprint optimizer LM-HALP~\cite{halp18} with LP RFFs in Section~\ref{subsec:method_details}; this can reduce memory consumption of model parameter to $\hb mc$ during training.
 
 \begin{table}
-	\caption{Kernel approximation method memory utilization}
+	\caption{Kernel approximation method memory utilization. Let $m$ be the number of kernel approximation features, while $d$ is the number of attributes of a datum. Given mini-batch size $s$, and the number of classes $c$ in a linear classification model, kernel approximation approaches demonstrate significantly different memory utilization.}
 	\label{table:mem-usage}
 	\centering
 	\begin{tabular}{llll}
@@ -61,7 +61,8 @@ where $\by = (\by_1,\ldots,\by_n)$ is the vector of ``noiseless labels.'' See Ap
 
 \subsection{Generalization bounds}
 \label{sec:genbound}
-Our goal in this section is to present bounds on the expected loss $\cR(f_{\tK})$ of a kernel ridge regression model $f_{\tK}$ learned using an approximate kernel matrix $\tK$, in place of the exact kernel matrix $K$. To do this, we will leverage the following notion of distance between $K$ and $\tK$:
+Our goal in this section is to present bounds on the expected loss $\cR(f_{\tK})$ of a kernel ridge regression model $f_{\tK}$ learned using an approximate kernel matrix $\tK$, in place of the exact kernel matrix $K$; our observation on the bounds provides motivation for our proposed method, low-precision random Fourier features, which generates a high-rank approximation to a kernel matrix, under a fixed memory budget.
+ Specifically, we leverage the following notion of distance between $K$ and $\tK$:
 
 \begin{definition}
 	Given a kernel matrix $K$ and an approximation to it $\tK$, we define the \textbf{$\lambda$-spectral distance} $D_{\lambda}(K,\tK)\geq 0$ between $K$ and $\tK$ as:
@@ -94,6 +95,8 @@ We include a proof in Appendix \ref{sec:lprff_theory_appendix}. \avner{Include p
 
 An important consequence of the above definitions, is that if $\tK$ is a rank $r$ matrix, 
 %in order for $\tK+\lambda I$ to be a $\Delta$-spectral approximation of $K+\lambda I$, 
-in order for $D_{\lambda}(K,\tK) \leq \Delta$, it must hold that $\lambda_{r+1}(K) \leq \Delta \lambda$, where $\lambda_i(K)$ denote the $i^{th}$ largest eigenvalues of $A$.  This follows from $A\preceq B \Rightarrow \lambda_i(A) \leq \lambda_i(B)$, $(\lambda_i(K) + \lambda)/(1+\Delta) \leq \lambda_i(\tK) + \lambda$, and $\lambda_{r+1}(\tK) = 0$.  This sets a lower bound on the rank necessary for $D_{\lambda}(K,\tK) \leq \Delta$, which holds regardless of the approximation method used.  This observation provides motivation for our proposed method, low-precision random Fourier features, which generates a high-rank approximation to a kernel matrix, under a fixed memory budget.
+in order for $D_{\lambda}(K,\tK) \leq \Delta$, it must hold that $\lambda_{r+1}(K) \leq \Delta \lambda$, where $\lambda_i(K)$ denote the $i^{th}$ largest eigenvalues of $A$.  This follows from $A\preceq B \Rightarrow \lambda_i(A) \leq \lambda_i(B)$, $(\lambda_i(K) + \lambda)/(1+\Delta) \leq \lambda_i(\tK) + \lambda$, and $\lambda_{r+1}(\tK) = 0$.  This sets a lower bound on the rank necessary for $D_{\lambda}(K,\tK) \leq \Delta$, which holds regardless of the approximation method used.  
+%This observation provides motivation for our proposed method, low-precision random Fourier features, which generates a high-rank approximation to a kernel matrix, under a fixed memory budget.
+Motivated by this observation, we discuss our proposed low-precision random Fourier features in the next section, which can generates a high-rank approximation to a kernel matrix, under a fixed memory budget.
 
 \avner{Should we add a section about low-precision training? LM-HALP?}

@@ -1,6 +1,7 @@
 In this section, we present the details of low-precision random Fourier features (LP-RFFs), and provide our theoretical results, which lower bound the probability that $D_{\lambda}(K,\tK) \leq \Delta$, where $\tK$ is the kernel approximation matrix corresponding to $m$ LP-RFFs.
 
 \subsection{Method details}
+\label{subsec:method_details}
 As discussed in the introduction, LP-RFFs provide ways of saving space across all three memory-intensive parts of the mini-batch training pipeline: (1) feature generation, (2) mini-batch storage, and (3) learned parameters.
 
 \paragraph{Feature generation} We leverage circulant random Fourier features \citep{yu15} in order for the RFF random projection matrix to occupy less space. This brings the space used by the projection matrix down from $32md$ to $32m$.
@@ -9,6 +10,8 @@ As discussed in the introduction, LP-RFFs provide ways of saving space across al
 \avner{Discuss whether $\eps$ is sampled differently every time?}
 
 \paragraph{Learned parameters} For binary classification and regression models, the cost of storing the full-precision model parameters is $32m$, which is quite small relative to the cost of storing the mini-batch of features. As such, we do not quantize the parameters in these cases. However, for multi-class classification problems where the number if classes $c$ is not a negligible fraction of the mini-batch size $s$, it becomes important to use low-precision for these parameters as well. In order to train with low-precision parameters, we propose using LM-HALP \citep{halp18}, a recently proposed algorithm for low-precision training of linear models.
+
+\jian{add a paragraph on LM-HALP}
 
 \avner{Discuss how different precisions mix in this system? Discuss low-precision SGD updates?}
 
