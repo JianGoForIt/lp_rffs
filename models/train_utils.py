@@ -63,13 +63,15 @@ def train(args, model, epoch, train_loader, optimizer, quantizer, kernel):
                     if quantizer != None:
                         # print("halp use quantizer")
                         data = quantizer.quantize(data)
+                    if data.size(0) != target.size(0):
+                        raise Exception("minibatch on data and target does not agree in closure")
+                    if not isinstance(data, torch.autograd.variable.Variable):
+                        data = Variable(data, requires_grad=False)
                 else:
                     # if we directly pass in the quantized feature, we directly use it without regeneration
+                    # this is for the case of LM halp where we need to sync the quantization for prev and curr model.
                     data = feat
-                if data.size(0) != target.size(0):
-                    raise Exception("minibatch on data and target does not agree in closure")
-                if not isinstance(data, torch.autograd.variable.Variable):
-                    data = Variable(data, requires_grad=False)
+
                 if not isinstance(target, torch.autograd.variable.Variable):
                     target = Variable(target, requires_grad=False)
 
