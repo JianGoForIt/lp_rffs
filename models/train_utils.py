@@ -18,6 +18,9 @@ def train(args, model, epoch, train_loader, optimizer, quantizer, kernel):
         if args.opt == "halp":
             # We need to add this function to models when we want to use SVRG
             def closure(data=X, target=Y):
+                if use_cuda:
+                    data = data.cuda()
+                    target = target.cuda()
                 # print "test 123", type(data), type(target)
                 if args.approx_type == "rff" or args.approx_type == "cir_rff":
                     data = kernel.get_cos_feat(data)
@@ -45,6 +48,11 @@ def train(args, model, epoch, train_loader, optimizer, quantizer, kernel):
         elif args.opt == "lm_halp":
             # We need to add this function to models when we want to use SVRG
             def closure(data=X, target=Y, feat=None):
+                if use_cuda:
+                    data = data.cuda()
+                    target = target.cuda()
+                    if feat is not None:
+                        feat = feat.cuda()
                 if feat is None:
                     if args.approx_type == "rff" or args.approx_type == "cir_rff":
                         data = kernel.get_cos_feat(data)

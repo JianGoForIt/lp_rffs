@@ -105,22 +105,40 @@
 #  --data_path=/dfs/scratch0/zjian/data/lp_kernel_data/census --save_path=./test/exact --approx_type=exact \
 #  --collect_sample_metrics --closed_form_sol --do_fp_feat
 
-sigma=1e4
-seed=1
-n_feat=8192
 
-python run_model.py --model=ridge_regression  \
-     --kernel_sigma=28.8675134595 --random_seed=1  \
-     --data_path=/dfs/scratch0/zjian/data/lp_kernel_data/census --save_path=/dfs/scratch0/zjian/lp_kernel/delta/fixed_design/exact_auto_l2_reg_noise_sigma_${sigma} --approx_type=exact \
-     --collect_sample_metrics --fixed_design --fixed_design_auto_l2_reg --fixed_design_noise_sigma=${sigma} --exit_after_collect_metric
+# test for fixed design exp script
+#sigma=1e4
+#seed=1
+#n_feat=8192
+#
+#python run_model.py --model=ridge_regression  \
+#     --kernel_sigma=28.8675134595 --random_seed=1  \
+#     --data_path=/dfs/scratch0/zjian/data/lp_kernel_data/census --save_path=/dfs/scratch0/zjian/lp_kernel/delta/fixed_design/exact_auto_l2_reg_noise_sigma_${sigma} --approx_type=exact \
+#     --collect_sample_metrics --fixed_design --fixed_design_auto_l2_reg --fixed_design_noise_sigma=${sigma} --exit_after_collect_metric
+#
+#python run_model.py --model=ridge_regression  \
+#              --kernel_sigma=28.8675134595 --random_seed=${seed}  \
+#              --data_path=/dfs/scratch0/zjian/data/lp_kernel_data/census --save_path=/dfs/scratch0/zjian/lp_kernel/delta/fixed_design/nystrom_noise_sigma_${sigma}_n_feat_${n_feat}_seed_${seed} \
+#              --approx_type=nystrom --do_fp_feat --n_fp_rff=${n_feat} \
+#              --collect_sample_metrics --fixed_design --fixed_design_auto_l2_reg --fixed_design_noise_sigma=${sigma} --exit_after_collect_metric
+#            
+#python run_model.py --model=ridge_regression  \
+#              --kernel_sigma=28.8675134595 --random_seed=${seed}  \
+#              --data_path=/dfs/scratch0/zjian/data/lp_kernel_data/census --save_path=/dfs/scratch0/zjian/lp_kernel/delta/fixed_design/rff_noise_sigma_${sigma}_n_feat_${n_feat}_seed_${seed} --approx_type=rff --do_fp_feat --n_fp_rff=${n_feat} \
+#              --collect_sample_metrics --fixed_design --fixed_design_auto_l2_reg --fixed_design_noise_sigma=${sigma} --exit_after_collect_metric
 
-python run_model.py --model=ridge_regression  \
-              --kernel_sigma=28.8675134595 --random_seed=${seed}  \
-              --data_path=/dfs/scratch0/zjian/data/lp_kernel_data/census --save_path=/dfs/scratch0/zjian/lp_kernel/delta/fixed_design/nystrom_noise_sigma_${sigma}_n_feat_${n_feat}_seed_${seed} \
-              --approx_type=nystrom --do_fp_feat --n_fp_rff=${n_feat} \
-              --collect_sample_metrics --fixed_design --fixed_design_auto_l2_reg --fixed_design_noise_sigma=${sigma} --exit_after_collect_metric
-            
-python run_model.py --model=ridge_regression  \
-              --kernel_sigma=28.8675134595 --random_seed=${seed}  \
-              --data_path=/dfs/scratch0/zjian/data/lp_kernel_data/census --save_path=/dfs/scratch0/zjian/lp_kernel/delta/fixed_design/rff_noise_sigma_${sigma}_n_feat_${n_feat}_seed_${seed} --approx_type=rff --do_fp_feat --n_fp_rff=${n_feat} \
-              --collect_sample_metrics --fixed_design --fixed_design_auto_l2_reg --fixed_design_noise_sigma=${sigma} --exit_after_collect_metric
+
+
+python run_model.py --model=logistic_regression --minibatch=250 --l2_reg=0.0 \
+                  --kernel_sigma=1.12 --n_fp_rff=10000 --random_seed=2 --learning_rate=2.5 \
+                  --data_path=/dfs/scratch0/zjian/data/lp_kernel_data/codrna --opt=halp --epoch=100 \
+                  --halp_mu=0.01 --halp_epoch_T=2.0 --cuda --n_bit_model=4 --n_bit_feat=4 \
+                  --save_path=./test/lm_halp_lr_2.5_model_bits_4_mu_0.01_epoch_T_2.0_seed_1
+
+#python run_model.py --model=logistic_regression --minibatch=250 --l2_reg=0.0 \
+#                  --kernel_sigma=1.12 --n_fp_rff=10000 --random_seed=1 --learning_rate=2.5 \
+#                  --data_path=/dfs/scratch0/zjian/data/lp_kernel_data/codrna --opt=halp --epoch=100 \
+#                  --halp_mu=0.01 --halp_epoch_T=2.0 --cuda --n_bit_model=4 --n_bit_feat=4 \
+#                  --save_path=./test/halp_lr_2.5_model_bits_4_mu_0.01_epoch_T_2.0_seed_1
+
+
