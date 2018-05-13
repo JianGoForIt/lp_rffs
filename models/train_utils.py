@@ -18,6 +18,9 @@ def train(args, model, epoch, train_loader, optimizer, quantizer, kernel):
         if args.opt == "halp":
             # We need to add this function to models when we want to use SVRG
             def closure(data=X, target=Y):
+                if use_cuda:
+                    data = data.cuda()
+                    target = target.cuda()
                 # print "test 123", type(data), type(target)
                 if args.approx_type == "rff" or args.approx_type == "cir_rff":
                     data = kernel.get_cos_feat(data)
@@ -40,6 +43,45 @@ def train(args, model, epoch, train_loader, optimizer, quantizer, kernel):
                 cost = model.forward(data, target)
                 cost.backward()
                 return cost
+            loss = optimizer.step(closure)
+            train_loss.append(loss[0].data.cpu().numpy() )
+        elif args.opt == "lm_halp":
+            # We need to add this function to models when we want to use SVRG
+            def closure(data=X, target=Y, feat=None):
+                if use_cuda:
+                    data = data.cuda()
+                    target = target.cuda()
+                    if feat is not None:
+                        feat = feat.cuda()
+                if feat is None:
+                    if args.approx_type == "rff" or args.approx_type == "cir_rff":
+                        data = kernel.get_cos_feat(data)
+                    elif args.approx_type == "nystrom":
+                        data = kernel.get_feat(data)
+                    else:
+                        raise Exception("kernel approximation type not supported!")
+                    if quantizer != None:
+                        # print("halp use quantizer")
+                        data = quantizer.quantize(data)
+                    if data.size(0) != target.size(0):
+                        raise Exception("minibatch on data and target does not agree in closure")
+                    if not isinstance(data, torch.autograd.variable.Variable):
+                        data = Variable(data, requires_grad=False)
+                else:
+                    # if we directly pass in the quantized feature, we directly use it without regeneration
+                    # this is for the case of LM halp where we need to sync the quantization for prev and curr model.
+                    data = feat
+
+                if not isinstance(target, torch.autograd.variable.Variable):
+                    target = Variable(target, requires_grad=False)
+
+                # if use_cuda:
+                #     data, target = data.cuda(), target.cuda()
+                cost = model.forward(data, target)
+                model.output.retain_grad()
+                cost.backward()
+                # extract the data X and grad of the output of 
+                return cost, data, model.output.grad
             loss = optimizer.step(closure)
             train_loss.append(loss[0].data.cpu().numpy() )
         else:

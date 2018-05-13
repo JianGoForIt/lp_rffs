@@ -162,7 +162,7 @@ if __name__ == "__main__":
         min_val = -np.sqrt(2.0/float(n_quantized_rff) )
         max_val = np.sqrt(2.0/float(n_quantized_rff) )
         quantizer = Quantizer(args.n_bit_feat, min_val, max_val, 
-            rand_seed=args.random_seed, use_cuda=use_cuda)
+            rand_seed=args.random_seed, use_cuda=use_cuda, for_lm_halp=True)
         print("feature quantization scale, bit ", quantizer.scale, quantizer.nbit)
     elif args.approx_type == "cir_rff" and args.do_fp_feat == True:
         print("fp circulant rff feature mode")
@@ -218,6 +218,14 @@ if __name__ == "__main__":
                 data_loader=train_loader, mu=args.halp_mu, bits=args.n_bit_model, weight_decay=args.l2_reg)
             print("model quantization, interval, mu, bit", optimizer.T, optimizer._mu, 
                 optimizer._bits, optimizer._biased)
+        elif args.opt == "lm_halp":
+            print("using lm halp optimizer")
+            optimizer = halp.optim.LMHALP(model.parameters(), lr=args.learning_rate, 
+                T=int(args.halp_epoch_T * X_train.size(0) / float(args.minibatch) ), 
+                data_loader=train_loader, mu=args.halp_mu, bits=args.n_bit_model, 
+                weight_decay=args.l2_reg, data_scale=quantizer.scale)
+            print("model quantization, interval, mu, bit", optimizer.T, optimizer._mu, 
+                optimizer._bits, optimizer._biased)
         else:
             raise Exception("optimizer not supported")
     
@@ -231,21 +239,21 @@ if __name__ == "__main__":
             # as the data is sampled and fixed here, we only need to do 1 calculation within here
             for i in range(1):
                 if use_cuda:
-                    approx_error_train = get_sample_kernel_F_norm(X_train.cuda(), kernel, kernel_approx, quantizer, args.l2_reg)
+                    #approx_error_train = get_sample_kernel_F_norm(X_train.cuda(), kernel, kernel_approx, quantizer, args.l2_reg)
                     approx_error_val = get_sample_kernel_F_norm(X_val.cuda(), kernel, kernel_approx, quantizer, args.l2_reg)
                 else:
-                    approx_error_train = get_sample_kernel_F_norm(X_train, kernel, kernel_approx, quantizer, args.l2_reg)
+                    #approx_error_train = get_sample_kernel_F_norm(X_train, kernel, kernel_approx, quantizer, args.l2_reg)
                     approx_error_val = get_sample_kernel_F_norm(X_val, kernel, kernel_approx, quantizer, args.l2_reg)
-                approx_train_error_list.append(approx_error_train)
+                #approx_train_error_list.append(approx_error_train)
                 approx_val_error_list.append(approx_error_val)
-            print("approx train kernel error list ", approx_train_error_list)
+            #print("approx train kernel error list ", approx_train_error_list)
             print("approx val kernel error list ", approx_val_error_list)
-            kernel_approx_error_dict_train = np.mean(approx_train_error_list)
+            #kernel_approx_error_dict_train = np.mean(approx_train_error_list)
             kernel_approx_error_dict_val = np.mean(approx_val_error_list)
             #kernel_approx_error_dict_train = {"F_norm_error": np.mean(approx_train_error_list) }
             #kernel_approx_error_dict_val = {"F_norm_error": np.mean(approx_val_error_list) }
-            with open(args.save_path + "/metric_sample_train.txt", "wb") as f:
-                cp.dump(kernel_approx_error_dict_train, f, protocol=2)
+            #with open(args.save_path + "/metric_sample_train.txt", "wb") as f:
+            #    cp.dump(kernel_approx_error_dict_train, f, protocol=2)
             with open(args.save_path + "/metric_sample_eval.txt", "wb") as f:
                 cp.dump(kernel_approx_error_dict_val, f, protocol=2)
         else:
