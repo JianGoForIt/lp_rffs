@@ -43,7 +43,7 @@ else:
 	    template = "python /lfs/1/zjian/lp_kernel/lp_kernel/models/run_model.py --model=unk --minibatch=250 --l2_reg=unk \
 	        --kernel_sigma=unk --n_fp_rff=unk --random_seed=unk --learning_rate=unk \
 	        --data_path=unk --opt=unk --epoch=unk \
-	        --save_path=unk --approx_type=unk --n_bit_feat=nbit" + str(nbit) + " --exit_after_collect_metric --only_collect_kernel_approx_error"
+	        --save_path=unk --approx_type=unk --n_bit_feat=" + str(nbit) + " --exit_after_collect_metric --only_collect_kernel_approx_error"
 
 
 if dataset == "census":
@@ -117,6 +117,8 @@ for seed in seed_list:
 					# 	continue
 					#if approx_type == "rff" and nbit != 64:
 					#	continue
+					if n_fp_rff >= 100000:
+						continue
 					save_suffix = "_type_" + approx_type + "_l2_reg_" + str(l2_reg) + "_n_fp_feat_" + str(n_fp_rff) \
 					 	+ "_opt_" + opt + "_lr_" + str(lr) + "_nbit_" + str(nbit) + "_seed_" + str(seed)
 					command = deepcopy(template)
