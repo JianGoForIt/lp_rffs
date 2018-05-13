@@ -35,7 +35,7 @@ EPS = 1e-10
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--model", type=str, default="logistic_regression")
-parser.add_argument("--minibatch", type=float, default=64)
+parser.add_argument("--minibatch", type=int, default=64)
 # parser.add_argument("--dataset", type=str, default="census")
 parser.add_argument("--l2_reg", type=float, default=0.0)
 parser.add_argument("--kernel_sigma", type=float, default=30.0)

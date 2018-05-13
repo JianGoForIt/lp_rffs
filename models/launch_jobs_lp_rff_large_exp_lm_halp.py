@@ -3,7 +3,7 @@ import math
 from copy import deepcopy
 
 # example
-# full run for nystrom vs rff: python launch_jobs_lp_rff_large_exp.py census lp_rff/full_tuning_run starcluster without_metric cuda -1 dryrun early_stop &
+# full run lp rff lm halp: python launch_jobs_lp_rff_large_exp_lm_halp.py timit lm_halp/first_round_sweep starcluster without_metric cuda -1 dryrun early_stop &
 
 #dataset = "census"
 #exp_name = "nystrom_vs_rff"
@@ -23,13 +23,13 @@ nbit_list = [4, 8]
 if cluster == "starcluster":
     template = "python /dfs/scratch0/zjian/lp_kernel_code/lp_kernel/models/run_model.py --model=unk --minibatch=250 --l2_reg=unk \
         --kernel_sigma=unk --n_fp_rff=unk --random_seed=unk --learning_rate=unk \
-        --data_path=unk --opt=unk --epoch=unk --opt=lm_halp --halp_mu=unk --halp_epoch_T=1.0 \
+        --data_path=unk --opt=unk --epoch=unk --halp_mu=unk --halp_epoch_T=unk \
         --save_path=unk --approx_type=unk --n_bit_feat=unk --n_bit_model=unk"
 
 else:
     template = "python /lfs/1/zjian/lp_kernel/lp_kernel/models/run_model.py --model=unk --minibatch=250 --l2_reg=unk \
         --kernel_sigma=unk --n_fp_rff=unk --random_seed=unk --learning_rate=unk \
-        --data_path=unk --opt=unk --epoch=unk --opt=lm_halp --halp_mu=unk --halp_epoch_T=1.0 \
+        --data_path=unk --opt=unk --epoch=unk --halp_mu=unk --halp_epoch_T=unk \
         --save_path=unk --approx_type=unk --n_bit_feat=unk --n_bit_model=unk"
 
 
@@ -91,8 +91,9 @@ else:
     raise Exception("dataset not supported")
 
 data_path = "/dfs/scratch0/zjian/data/lp_kernel_data/" + dataset
-opt = "sgd"
+opt = "lm_halp"
 epoch = 100 
+halp_T = 1.0
 save_path = "/dfs/scratch0/zjian/lp_kernel/" + exp_name + "/" + dataset
 
 cnt = 0
@@ -108,7 +109,7 @@ for seed in seed_list:
 							if approx_type == "cir_rff" and n_fp_rff > 100000:
 								continue
 							save_suffix = "_type_" + approx_type + "_l2_reg_" + str(l2_reg) + "_n_fp_feat_" + str(n_fp_rff) \
-							 	+ "_opt_" + opt + "_lr_" + str(lr) + "_nbit_" + str(nbit) + "_seed_" + str(seed)
+							 	+ "_opt_" + opt + "_lr_" + str(lr) + "_nbit_" + str(nbit) + "_halp_mu_" + str(halp_mu) + "_halp_T_" + str(halp_T) + "_seed_" + str(seed)
 							command = deepcopy(template)
 							command = command.replace("--model=unk", "--model="+model)
 							command = command.replace("--l2_reg=unk", "--l2_reg="+str(l2_reg) )
@@ -123,7 +124,8 @@ for seed in seed_list:
 							command = command.replace("--approx_type=unk", "--approx_type="+approx_type)
 							command = command.replace("--n_bit_feat=unk", "--n_bit_feat=" + str(nbit) )
 							command = command.replace("--n_bit_model=unk", "--n_bit_model=" + str(nbit) )
-							command = command.replace("--halp_mu=unk", "--halp_mu=" + str(mu) )
+							command = command.replace("--halp_mu=unk", "--halp_mu=" + str(halp_mu) )
+							command = command.replace("--halp_epoch_T=unk", "--halp_epoch_T="+str(halp_T))
 							if do_metric == "with_metric":
 								command += " --collect_sample_metrics"
 							if do_cuda == "cuda":
