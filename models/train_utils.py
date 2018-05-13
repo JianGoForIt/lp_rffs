@@ -42,6 +42,38 @@ def train(args, model, epoch, train_loader, optimizer, quantizer, kernel):
                 return cost
             loss = optimizer.step(closure)
             train_loss.append(loss[0].data.cpu().numpy() )
+        elif args.opt == "lm_halp":
+            # We need to add this function to models when we want to use SVRG
+            def closure(data=X, target=Y, feat=None):
+                if feat is None:
+                    if args.approx_type == "rff" or args.approx_type == "cir_rff":
+                        data = kernel.get_cos_feat(data)
+                    elif args.approx_type == "nystrom":
+                        data = kernel.get_feat(data)
+                    else:
+                        raise Exception("kernel approximation type not supported!")
+                    if quantizer != None:
+                        # print("halp use quantizer")
+                        data = quantizer.quantize(data)
+                else:
+                    # if we directly pass in the quantized feature, we directly use it without regeneration
+                    data = feat
+                if data.size(0) != target.size(0):
+                    raise Exception("minibatch on data and target does not agree in closure")
+                if not isinstance(data, torch.autograd.variable.Variable):
+                    data = Variable(data, requires_grad=False)
+                if not isinstance(target, torch.autograd.variable.Variable):
+                    target = Variable(target, requires_grad=False)
+
+                # if use_cuda:
+                #     data, target = data.cuda(), target.cuda()
+                cost = model.forward(data, target)
+                model.output.retain_grad()
+                cost.backward()
+                # extract the data X and grad of the output of 
+                return cost, data, model.output.grad
+            loss = optimizer.step(closure)
+            train_loss.append(loss[0].data.cpu().numpy() )
         else:
             if args.approx_type == "rff" or args.approx_type == "cir_rff":
                 X = kernel.get_cos_feat(X)
