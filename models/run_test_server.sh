@@ -132,7 +132,7 @@
 python run_model.py --model=logistic_regression --minibatch=250 --l2_reg=0.0 \
                   --kernel_sigma=1.12 --n_fp_rff=10000 --random_seed=5 --learning_rate=2.5 \
                   --data_path=/dfs/scratch0/zjian/data/lp_kernel_data/codrna --opt=lm_halp --epoch=100 \
-                  --halp_mu=0.01 --halp_epoch_T=2.0 --cuda --n_bit_model=4 --n_bit_feat=4 \
+                  --halp_mu=0.01 --halp_epoch_T=2.0 --cuda --n_bit_model=4 --n_bit_feat=4 --approx_type=cir_rff \
                   --save_path=./test/lm_halp_lr_2.5_model_bits_4_mu_0.01_epoch_T_2.0_seed_11
 
 #python run_model.py --model=logistic_regression --minibatch=250 --l2_reg=0.0 \

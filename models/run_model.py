@@ -162,7 +162,7 @@ if __name__ == "__main__":
         min_val = -np.sqrt(2.0/float(n_quantized_rff) )
         max_val = np.sqrt(2.0/float(n_quantized_rff) )
         quantizer = Quantizer(args.n_bit_feat, min_val, max_val, 
-            rand_seed=args.random_seed, use_cuda=use_cuda)
+            rand_seed=args.random_seed, use_cuda=use_cuda, for_lm_halp=True)
         print("feature quantization scale, bit ", quantizer.scale, quantizer.nbit)
     elif args.approx_type == "cir_rff" and args.do_fp_feat == True:
         print("fp circulant rff feature mode")
