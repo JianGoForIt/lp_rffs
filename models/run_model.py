@@ -222,7 +222,8 @@ if __name__ == "__main__":
             print("using lm halp optimizer")
             optimizer = halp.optim.LMHALP(model.parameters(), lr=args.learning_rate, 
                 T=int(args.halp_epoch_T * X_train.size(0) / float(args.minibatch) ), 
-                data_loader=train_loader, mu=args.halp_mu, bits=args.n_bit_model, weight_decay=args.l2_reg)
+                data_loader=train_loader, mu=args.halp_mu, bits=args.n_bit_model, 
+                weight_decay=args.l2_reg, data_scale=quantizer.scale)
             print("model quantization, interval, mu, bit", optimizer.T, optimizer._mu, 
                 optimizer._bits, optimizer._biased)
         else:
