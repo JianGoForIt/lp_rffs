@@ -5,12 +5,16 @@ from time import time
 import math
 
 class Quantizer(object):
-  def __init__(self, nbit, min_val, max_val, scale=None, rand_seed=1, use_cuda=False):
+  def __init__(self, nbit, min_val, max_val, scale=None, rand_seed=1, use_cuda=False, for_lm_halp=False):
     self.nbit = nbit
     self.min_val = min_val
     self.max_val = max_val
     if scale == None:
-      self.scale = (max_val - min_val) / float(2**self.nbit - 1)
+      if for_lm_halp == False:
+        self.scale = (max_val - min_val) / float(2**self.nbit - 1)
+      else:
+        # adapt to the halp quantization scheme where 0 is in the representation grid
+        self.scale = (max_val - min_val) / float(2**self.nbit - 2)
     self.rand_seed = rand_seed
     self.use_cuda = use_cuda
 
