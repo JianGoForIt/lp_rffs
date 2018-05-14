@@ -107,8 +107,37 @@
 #   --data_path=../../data/census/census --save_path=./test/123 --approx_type=rff --do_fp_feat --n_fp_rff=8192 \
 #   --collect_sample_metrics --fixed_design --fixed_design_auto_l2_reg --fixed_design_noise_sigma=1e4
 
-# test only collecting kernel approximation error
-python run_model.py --model=ridge_regression  \
-  --kernel_sigma=28.8675134595 --random_seed=1  \
-  --data_path=../../data/census/census --save_path=./test/123 --approx_type=rff --do_fp_feat --n_fp_rff=128 \
-  --collect_sample_metrics --exit_after_collect_metric --only_collect_kernel_approx_error
+# # test only collecting kernel approximation error
+# python run_model.py --model=ridge_regression  \
+#   --kernel_sigma=28.8675134595 --random_seed=1  \
+#   --data_path=../../data/census/census --save_path=./test/123 --approx_type=rff --do_fp_feat --n_fp_rff=128 \
+#   --collect_sample_metrics --exit_after_collect_metric --only_collect_kernel_approx_error
+
+
+# test LM HALP for full precision 
+# python run_model.py --model=logistic_regression --minibatch=48 --l2_reg=0.0 \
+#   --kernel_sigma=2.24 --n_fp_rff=30 --random_seed=2 --n_bit_feat=8 --learning_rate=10.0 \
+#   --data_path=../../data/adult/adult --opt=halp --epoch=2 --n_bit_model=8 --halp_mu=0.01 \
+#   --halp_epoch_T=1.0
+
+
+# python run_model.py --model=logistic_regression --minibatch=48 --l2_reg=0.0 \
+#   --kernel_sigma=2.24 --n_fp_rff=30 --random_seed=2 --n_bit_feat=8 --learning_rate=30.0 \
+#   --data_path=../../data/adult/adult --opt=halp --epoch=2 --n_bit_model=8 --halp_mu=0.01 \
+#   --halp_epoch_T=1.0
+
+python run_model.py --model=logistic_regression --minibatch=2 --l2_reg=0.0 \
+  --kernel_sigma=2.24 --n_fp_rff=3 --random_seed=2 --n_bit_feat=8 --learning_rate=10.0 \
+  --data_path=../../data/adult/adult --opt=halp --epoch=2 --n_bit_model=8 --halp_mu=0.01 \
+  --halp_epoch_T=1.0
+
+python run_model.py --model=logistic_regression --minibatch=2 --l2_reg=0.0 \
+  --kernel_sigma=2.24 --n_fp_rff=3 --random_seed=2 --n_bit_feat=8 --learning_rate=10.0 \
+  --data_path=../../data/adult/adult --opt=lm_halp --epoch=2 --n_bit_model=8 --halp_mu=0.01 \
+  --halp_epoch_T=1.0
+
+
+# python run_model.py --model=logistic_regression --minibatch=48 --l2_reg=0.0 \
+#   --kernel_sigma=2.24 --n_fp_rff=30 --random_seed=2 --n_bit_feat=8 --learning_rate=30.0 \
+#   --data_path=../../data/adult/adult --opt=lm_halp --epoch=2 --n_bit_model=8 --halp_mu=0.01 \
+#   --halp_epoch_T=1.0
