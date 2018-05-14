@@ -14,17 +14,26 @@ In Table~\ref{fig:mem_saving} we present the compression ratios we can achieve w
 \begin{figure}
 	\centering
 	\begin{tabular}{c@{\hskip 0in}c@{\hskip 0in}c@{\hskip 0in}c}
-		\includegraphics[width=0.3\linewidth]{figures/census_MSE_vs_n_memory.pdf} &
-		\includegraphics[width=0.3\linewidth]{figures/yearpred_MSE_vs_n_memory.pdf} &
-		\includegraphics[width=0.3\linewidth]{figures/covtype_error_vs_n_memory.pdf} &
-		\includegraphics[width=0.3\linewidth]{figures/timit_error_vs_n_memory.pdf} \\
-		\includegraphics[width=0.3\linewidth]{figures/census_MSE_vs_n_feat.pdf} &
-		\includegraphics[width=0.3\linewidth]{figures/yearpred_MSE_vs_n_feat.pdf} &
-		\includegraphics[width=0.3\linewidth]{figures/covtype_error_vs_n_feat.pdf} &
-		\includegraphics[width=0.3\linewidth]{figures/timit_error_vs_n_feat.pdf} \\
-		(a) Census & (b) YearPred & (c) Covtype & (d) TIMIT \\
+		\subfigure[YearPred heldout MSE]{\label{fig:year_pred_mem} \includegraphics[width=0.3\linewidth]{figures/yearpred_MSE_vs_n_memory.pdf} } \hfill
+		\subfigure[YearPred heldout MSE]{\label{fig:year_pred_feat}\includegraphics[width=0.3\linewidth]{figures/yearpred_MSE_vs_n_feat.pdf} } \hfill
+		\subfigure[TIMIT heldout error]{\label{fig:year_pred_mem} \includegraphics[width=0.3\linewidth]{figures/timit_error_vs_n_memory.pdf} } \hfill
+		\subfigure[TIMIT heldout error]{\label{fig:year_pred_feat}\includegraphics[width=0.3\linewidth]{figures/timit_error_vs_n_feat.pdf} } \hfill
+%		\includegraphics[width=0.3\linewidth]{figures/yearpred_MSE_vs_n_memory.pdf} &
+%		\includegraphics[width=0.3\linewidth]{figures/yearpred_MSE_vs_n_feat.pdf} &
+%		\includegraphics[width=0.3\linewidth]{figures/timit_error_vs_n_memory.pdf} &
+%		\includegraphics[width=0.3\linewidth]{figures/timit_error_vs_n_feat.pdf} \\
+%		(a) Census & (b) YearPred & (c) Covtype & (d) TIMIT \\
+%		\includegraphics[width=0.3\linewidth]{figures/census_MSE_vs_n_memory.pdf} &
+%		\includegraphics[width=0.3\linewidth]{figures/yearpred_MSE_vs_n_memory.pdf} &
+%		\includegraphics[width=0.3\linewidth]{figures/covtype_error_vs_n_memory.pdf} &
+%		\includegraphics[width=0.3\linewidth]{figures/timit_error_vs_n_memory.pdf} \\
+%		\includegraphics[width=0.3\linewidth]{figures/census_MSE_vs_n_feat.pdf} &
+%		\includegraphics[width=0.3\linewidth]{figures/yearpred_MSE_vs_n_feat.pdf} &
+%		\includegraphics[width=0.3\linewidth]{figures/covtype_error_vs_n_feat.pdf} &
+%		\includegraphics[width=0.3\linewidth]{figures/timit_error_vs_n_feat.pdf} \\
+%		(a) Census & (b) YearPred & (c) Covtype & (d) TIMIT \\
 	\end{tabular}
-	\caption{Generalization performance of low precision RFF, full precision RFF and \Nystrom with respect to number of features and memory budgets. Across the 4 datasets, LP RFFs demonstrate better generalization performance than full precision baselines under memory budget. Noticeably, the comparison of different methods on generalization performance behaves differently under memory budget and under number off features. E.g., \Nystrom shows better generalization performance than RFF based approach with the same number of features. However, \Nystrom can be significantly worse under memory budgets.}
+	\caption{Generalization performance of low precision RFF, full precision RFF and \Nystrom with respect to number of features and memory budgets. Across the 4 datasets (we show results in Figure~\ref{fig:generalization_col_app} in Appendix~\ref{sec:exp_details} for the Census and CovType dataset), LP RFFs demonstrate better generalization performance than full precision baselines under memory budget. Noticeably, the comparison of different methods on generalization performance behaves differently under memory budget and under number off features. E.g., \Nystrom shows better generalization performance than RFF based approach with the same number of features. However, \Nystrom can be significantly worse under memory budgets.}
 	\label{fig:generalization_col}
 \end{figure}
 
@@ -82,16 +91,26 @@ In Figure~\ref{fig:specdist}, we observe that LP-RFFs can achieve significantly 
 
 \begin{figure}
 	\centering
-	\begin{tabular}{c c c}
-		\includegraphics[width=0.33\linewidth]{figures/regression_delta_vs_mem.pdf} &
-		\includegraphics[width=0.33\linewidth]{figures/regression_l2_vs_mem.pdf} &
-		\includegraphics[width=0.33\linewidth]{figures/regression_l2_vs_delta.pdf} \\
-		\includegraphics[width=0.33\linewidth]{figures/classification_delta_vs_mem.pdf} &
-		\includegraphics[width=0.33\linewidth]{figures/classification_acc_vs_mem.pdf} &
-		\includegraphics[width=0.33\linewidth]{figures/classification_acc_vs_delta.pdf} \\
-		(a) & (b) & (c)
+	\begin{tabular}{c c}
+		\subfigure[Census heldout MSE]{\label{fig:year_pred_mem} \includegraphics[width=0.33\linewidth]{figures/regression_l2_vs_delta.pdf} } \hfill
+		\subfigure[CovType heldout error]{\label{fig:year_pred_mem} \includegraphics[width=0.33\linewidth]{figures/classification_acc_vs_delta.pdf} } \hfill
 	\end{tabular}
-	\caption{The strong correlation between generalization performance and $\lambda$-spectral distance $D_{\lambda}(K,\tK)$ under memory budgets for the Census dataset (top) and subsampled CovType dataset (bottom). Under different memory budget in (a) and (b), the precision demonstrates smaller $D_{\lambda}(K,\tK)$ tends to have better generalization performance. In (c), different kernel approximation approaches demonstrate similar generalization performance for similar $\lambda$-spectral distance.}
+	\caption{The strong correlation between generalization performance and $\lambda$-spectral distance $D_{\lambda}(K,\tK)$ under memory budgets for the Census dataset (left) and subsampled CovType dataset (right).  Different kernel approximation approaches demonstrate similar generalization performance for similar $\lambda$-spectral distance.}
 	\label{fig:specdist}
 \end{figure}
+
+%\begin{figure}
+%	\centering
+%	\begin{tabular}{c c c}
+%		\includegraphics[width=0.33\linewidth]{figures/regression_delta_vs_mem.pdf} &
+%		\includegraphics[width=0.33\linewidth]{figures/regression_l2_vs_mem.pdf} &
+%		\includegraphics[width=0.33\linewidth]{figures/regression_l2_vs_delta.pdf} \\
+%		\includegraphics[width=0.33\linewidth]{figures/classification_delta_vs_mem.pdf} &
+%		\includegraphics[width=0.33\linewidth]{figures/classification_acc_vs_mem.pdf} &
+%		\includegraphics[width=0.33\linewidth]{figures/classification_acc_vs_delta.pdf} \\
+%		(a) & (b) & (c)
+%	\end{tabular}
+%	\caption{The strong correlation between generalization performance and $\lambda$-spectral distance $D_{\lambda}(K,\tK)$ under memory budgets for the Census dataset (top) and subsampled CovType dataset (bottom). Under different memory budget in (a) and (b), the precision demonstrates smaller $D_{\lambda}(K,\tK)$ tends to have better generalization performance. In (c), different kernel approximation approaches demonstrate similar generalization performance for similar $\lambda$-spectral distance.}
+%	\label{fig:specdist}
+%\end{figure}
 
