@@ -28,7 +28,7 @@ if cluster == "starcluster":
         --save_path=unk --approx_type=unk --n_bit_feat=unk --n_bit_model=unk"
 
 else:
-    template = "python /lfs/1/zjian/lp_kernel/lp_kernel/models/run_model.py --model=unk --minibatch=250 --l2_reg=unk \
+    template = "python /dfs/scratch0/zjian/lp_kernel_code/lp_kernel/models/run_model.py --model=unk --minibatch=250 --l2_reg=unk \
         --kernel_sigma=unk --n_fp_rff=unk --random_seed=unk --learning_rate=unk \
         --data_path=unk --opt=unk --epoch=unk --halp_mu=unk --halp_epoch_T=unk \
         --save_path=unk --approx_type=unk --n_bit_feat=unk --n_bit_model=unk"
@@ -84,7 +84,7 @@ elif dataset == "timit":
     #n_fp_rff_list = [5000, 50000, 400000]
     #n_fp_rff_list = [20000, ] # to simulate exact kernel approach
     halp_mu_list = [1e-3, 1e-2, 1e-1, 1e0]
-    seed_list = [2, 3,]
+    seed_list = [1,]
     #lr_list = [1.0, 5.0, 10.0, 50.0, 100.0]
     lr_list = [100.0]
 
@@ -107,7 +107,7 @@ for seed in seed_list:
 						for approx_type in ["cir_rff"]:
 							# if approx_type == "nystrom" and n_fp_rff > 20000:
 							# 	continue
-							if approx_type == "cir_rff" and n_fp_rff > 100000:
+							if approx_type == "cir_rff" and n_fp_rff <= 100000:
 								continue
 							save_suffix = "_type_" + approx_type + "_l2_reg_" + str(l2_reg) + "_n_fp_feat_" + str(n_fp_rff) \
 							 	+ "_opt_" + opt + "_lr_" + str(lr) + "_model_nbit_" + str(nbit_model) + "_feat_n_bit_" + str(nbit_feat)  + "_halp_mu_" + str(halp_mu) + "_halp_T_" + str(halp_T) + "_seed_" + str(seed)
@@ -139,7 +139,7 @@ for seed in seed_list:
 							if cluster == "starcluster":
 								command = "cd /dfs/scratch0/zjian/lp_kernel_code/lp_kernel/models && " + command
 							else:
-								command = "cd /lfs/1/zjian/lp_kernel/lp_kernel/models && " + command
+								command = "cd /dfs/scratch0/zjian/lp_kernel_code/lp_kernel/models && " + command
 							f = open(save_path + save_suffix + "/job.sh", "w")
 							f.write(command)
 							f.close()
