@@ -54,10 +54,14 @@ In Table~\ref{fig:mem_saving} we present the compression ratios we can achieve w
 		& FP RFF (best/median) & FP circulant RFF (best/median) & \Nystrom (best/median) \\
 		\hline
 		\hline
-		Census & 2.8x / 1.13x & 30.7x / 7.7x & 62.2x / 4.09x \\
-		YearPred & 10.0x / 7.3x & 14.7x / 10.8x & 436.9x / 78.0x \\ 
-		Covtype & 4.6x / 4.6x & 7.6x / 7.6x & 230.4x / 75.3x \\ 
-		TIMIT & 5.1x / 2.0x & 3.9x / 3.6x & 50.6x / 8.9x \\ 
+%		Census & 2.8x / 1.13x & 30.7x / 7.7x & 62.2x / 4.09x \\
+%		YearPred & 10.0x / 7.3x & 14.7x / 10.8x & 436.9x / 78.0x \\ 
+%		Covtype & 4.6x / 4.6x & 7.6x / 7.6x & 230.4x / 75.3x \\ 
+%		TIMIT & 5.1x / 2.0x & 3.9x / 3.6x & 50.6x / 8.9x \\ 
+		Census & 2.8x / 1.13x & 15.5x / 3.9x & 62.2x / 4.09x \\
+		YearPred & 10.0x / 7.3x & 7.4x / 5.4x & 436.9x / 78.0x \\ 
+		Covtype & 4.6x / 4.6x & 3.8x / 3.8x & 230.4x / 75.3x \\ 
+		TIMIT & 5.1x / 2.0x & 2.4x / 2.2x & 50.6x / 8.9x \\ 
 		\hline
 	\end{tabular}
 	\caption{The memory savings from LP RFF to achieve within $1e^{-4}$ relative difference from reference performance of baselines. We measure heldout MSE and heldout classification error as the generalization performance respectively for regression and classification problems. The memory saving is reported with respect to both the best and median performance from the feature number grid of a baseline; this avoids the gain being inflated from the performance plateau near the best heldout metric. }
