@@ -3,7 +3,7 @@ import math
 from copy import deepcopy
 
 # example
-# full run lp rff lm halp: python launch_jobs_lp_rff_large_exp_lm_halp.py timit lm_halp/first_round_sweep starcluster without_metric cuda -1 dryrun early_stop &
+# full run lp rff lm halp: python launch_jobs_lp_rff_large_exp_lm_halp_mix_prec.py timit lm_halp/first_round_sweep starcluster without_metric cuda -1 dryrun early_stop &
 
 #dataset = "census"
 #exp_name = "nystrom_vs_rff"
@@ -16,7 +16,8 @@ do_cuda = sys.argv[5]
 n_subsample = sys.argv[6]
 run_option = sys.argv[7]
 early_stop = sys.argv[8]
-nbit_list = [4, 8]
+model_nbit_list = [8]
+feat_nbit_list = [4]
 #approx_type = sys.argv[3]
 
 # /dfs/scratch0/zjian/data/lp_kernel_data/census
@@ -83,8 +84,7 @@ elif dataset == "timit":
     #n_fp_rff_list = [5000, 50000, 400000]
     #n_fp_rff_list = [20000, ] # to simulate exact kernel approach
     halp_mu_list = [1e-3, 1e-2, 1e-1, 1e0]
-    #halp_mu_list = [5e-2, 5e-1]
-    seed_list = [2, 3]
+    seed_list = [2, 3,]
     #lr_list = [1.0, 5.0, 10.0, 50.0, 100.0]
     lr_list = [100.0]
 
@@ -102,7 +102,7 @@ for seed in seed_list:
 	for l2_reg in l2_reg_list:
 		for n_fp_rff in n_fp_rff_list:
 			for lr in lr_list:
-				for nbit in nbit_list:
+				for nbit_model, nbit_feat in zip(model_nbit_list, feat_nbit_list):
 					for halp_mu in halp_mu_list:
 						for approx_type in ["cir_rff"]:
 							# if approx_type == "nystrom" and n_fp_rff > 20000:
@@ -110,7 +110,7 @@ for seed in seed_list:
 							if approx_type == "cir_rff" and n_fp_rff > 100000:
 								continue
 							save_suffix = "_type_" + approx_type + "_l2_reg_" + str(l2_reg) + "_n_fp_feat_" + str(n_fp_rff) \
-							 	+ "_opt_" + opt + "_lr_" + str(lr) + "_nbit_" + str(nbit) + "_halp_mu_" + str(halp_mu) + "_halp_T_" + str(halp_T) + "_seed_" + str(seed)
+							 	+ "_opt_" + opt + "_lr_" + str(lr) + "_model_nbit_" + str(nbit_model) + "_feat_n_bit_" + str(nbit_feat)  + "_halp_mu_" + str(halp_mu) + "_halp_T_" + str(halp_T) + "_seed_" + str(seed)
 							command = deepcopy(template)
 							command = command.replace("--model=unk", "--model="+model)
 							command = command.replace("--l2_reg=unk", "--l2_reg="+str(l2_reg) )
@@ -123,8 +123,8 @@ for seed in seed_list:
 							command = command.replace("--epoch=unk", "--epoch="+str(epoch) )
 							command = command.replace("--save_path=unk", "--save_path="+save_path + save_suffix)
 							command = command.replace("--approx_type=unk", "--approx_type="+approx_type)
-							command = command.replace("--n_bit_feat=unk", "--n_bit_feat=" + str(nbit) )
-							command = command.replace("--n_bit_model=unk", "--n_bit_model=" + str(nbit) )
+							command = command.replace("--n_bit_feat=unk", "--n_bit_feat=" + str(nbit_feat) )
+							command = command.replace("--n_bit_model=unk", "--n_bit_model=" + str(nbit_model) )
 							command = command.replace("--halp_mu=unk", "--halp_mu=" + str(halp_mu) )
 							command = command.replace("--halp_epoch_T=unk", "--halp_epoch_T="+str(halp_T))
 							if do_metric == "with_metric":
