@@ -262,6 +262,7 @@ def get_sample_kernel_metrics(X, kernel, kernel_approx, quantizer, l2_reg):
     spectrum_exact = None
     metric_dict = {"F_norm_error": float(F_norm_error),
                    "Delta": float(delta) }
+    print metric_dict
     if is_cuda_tensor:
         kernel.torch(cuda=True)
         kernel_approx.torch(cuda=True)

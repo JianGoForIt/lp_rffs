@@ -3,7 +3,7 @@ import math
 from copy import deepcopy
 
 # example
-#python launch_jobs_nystrom_vs_rff_closed_form_sol_delta.py census delta/regression_real_settting dawn with_metric cpu dryrun &
+#python launch_jobs_nystrom_vs_rff_closed_form_sol_delta_theory_supporting.py census fixed_design/theory_supporting dawn with_metric cpu dryrun &
 
 #dataset = "census"
 #exp_name = "nystrom_vs_rff"
@@ -20,17 +20,18 @@ n_sample = 8000
 if cluster == "starcluster":
 	template = "python /dfs/scratch0/zjian/lp_kernel_code/lp_kernel/models/run_model.py --model=ridge_regression \
 		--l2_reg=unk  --kernel_sigma=unk --random_seed=unk --n_bit_feat=unk \
-		--data_path=unk --save_path=unk --approx_type=unk --n_fp_rff=unk --closed_form_sol --exit_after_collect_metric --n_sample=" + str(n_sample)
+		--data_path=unk --save_path=unk --approx_type=unk --n_fp_rff=unk --closed_form_sol --exit_after_collect_metric --fixed_design_noise_sigma=1e3 --fixed_design --n_sample=" + str(n_sample)
 else:
-	template = "python /lfs/1/zjian/lp_kernel/lp_kernel/models/run_model.py --model=ridge_regression \
+	template = "python /dfs/scratch0/zjian/lp_kernel_code/lp_kernel/models/run_model.py --model=ridge_regression \
   		--l2_reg=unk  --kernel_sigma=unk --random_seed=unk --n_bit_feat=unk \
-  		--data_path=unk --save_path=unk --approx_type=unk --n_fp_rff=unk --closed_form_sol --exit_after_collect_metric --n_sample=" + str(n_sample)
+  		--data_path=unk --save_path=unk --approx_type=unk --n_fp_rff=unk --closed_form_sol --exit_after_collect_metric --fixed_design_noise_sigma=1e3 --fixed_design --n_sample=" + str(n_sample)
 
 
 
 if dataset == "census":
     model = "ridge_regression"
-    l2_reg_list = [1e-3, 1e-2, 1e-1, 1e0]
+#    l2_reg_list = [1e-3, 1e-2]#, 1e-1, 1e0]
+    l2_reg_list = [1e-1, 1e0]#, 1e-1, 1e0]
     kernel_sigma = math.sqrt(1.0/0.0006/2.0)
     #n_fp_nystrom_list= [1250, 2500, 5000, 10000, 20000]
     n_fp_rff_list = [2000]
@@ -49,7 +50,7 @@ for seed in seed_list:
 		for n_fp_rff in n_fp_rff_list:
 			for approx_type in ["cir_rff"]:
 				for n_bit in feat_bit_list:
-					save_suffix = "_type_" + approx_type + "_l2_reg_" + str(l2_reg) + "_n_fp_feat_" + str(n_fp_rff) + "_seed_" + str(seed)
+					save_suffix = "_type_" + approx_type + "_l2_reg_" + str(l2_reg) + "_n_feat_" + str(n_fp_rff) + "_nbit_" + str(n_bit) +  "_seed_" + str(seed)
 					command = deepcopy(template)
 					command = command.replace("--l2_reg=unk", "--l2_reg="+str(l2_reg) )
 					command = command.replace("--kernel_sigma=unk", "--kernel_sigma="+str(kernel_sigma) )
@@ -58,7 +59,7 @@ for seed in seed_list:
 					command = command.replace("--data_path=unk", "--data_path="+str(data_path) )
 					command = command.replace("--save_path=unk", "--save_path="+save_path + save_suffix)
 					command = command.replace("--approx_type=unk", "--approx_type="+approx_type)
-					command = command.replace("--n_bit_feat=unk", "--n_bit_feat="+str(nbit) )
+					command = command.replace("--n_bit_feat=unk", "--n_bit_feat="+str(n_bit) )
 					if do_metric == "with_metric":
 						command += " --collect_sample_metrics"
 					if do_cuda == "cuda":
@@ -67,7 +68,7 @@ for seed in seed_list:
 					if cluster == "starcluster":
 						command = "cd /dfs/scratch0/zjian/lp_kernel_code/lp_kernel/models && " + command
 					else:
-						command = "cd /lfs/1/zjian/lp_kernel/lp_kernel/models && " + command
+						command = "cd /dfs/scratch0/zjian/lp_kernel_code/lp_kernel/models && " + command
 					f = open(save_path + save_suffix + "/job.sh", "w")
 					f.write(command)
 					f.close()
