@@ -157,7 +157,7 @@ This is equivalent to
 \begin{equation*}
 \norm{(K + \lambda I_n)^{-1/2} ((Z + C) (Z + C)^\top - K) (K + \lambda I_n)^{-1/2}} \leq \Delta'.
 \end{equation*}
-Suppose that $\norm{B((Z + C)(Z + C)^\top - (K + D))B} \leq \Delta_0$.
+Suppose that there is some $\Delta_0 > 0$ such that $\norm{B((Z + C)(Z + C)^\top - (K + D))B} \leq \Delta_0$.
 Then since $0 \preceq D \preceq \delta^2_b I_n$, $\norm{B(K + D - K) B} = \norm{B D B} \leq \delta^2_b
 \norm{B}^2$, and the triangle inequality yields
 \begin{align*}
@@ -166,7 +166,7 @@ Then since $0 \preceq D \preceq \delta^2_b I_n$, $\norm{B(K + D - K) B} = \norm{
 &\leq \Delta_0 + \delta^2_b \norm{B}^2 \\
 &\leq \Delta_0 + \delta^2_b/\lambda.
 \end{align*}
-We can now let $\Delta' \defeq \Delta_0 + \delta^2_b/\lambda$.  Given that $\Delta' = \frac{2}{3}\Delta$, and $\Delta \in \Big[\frac{3}{2}\sqrt{\frac{2n/\lambda}{m}} + \frac{2n/\lambda}{m} + \frac{3}{2}\frac{\delta^2_b}{\lambda}, \frac{1}{2} \Big]$, this implies that $\Delta_0 \in \Big[\sqrt{\frac{2n/\lambda}{m}} + \frac{4n/\lambda}{3m}, \frac{1}{3}-\frac{\delta^2_b}{\lambda}\Big]$.
+We can now let $\Delta' = \Delta_0 + \delta^2_b/\lambda$.  Given that $\Delta' = \frac{2}{3}\Delta$, and $\Delta \in \Big[\frac{3}{2}\sqrt{\frac{2n/\lambda}{m}} + \frac{2n/\lambda}{m} + \frac{3}{2}\frac{\delta^2_b}{\lambda}, \frac{1}{2} \Big]$, this implies that $\Delta_0 \in \Big[\sqrt{\frac{2n/\lambda}{m}} + \frac{4n/\lambda}{3m}, \frac{1}{3}-\frac{\delta^2_b}{\lambda}\Big]$.
 
 Now, it suffices to show that
 \begin{equation*}
@@ -229,7 +229,8 @@ features, then $D_\lambda(K,\tK)\leq \Delta$  with probability at least $1 - \rh
 \end{corollary}
 The constants are slightly different from that of \citet{avron17} as we use the
 real features $\sqrt{2} \cos(w^T x + b)$ instead of the complex features $\exp(i
-w^T x)$, and our definition of $\Delta$-spectral approximation is different from theirs.
+w^T x)$, and our definition of $\Delta$-spectral approximation is slightly different
+from theirs.
 
 The number of features depend linearly on $n/ \lambda$.
 \citet{avron17} provided a lower bound, showing that the number of random Fourier features
