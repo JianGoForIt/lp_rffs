@@ -40,3 +40,45 @@ TIMIT & 0.0015 & {5.0, 10.0, 50.0, \textbf{100.0}, 500.0} \\
 \end{table}
 
 
+\begin{figure}
+	\centering
+	\begin{tabular}{c@{\hskip 0in}c@{\hskip 0in}c@{\hskip 0in}c}
+		\subfigure[Census heldout MSE]{\label{fig:census_mem} \includegraphics[width=0.3\linewidth]{figures/census_MSE_vs_n_memory.pdf} } \hfill
+		\subfigure[Census heldout MSE]{\label{fig:census_feat}\includegraphics[width=0.3\linewidth]{figures/census_MSE_vs_n_feat.pdf} } \hfill
+		\subfigure[CovType heldout error]{\label{fig:covtype_mem} \includegraphics[width=0.3\linewidth]{figures/covtype_error_vs_n_memory.pdf} } \hfill
+		\subfigure[CovType heldout error]{\label{fig:covtype_feat}\includegraphics[width=0.3\linewidth]{figures/covtype_error_vs_n_feat.pdf} } \hfill
+%		\includegraphics[width=0.3\linewidth]{figures/yearpred_MSE_vs_n_memory.pdf} &
+%		\includegraphics[width=0.3\linewidth]{figures/yearpred_MSE_vs_n_feat.pdf} &
+%		\includegraphics[width=0.3\linewidth]{figures/timit_error_vs_n_memory.pdf} &
+%		\includegraphics[width=0.3\linewidth]{figures/timit_error_vs_n_feat.pdf} \\
+%		(a) Census & (b) YearPred & (c) Covtype & (d) TIMIT \\
+%		\includegraphics[width=0.3\linewidth]{figures/census_MSE_vs_n_memory.pdf} &
+%		\includegraphics[width=0.3\linewidth]{figures/yearpred_MSE_vs_n_memory.pdf} &
+%		\includegraphics[width=0.3\linewidth]{figures/covtype_error_vs_n_memory.pdf} &
+%		\includegraphics[width=0.3\linewidth]{figures/timit_error_vs_n_memory.pdf} \\
+%		\includegraphics[width=0.3\linewidth]{figures/census_MSE_vs_n_feat.pdf} &
+%		\includegraphics[width=0.3\linewidth]{figures/yearpred_MSE_vs_n_feat.pdf} &
+%		\includegraphics[width=0.3\linewidth]{figures/covtype_error_vs_n_feat.pdf} &
+%		\includegraphics[width=0.3\linewidth]{figures/timit_error_vs_n_feat.pdf} \\
+%		(a) Census & (b) YearPred & (c) Covtype & (d) TIMIT \\
+	\end{tabular}
+	\caption{Generalization performance of low precision RFF, full precision RFF and \Nystrom with respect to number of features and memory budgets. We can observe that LP RFFs demonstrate better generalization performance than full precision baselines under memory budget. Noticeably, the comparison of different methods on generalization performance behaves differently under memory budget and under number off features. E.g., \Nystrom shows better generalization performance than RFF based approach with the same number of features. However, \Nystrom can be significantly worse under memory budgets.}
+	\label{fig:generalization_col_app}
+\end{figure}
+
+\begin{figure}
+	\centering
+	\begin{tabular}{c c c}
+		\includegraphics[width=0.33\linewidth]{figures/regression_delta_vs_mem.pdf} &
+		\includegraphics[width=0.33\linewidth]{figures/regression_l2_vs_mem.pdf} &
+		\includegraphics[width=0.33\linewidth]{figures/regression_l2_vs_delta.pdf} \\
+		\includegraphics[width=0.33\linewidth]{figures/classification_delta_vs_mem.pdf} &
+		\includegraphics[width=0.33\linewidth]{figures/classification_acc_vs_mem.pdf} &
+		\includegraphics[width=0.33\linewidth]{figures/classification_acc_vs_delta.pdf} \\
+		(a) & (b) & (c)
+	\end{tabular}
+	\caption{The strong correlation between generalization performance and $\lambda$-spectral distance $D_{\lambda}(K,\tK)$ under memory budgets for the Census dataset (top) and subsampled CovType dataset (bottom). Under different memory budget in (a) and (b), the precision demonstrates smaller $D_{\lambda}(K,\tK)$ tends to have better generalization performance. In (c), different kernel approximation approaches demonstrate similar generalization performance for similar $\lambda$-spectral distance.}
+	\label{fig:specdist_app}
+\end{figure}
+
+
