@@ -1,0 +1,81 @@
+\begin{theorem}
+  Suppose that $\norm{K} \geq \lambda$ and $\delta^2_b \leq \lambda$.
+  Then for any $1/2 \geq \Delta_0 \geq \sqrt{\frac{2n/\lambda}{m}} + \frac{4n/\lambda}{3m}$, with $\Delta =
+  \Delta_0 + \delta^2_b / \lambda$,
+  \begin{equation*}
+    P((1 - \Delta)(K + \lambda I_n) \preceq (Z + C) (Z + C)^\top + \lambda I_n \preceq (1 + \Delta)(K + \lambda I_n)) \geq 1 - 16 \tr((K +
+    \lambda I_n)^{-1} (K + \delta^2_b I_n)) \exp \left( -\frac{3m \Delta_0^2}{16n/\lambda} \right).
+  \end{equation*}
+  Thus if we use $m \geq \frac{16}{3 \Delta_0^2} n/\lambda \log (16 \tr((K + \lambda I_n)^{-1} (K +
+  \delta^2_b I_n)) / \rho)$
+  features, then $(Z + C) (Z + C)^\top + \lambda I_n$ is a $\Delta$-spectral approximation of $K + \lambda I_n$,
+  with probability at least $1 - \rho$.
+\end{theorem}
+
+\begin{proof}
+  Consider the condition $(1 - \Delta)(K + \lambda I_n) \preceq (Z + C) (Z + C)^\top + \lambda I_n \preceq (1 +
+  \Delta)(K + \lambda I_n)$.
+  Let $B \defeq (K + \lambda I_n)^{-1/2}$, which is symmetric, then $\norm{B}^2 =
+  \norm{K + \lambda I_n}^{-1} \leq 1/\lambda$.
+  Conjugating by $B \defeq (K + \lambda I_n)^{-1/2}$ (i.e.\ multiplying by $B$ on the
+  left and right) yields an equivalent condition (as $B$ is
+  invertible):
+  \begin{equation*}
+    (1 - \Delta) I_n \preceq (K + \lambda I_n)^{-1/2} ((Z + C) (Z + C)^\top + \lambda I_n) (K + \lambda I_n)^{-1/2} \preceq (1 +
+    \Delta) I_n.
+  \end{equation*}
+  Subtracting $I_n$ from both sides:
+  \begin{equation*}
+    -\Delta I_n \preceq (K + \lambda I_n)^{-1/2} ((Z + C) (Z + C)^\top + \lambda I_n - (K + \lambda I_n)) (K + \lambda
+    I_n)^{-1/2} \preceq \Delta I_n.
+  \end{equation*}
+  This is equivalent to
+  \begin{equation*}
+    \norm{(K + \lambda I_n)^{-1/2} ((Z + C) (Z + C)^\top - K) (K + \lambda I_n)^{-1/2}} \leq \Delta.
+  \end{equation*}
+  Suppose that $\norm{B((Z + C)(Z + C)^\top - (K + D))B} \leq \Delta_0$.
+  Then since $0 \preceq D \preceq \delta^2_b I_n$, $\norm{B(K + D - K) B} = \norm{B D B} \leq \delta^2_b
+  \norm{B}^2$, and the triangle inequality yields
+  \begin{align*}
+    \norm{B((Z + C)(Z + C)^\top - K)B}
+    &\leq \norm{B((Z + C)(Z + C)^\top - (K + D))B} + \norm{B (K + D - K)B} \\
+    &\leq \Delta_0 + \delta^2_b \norm{B}^2 \\
+    &\leq \Delta_0 + \delta^2_b/\lambda \\
+    &= \Delta.
+  \end{align*}
+  Thus it suffices to show that
+  \begin{equation*}
+    P(\norm{B((Z + C)(Z + C)^\top - (K + D))B} \geq \Delta_0) \leq 8 \tr((K + \lambda I_n)^{-1} (K +
+    \delta^2_b I)) \exp \left( -\frac{3m \Delta_0^2}{16n/\lambda} \right).
+  \end{equation*}
+
+  We have $L \defeq 2n \norm{B}^2 \leq 2n/\lambda$.
+  Let $\lambda_1, \dots, \lambda_n$ be the eigenvalues of $K$.
+  We have
+  \begin{equation*}
+    M \defeq B(K + \delta^2_b I_n) B =  (K + \lambda I_n)^{-1/2} (K + \delta^2_b I_n) (K + \lambda
+    I_n)^{-1/2} = \diag((\lambda_1 + \delta^2_b)/(\lambda_1 + \lambda), \dots,
+    (\lambda_n + \delta^2_b) / (\lambda_n + \lambda)).
+  \end{equation*}
+  By assumption, $\norm{K} \geq \lambda$, so $\norm{M} = \frac{\lambda_1 + \delta^2_b}{\lambda_1 + \lambda} \geq
+  1/2$.
+  We also assume that $\delta^2_b \leq \lambda$, so $\norm{M} \leq 1$.
+  Moreover, $\tr(M) = \tr((K + \lambda I_n)^{-1/2} (K + \delta^2_b I) (K + \lambda I_n)^{-1/2}) =
+  \tr((K + \lambda I_n)^{-1} (K + \delta^2_b I_n))$.
+  The condition of $\Delta_0 \geq \sqrt{L \norm{M} / m} + 2L/3m$ becomes $\Delta_0 \geq \sqrt{\frac{2n/\lambda}{m}} + \frac{2n/\lambda}{3m}$.
+  The bound of Proposition~\ref{prop:quantized_concentration} becomes:
+  \begin{align*}
+    &P(\norm{(K + \lambda I_n)^{-1/2} ((Z + C) (Z + C)^\top - (K + D)) (K + \lambda
+      I_n)^{-1/2}} \geq \Delta_0) \\
+    \leq&\ \frac{8 \tr((K + \lambda I_n)^{-1} (K + \delta^2_b I_n))}{1/2} \exp \left( -\frac{m
+      \Delta_0^2}{4\frac{n}{\lambda} (1 + 2\Delta_0/3)} \right) \\
+    \leq&\ 16 \tr((K + \lambda I_n)^{-1} (K + \delta^2_b I_n)) \exp \left( -\frac{3m\Delta_0^2}{16n/\lambda} \right)
+  \end{align*}
+  where we get the last inequality from the assumption that $\Delta_0 \leq 1/2$.
+
+  Letting this probability be $\rho$ and solving for $m$ yields
+  \begin{equation*}
+    m \geq \frac{16}{3 \Delta_0^2} n/\lambda \log (16 \tr((K + \lambda I_n)^{-1} (K + \delta^2_b I_n)) / \rho).
+  \end{equation*}
+
+\end{proof}
