@@ -79,3 +79,35 @@
   \end{equation*}
 
 \end{proof}
+
+
+There is a bias--variance trade-off: as we decrease the number of bits $b$, under
+a fixed memory budget, we can use more features, and $(Z + C)(Z + C)^\top$
+concentrates more strongly (lower variance) around the expectation $K + D$ with
+$0 \preceq D \preceq \delta^2_b I_n$, but this expectation is further away from the true kernel
+matrix $K$ (larger bias).
+Thus there should be an optimal number of bits $b^*$ that balances the bias and
+the variance.
+
+As a sanity check, if we let the number of bits $b$ goes to $\infty$, we recover the
+result of \citet{avron17}.
+\begin{corollary}
+	Suppose that $\norm{K} \geq \lambda$.
+	Then for any $1/2 \geq \Delta \geq \sqrt{\frac{2n/\lambda}{m}} + \frac{4n/\lambda}{3m}$,
+	\begin{equation*}
+	P((1 - \Delta)(K + \lambda I_n) \preceq Z Z^\top + \lambda I_n \preceq (1 + \Delta)(K + \lambda I_n)) \geq 1 - 16 \tr((K +
+	\lambda I_n)^{-1} K) \exp \left( -\frac{3m \Delta^2}{16n/\lambda} \right).
+	\end{equation*}
+	Thus if we use $m \geq \frac{16}{3 \Delta^2} n/\lambda \log (16 \tr((K + \lambda I_n)^{-1} K) / \rho)$
+	features, then $Z Z^\top + \lambda I_n$ is a $\Delta$-spectral approximation of $K + \lambda I_n$,
+	with probability at least $1 - \rho$.
+\end{corollary}
+The constants are slightly different from that of \citet{avron17} as we use the
+real features $\sqrt{2} \cos(w^T x + b)$ instead of the complex features $\exp(i
+w^T x)$, and our definition of $\Delta$-spectral approximation is different from theirs.
+
+The number of features depend linearly on $n/ \lambda$.
+\citet{avron17} provided a lower bound, showing that the number of random Fourier features
+must depend linearly on $n / \lambda$.
+For optimal minimax rate, the value of $\lambda$ is of order $\sqrt{n}$ (\todo{check
+	this}), so the number of features is still sublinear in $n$.

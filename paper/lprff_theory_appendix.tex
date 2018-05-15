@@ -114,19 +114,24 @@ approximation to the kernel matrix.
 
 \begin{theorem}
   Suppose that $\tK = (Z+C)(Z+C)^\top$, $\norm{K} \geq \lambda$ and $\delta^2_b \leq \lambda$.
-  Then for any $\Delta_0 \in \Big[\sqrt{\frac{2n/\lambda}{m}} + \frac{4n/\lambda}{3m}, \frac{1}{2}\Big]$, $\Delta \in [0,1/2]$, with $\frac{2}{3}\Delta = \Delta_0 + \delta^2_b / \lambda$,
+  Then for any $\Delta \in \Big[\frac{3}{2}\sqrt{\frac{2n/\lambda}{m}} + \frac{2n/\lambda}{m} + \frac{3}{2}\frac{\delta^2_b}{\lambda}, \frac{1}{2} \Big]$,
   \begin{equation*}
   %(1 + \Delta)^{-1}(K + \lambda I_n) \preceq (Z + C) (Z + C)^\top + \lambda I_n \preceq (1 + \Delta)(K + \lambda I_n)
     \Prob\Big[D_{\lambda}(K,\tK) \leq \Delta\Big] \geq 1 - 16 \tr((K +
-    \lambda I_n)^{-1} (K + \delta^2_b I_n)) \exp \left( -\frac{3m \Delta_0^2}{16n/\lambda} \right).
+    \lambda I_n)^{-1} (K + \delta^2_b I_n)) \exp \left( -\frac{9m \big(\frac{2}{3}\Delta - \delta^2_b / \lambda\big)^2}{44n/\lambda} \right).
   \end{equation*}
-  Thus if we use $m \geq \frac{16}{3 \Delta_0^2} n/\lambda \log (16 \tr((K + \lambda I_n)^{-1} (K +
+  Thus if we use $m \geq \frac{44}{9 \big(\frac{2}{3}\Delta - \delta^2_b / \lambda\big)^2} n/\lambda \log (16 \tr((K + \lambda I_n)^{-1} (K +
   \delta^2_b I_n)) / \rho)$
   features, then $D_\lambda(K,\tK)\leq \Delta$  with probability at least $1 - \rho$.
 \end{theorem}
+%$\Delta_0 \in \Big[\sqrt{\frac{2n/\lambda}{m}} + \frac{4n/\lambda}{3m}, \frac{1}{3} - \frac{\delta^2_b}{\lambda}\Big]$, with
+
+%\Delta = \frac{3}{2}\Big(\Delta_0 + \delta^2_b / \lambda\Big)
+% \frac{2}{3}\Delta = \Delta_0 + \delta^2_b / \lambda
+% \Delta_0  = \frac{2}{3}\Delta - \delta^2_b / \lambda
 
 \begin{proof}
-First, we use the fact that for $\Delta\in[0,1/2]$, $(1+\Delta)^{-1} \leq 1-\frac{2}{3}\Delta$, and note the following:
+First, we use the fact that for any $x\in[0,1/2]$, $(1+x)^{-1} \leq 1-\frac{2}{3}x$, and note the following:
 \begin{eqnarray*}
 \Prob\Big[D_{\lambda}(K,\tK) \leq \Delta\Big] &=& \Prob\Big[(1 + \Delta)^{-1}(K + \lambda I_n) \preceq (Z + C) (Z + C)^\top + \lambda I_n \preceq (1 + \Delta)(K + \lambda I_n)\Big] \\
 &\geq& \Prob\Big[(1 - \frac{2}{3}\Delta)(K + \lambda I_n) \preceq (Z + C) (Z + C)^\top + \lambda I_n \preceq (1 + \frac{2}{3}\Delta)(K + \lambda I_n)\Big]\\
@@ -159,13 +164,14 @@ Then since $0 \preceq D \preceq \delta^2_b I_n$, $\norm{B(K + D - K) B} = \norm{
 \norm{B((Z + C)(Z + C)^\top - K)B}
 &\leq \norm{B((Z + C)(Z + C)^\top - (K + D))B} + \norm{B (K + D - K)B} \\
 &\leq \Delta_0 + \delta^2_b \norm{B}^2 \\
-&\leq \Delta_0 + \delta^2_b/\lambda \\
-&= \Delta'.
+&\leq \Delta_0 + \delta^2_b/\lambda.
 \end{align*}
-Thus it suffices to show that
+We can now let $\Delta' \defeq \Delta_0 + \delta^2_b/\lambda$.  Given that $\Delta' = \frac{2}{3}\Delta$, and $\Delta \in \Big[\frac{3}{2}\sqrt{\frac{2n/\lambda}{m}} + \frac{2n/\lambda}{m} + \frac{3}{2}\frac{\delta^2_b}{\lambda}, \frac{1}{2} \Big]$, this implies that $\Delta_0 \in \Big[\sqrt{\frac{2n/\lambda}{m}} + \frac{4n/\lambda}{3m}, \frac{1}{3}-\frac{\delta^2_b}{\lambda}\Big]$.
+
+Now, it suffices to show that
 \begin{equation*}
 P(\norm{B((Z + C)(Z + C)^\top - (K + D))B} \geq \Delta_0) \leq 8 \tr((K + \lambda I_n)^{-1} (K +
-\delta^2_b I)) \exp \left( -\frac{3m \Delta_0^2}{16n/\lambda} \right).
+\delta^2_b I)) \exp \left( -\frac{9m \Delta_0^2}{44n/\lambda} \right).
 \end{equation*}
 
 We have $L \defeq 2n \norm{B}^2 \leq 2n/\lambda$.
@@ -188,14 +194,14 @@ The bound of Proposition~\ref{prop:quantized_concentration} becomes:
   I_n)^{-1/2}} \geq \Delta_0) \\
 \leq&\ \frac{8 \tr((K + \lambda I_n)^{-1} (K + \delta^2_b I_n))}{1/2} \exp \left( -\frac{m
   \Delta_0^2}{4\frac{n}{\lambda} (1 + 2\Delta_0/3)} \right) \\
-\leq&\ 16 \tr((K + \lambda I_n)^{-1} (K + \delta^2_b I_n)) \exp \left( -\frac{3m\Delta_0^2}{16n/\lambda} \right)
+\leq&\ 16 \tr((K + \lambda I_n)^{-1} (K + \delta^2_b I_n)) \exp \left( -\frac{9m\Delta_0^2}{44n/\lambda} \right)
 \end{align*}
-where we get the last inequality from the assumption that $\Delta_0 \leq 1/2$.
+where we get the last inequality from $\Delta_0 \leq 1/3$.
 
 Letting this probability be $\rho$ and solving for $m$ yields
 \begin{eqnarray*}
-m &\geq& \frac{16}{3 \Delta_0^2} n/\lambda \log (16 \tr((K + \lambda I_n)^{-1} (K + \delta^2_b I_n)) / \rho) \\
-&=& \frac{16}{3 \Big((2/3)\Delta - \delta_b^2/\lambda\Big)^2} n/\lambda \log (16 \tr((K + \lambda I_n)^{-1} (K + \delta^2_b I_n)) / \rho).
+m &\geq& \frac{44}{9 \Delta_0^2} n/\lambda \log (16 \tr((K + \lambda I_n)^{-1} (K + \delta^2_b I_n)) / \rho) \\
+&=& \frac{44}{9 \Big((2/3)\Delta - \delta_b^2/\lambda\Big)^2} n/\lambda \log (16 \tr((K + \lambda I_n)^{-1} (K + \delta^2_b I_n)) / \rho).
 \end{eqnarray*}
 
 \end{proof}
@@ -211,19 +217,19 @@ the variance.
 As a sanity check, if we let the number of bits $b$ goes to $\infty$, we recover the
 result of \citet{avron17}.
 \begin{corollary}
-  Suppose that $\norm{K} \geq \lambda$.
-  Then for any $1/2 \geq \Delta \geq \sqrt{\frac{2n/\lambda}{m}} + \frac{4n/\lambda}{3m}$,
-  \begin{equation*}
-    P((1 - \Delta)(K + \lambda I_n) \preceq Z Z^\top + \lambda I_n \preceq (1 + \Delta)(K + \lambda I_n)) \geq 1 - 16 \tr((K +
-    \lambda I_n)^{-1} K) \exp \left( -\frac{3m \Delta^2}{16n/\lambda} \right).
-  \end{equation*}
-  Thus if we use $m \geq \frac{16}{3 \Delta^2} n/\lambda \log (16 \tr((K + \lambda I_n)^{-1} K) / \rho)$
-  features, then $Z Z^\top + \lambda I_n$ is a $\Delta$-spectral approximation of $K + \lambda I_n$,
-  with probability at least $1 - \rho$.
+  Suppose that $\tK = ZZ^\top$, $\norm{K} \geq \lambda$.
+Then for any $\Delta \in \Big[\frac{3}{2}\sqrt{\frac{2n/\lambda}{m}} + \frac{2n/\lambda}{m}, \frac{1}{2} \Big]$,
+\begin{equation*}
+%(1 + \Delta)^{-1}(K + \lambda I_n) \preceq (Z + C) (Z + C)^\top + \lambda I_n \preceq (1 + \Delta)(K + \lambda I_n)
+\Prob\Big[D_{\lambda}(K,\tK) \leq \Delta\Big] \geq 1 - 16 \tr((K +
+\lambda I_n)^{-1} (K + \delta^2_b I_n)) \exp \left( -\frac{m \Delta^2}{11n/\lambda} \right).
+\end{equation*}
+Thus if we use $m \geq \frac{11}{\Delta^2} n/\lambda \log (16 \tr((K + \lambda I_n)^{-1} (K + \delta^2_b I_n)) / \rho)$
+features, then $D_\lambda(K,\tK)\leq \Delta$  with probability at least $1 - \rho$.
 \end{corollary}
 The constants are slightly different from that of \citet{avron17} as we use the
 real features $\sqrt{2} \cos(w^T x + b)$ instead of the complex features $\exp(i
-w^T x)$.
+w^T x)$, and our definition of $\Delta$-spectral approximation is different from theirs.
 
 The number of features depend linearly on $n/ \lambda$.
 \citet{avron17} provided a lower bound, showing that the number of random Fourier features
