@@ -71,10 +71,10 @@ TIMIT & 0.0015 & {5.0, 10.0, 50.0, \textbf{100.0}, 500.0} \\
 	\begin{tabular}{c c}
 		\subfigure[MSE and $\lambda$-spectral distance]{\label{fig:census_delta_all_line} \includegraphics[width=0.33\linewidth]{figures/regression_l2_vs_delta_all_line.pdf} } \hfill
 		\subfigure[MSE and Frobenius norm]{\label{fig:census_f_norm_all_line} \includegraphics[width=0.33\linewidth]{figures/regression_l2_vs_f_norm_all_line.pdf} } \hfill
-		\subfigure[$\lambda$-spectral distance and memory]{\label{fig:census_s_norm_all_line}  \includegraphics[width=0.33\linewidth]{figures/regression_delta_vs_mem_all_line.pdf} } \hfill \\
-		\subfigure[MSE and $\lambda$-spectral distance]{\label{fig:covtype_delta_all_line} \includegraphics[width=0.33\linewidth]{figures/classification_acc_vs_delta_all_line.pdf} } \hfill
+		\subfigure[$\lambda$-spectral distance and memory]{\label{fig:census_s_norm_all_line}  \includegraphics[width=0.33\linewidth]{figures/regression_l2_vs_s_norm_all_line.pdf} } \hfill \\
+		\subfigure[MSE and Frobenius norm]{\label{fig:covtype_delta_all_line} \includegraphics[width=0.33\linewidth]{figures/classification_acc_vs_delta_all_line.pdf} } \hfill
 		\subfigure[Error and Frobenius norm]{\label{fig:covtype_f_norm_all_line} \includegraphics[width=0.33\linewidth]{figures/classification_acc_vs_f_norm_all_line.pdf} } \hfill
-		\subfigure[$\lambda$-spectral distance and memory]{\label{fig:covtype_s_norm_all_line} \includegraphics[width=0.33\linewidth]{figures/classification_delta_vs_mem_all_line.pdf}} \hfill
+		\subfigure[Error and spectral norm]{\label{fig:covtype_s_norm_all_line} \includegraphics[width=0.33\linewidth]{figures/classification_acc_vs_s_norm_all_line.pdf}} \hfill
 	\end{tabular}
 	\caption{Generalization performance as a function of $\lambda$-spectral distance $D_{\lambda}(K,\tK)$, Frobenius norm of $K - \tK$ and spectural norm of $K - \tK$. We can observe the positive correlation between generalization performance and $\lambda$-spectral distance $D_{\lambda}(K,\tK)$ for the Census dataset (top row) and subsampled CovType dataset (bottom row) across different kernel approximation methods. The correlation between generalization performance and $\lambda$-spectral distance $D_{\lambda}(K,\tK)$ is stronger than the ones between generalization performance and Frobenius norm, spectral norm of $K - \tK$.}
 	\label{fig:specdist_app}	
