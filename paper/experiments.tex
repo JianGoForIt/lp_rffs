@@ -89,19 +89,14 @@ In Table~\ref{tab:mem_saving} we present the compression ratios we can achieve w
 
 \subsubsection{Low precision training for LP-RFFs}
 \label{sec:halp}
-<<<<<<< HEAD
-In this section, we demonstrate that LP RFFs can be trained using 8-bit low precision HALP training algorithm. The generalization performance from 8-bit HALP training can closely match the performance from full precision SGD training. We uniformly use the same learning rate schedule as the one in the SGD-based comparison of LP RFFs, FP RFFs and \Nystrom. We sweep the $\mu$ parameter, which determines the value of the quantization scale in HALP, using grid search over $\{0.001, 0.01, 0.1, 1.0\}$. For each number of LP RFFs, we report the lowest heldout classification error from the grid of $\mu$. In Figure~\ref{fig:halp}, we can observe that for 8-bit LP RFFs, the generalization performance can very closely match after the number of features exceed 10k; this shows, in scenarios where large number of kernel approximation features are required~\cite{}, we can safely train LP RFFs with low precision training algorithms to reduce the memory footprint of training. 
-%\label{sec:lptrain}
-%\begin{figure}
-%\centering
-%	\includegraphics[width=.6\linewidth]{figures/timit_error_vs_n_feat_lm_halp.pdf}
-%\label{fig:halp}
-%\caption{Low precision training using HALP can demonstrate similar generalization performance as full precision training with SGD.}	
-%\end{figure}
-
-=======
 In this section, we demonstrate that LP-RFFs can be trained using 8-bit low precision HALP training algorithm. The generalization performance from 8-bit HALP training can closely match the performance from full-precision SGD training. We use the same learning rate schedule as the one in the SGD-based experiments. We sweep the $\mu$ parameter, which determines the value of the quantization scale in HALP, using grid search over $\{0.001, 0.01, 0.1, 1.0\}$. For each number of LP-RFFs $m$, we choose the value of $\mu$ attaining lowest heldout classification error, and report this as the error. In Figure~\ref{fig:halp}, we can see that for 8-bit LP-RFFs, the generalization performance of the models trained with HALP can closely match the results from full-precision SGD, once the number of features exceed 10k. This shows, in scenarios where large numbers of kernel approximation features are required, we can safely train LP-RFFs with low precision training algorithms to reduce the memory footprint of training.
->>>>>>> 559a5c577d02489c4ccffc67c84c7eacd90ee39c
+\label{sec:lptrain}
+\begin{figure}
+\centering
+	\includegraphics[width=.6\linewidth]{figures/timit_error_vs_n_feat_lm_halp.pdf}
+\label{fig:halp}
+\caption{Low precision training using HALP can demonstrate similar generalization performance as full precision training with SGD.}	
+\end{figure}
 
 \subsection{Heldout performance vs. $\lambda$-spectral distance}
 In this section, our goal is to dig deeper into the strong generalization performance of LP-RFFs, by seeing whether these results can be understood in terms of the theory presented in Sections \ref{sec:genbound} and \ref{sec:lprff}.  In particular, the theory we presented bounds the generalization performance of the kernel approximation models using the $\lambda$-spectral distance between the kernel approximation matrix, and the exact kernel matrix.  Although the theory as presented only applies to fixed design linear regression, in this section we ask whether $\lambda$-spectral distance is predictive of generalization performance for non-fixed design kernel ridgre regression, as well as for kernel logistic regression.
