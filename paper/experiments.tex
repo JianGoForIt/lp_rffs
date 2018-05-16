@@ -7,7 +7,7 @@ We compare the generalization performance of LP-RFFs to full-precision RFFs (FP-
 
 In Figure \ref{fig:generalization_col}, we plot the generalization performance for all these experiments, as a function of the amount of memory used, as well as the number of features $m$. We show across all four datasets that LP-RFFs show systematically better generalization performance than the full precision baselines under different memory budget. Importantly, we can observe that the \Nystrom method has observably better generalization performance than LP-RFF and FP-RFF-based baselines under the same number of features. However, when we instead consider performance as a function of memory utilization, the opposite it true, with the RFF-based methods demonstrating superior generalization performance. This observation further validates the practical importance of comparing kernel approximation methods under memory budgets.
 
-In Table~\ref{fig:mem_saving} we present the compression ratios we can achieve with LP-RFF, relative to the baselines, while still attaining generalization performance within $10^{-4}$ of the full-precision baseline.  We measure this as follows:  For each baseline (FP-RFF, circulant FP-RFF, \Nystrom), we find the best performing (as well as median) model. We then find the smallest LP-RFF model, as well as the smallest baseline model, which attains within $10^{-4}$ relative performance to the best performing baseline.  We report the ratio of the memory used by these two models (baseline/LP-RFF), that are both within $10^{-4}$ of the best baseline. We compute this ratio across three independent runs using different random seeds, and report the average.  We can see that LP-RFFs demonstrate significant memory saving over FP-RFFs and circulant FP-RFFs, showing 2.8x-10.0x and 3.9x-30.7x compression ratios respectively. On the TIMIT dataset, there are 147 classes, and thus the full-precision learned parameters occupy a large portion of the total memory across all methods. Nonetheless, even though these LP-RFF experiments only quantize the feature mini-batches, they still attain 5.1x and 3.9x compression ratios relative to FP-RFF and circulant FP-RFF.
+In Table~\ref{tab:mem_saving} we present the compression ratios we can achieve with LP-RFF, relative to the baselines, while still attaining generalization performance within $10^{-4}$ of the full-precision baseline.  We measure this as follows:  For each baseline (FP-RFF, circulant FP-RFF, \Nystrom), we find the best performing (as well as median) model. We then find the smallest LP-RFF model, as well as the smallest baseline model, which attains within $10^{-4}$ relative performance to the best performing baseline.  We report the ratio of the memory used by these two models (baseline/LP-RFF), that are both within $10^{-4}$ of the best baseline. We compute this ratio across three independent runs using different random seeds, and report the average.  We can see that LP-RFFs demonstrate significant memory saving over FP-RFFs and circulant FP-RFFs, showing 2.8x-10.0x and 3.9x-30.7x compression ratios respectively. On the TIMIT dataset, there are 147 classes, and thus the full-precision learned parameters occupy a large portion of the total memory across all methods. Nonetheless, even though these LP-RFF experiments only quantize the feature mini-batches, they still attain 5.1x and 3.9x compression ratios relative to FP-RFF and circulant FP-RFF.
 
 \begin{figure}
 	\centering
@@ -56,11 +56,12 @@ In Table~\ref{fig:mem_saving} we present the compression ratios we can achieve w
 %\end{table}
 
 % version with model memory
-\begin{table}
-	\centering
+\begin{table}[ht]
+\begin{minipage}{.6\linewidth}
+\centering
 	\begin{tabular}{c c c c}
 		\hline
-		& FP-RFFs (best/median) & Circulant FP-RFFs (best/median) & \Nystrom (best/median) \\
+		& FP-RFFs & Cir. FP-RFFs & \Nystrom \\
 		\hline
 		\hline
 %		Census & 2.8x / 1.13x & 30.7x / 7.7x & 62.2x / 4.09x \\
@@ -74,18 +75,28 @@ In Table~\ref{fig:mem_saving} we present the compression ratios we can achieve w
 		\hline
 	\end{tabular}
 	\caption{The compression ratios achieved by LP-RFF relative to the best/median performing configurations for each baseline (FP-RFFs, circulant FP-RFFs, \NystromNS). For each baseline method, we find the best/median performing configuration (reference model), then find the smallest LP-RFF and baseline models that are within $10^{-4}$ relative performance to the reference model. The memory saving is reported with respect to both the best/median models.}
-	\label{fig:mem_saving}
+	\label{tab:mem_saving}
+\end{minipage}
+\begin{minipage}{0.05\linewidth}	
+\end{minipage}
+\begin{minipage}{0.35\linewidth}
+	\includegraphics[width=\linewidth]{figures/timit_error_vs_n_feat_lm_halp.pdf}
+	\captionof{figure}{Low precision training using 8-bit HALP on TIMIT using 8-bit LP RFFs. Low precision training with HALP can demonstrate similar generalization performance as full precision training with SGD.}	
+	\label{fig:halp}
+\end{minipage}
 \end{table}
 
+
 \subsubsection{Low precision training for LP-RFFs}
-In this section, we demonstrate the generalization performance of LP-RFFs 
-\label{sec:lptrain}
-\begin{figure}
-\centering
-	\includegraphics[width=.6\linewidth]{figures/timit_error_vs_n_feat_lm_halp.pdf}
-\label{fig:halp}
-\caption{Low precision training using HALP can demonstrate similar generalization performance as full precision training with SGD.}	
-\end{figure}
+\label{sec:halp}
+In this section, we demonstrate that LP RFFs can be trained using 8-bit low precision HALP training algorithm. The generalization performance from 8-bit HALP training can closely match the performance from full precision SGD training. We uniformly use the same learning rate schedule as the one in the SGD-based comparison of LP RFFs, FP RFFs and \Nystrom. We sweep the $\mu$ parameter, which determines the value of the quantization scale in HALP, using grid search over $\{0.001, 0.01, 0.1, 1.0\}$. For each number of LP RFFs, we report the lowest heldout classification error from the grid of $\mu$. In Figure~\ref{fig:halp}, we can observe that for 8-bit LP RFFs, the generalization performance can very closely match after the number of features exceed 10k; this shows, in scenarios where large number of kernel approximation features are required~\cite{}, we can safely train LP RFFs with low precision training algorithms to reduce the memory footprint of training. 
+%\label{sec:lptrain}
+%\begin{figure}
+%\centering
+%	\includegraphics[width=.6\linewidth]{figures/timit_error_vs_n_feat_lm_halp.pdf}
+%\label{fig:halp}
+%\caption{Low precision training using HALP can demonstrate similar generalization performance as full precision training with SGD.}	
+%\end{figure}
 
 
 \subsection{Heldout performance vs. $\lambda$-spectral distance}
@@ -97,7 +108,7 @@ In Figure~\ref{fig:specdist}, we observe that LP-RFFs can achieve significantly 
 
 \begin{figure}
 	\centering
-	\begin{tabular}{c c}
+	\begin{tabular}{c c c}
 		\subfigure[MSE and $\lambda$-spectral distance]{\label{fig:census_delta} \includegraphics[width=0.33\linewidth]{figures/regression_l2_vs_delta.pdf} } \hfill
 		\subfigure[MSE and Frobenius norm]{\label{fig:census_f_norm} \includegraphics[width=0.33\linewidth]{figures/regression_l2_vs_f_norm.pdf} } \hfill
 		\subfigure[$\lambda$-spectral distance and memory]{\label{fig:census_s_norm}  \includegraphics[width=0.33\linewidth]{figures/regression_delta_vs_mem.pdf} } \hfill \\
