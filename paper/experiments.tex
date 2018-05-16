@@ -11,11 +11,11 @@ In Table~\ref{tab:mem_saving} we present the compression ratios we can achieve w
 
 \begin{figure}
 	\centering
-	\begin{tabular}{c@{\hskip 0in}c@{\hskip 0in}c@{\hskip 0in}c}
-		\subfigure[YearPred heldout MSE]{\label{fig:year_pred_mem} \includegraphics[width=0.3\linewidth]{figures/yearpred_MSE_vs_n_memory.pdf} } \hfill
-		\subfigure[YearPred heldout MSE]{\label{fig:year_pred_feat}\includegraphics[width=0.3\linewidth]{figures/yearpred_MSE_vs_n_feat.pdf} } \hfill
-		\subfigure[TIMIT heldout error]{\label{fig:year_pred_mem} \includegraphics[width=0.3\linewidth]{figures/timit_error_vs_n_memory.pdf} } \hfill
-		\subfigure[TIMIT heldout error]{\label{fig:year_pred_feat}\includegraphics[width=0.3\linewidth]{figures/timit_error_vs_n_feat.pdf} } \hfill
+	\begin{tabular}{c@{\hskip 0in}c@{\hskip 0in}}
+		\subfigure[YearPred: MSE vs. Memory]{\label{fig:year_pred_mem} \includegraphics[width=0.4\linewidth]{figures/yearpred_MSE_vs_n_memory.pdf} } \hfill
+		\subfigure[TIMIT: Error vs. Memory]{\label{fig:year_pred_mem} \includegraphics[width=0.4\linewidth]{figures/timit_error_vs_n_memory.pdf} } \hfill \\
+		\subfigure[YearPred: MSE vs. \# Features]{\label{fig:year_pred_feat}\includegraphics[width=0.4\linewidth]{figures/yearpred_MSE_vs_n_feat.pdf} } \hfill
+		\subfigure[TIMIT: Error vs. \# Features]{\label{fig:year_pred_feat}\includegraphics[width=0.4\linewidth]{figures/timit_error_vs_n_feat.pdf} } \hfill
 %		\includegraphics[width=0.3\linewidth]{figures/yearpred_MSE_vs_n_memory.pdf} &
 %		\includegraphics[width=0.3\linewidth]{figures/yearpred_MSE_vs_n_feat.pdf} &
 %		\includegraphics[width=0.3\linewidth]{figures/timit_error_vs_n_memory.pdf} &
@@ -81,7 +81,7 @@ In Table~\ref{tab:mem_saving} we present the compression ratios we can achieve w
 \end{minipage}
 \begin{minipage}{0.35\linewidth}
 	\includegraphics[width=\linewidth]{figures/timit_error_vs_n_feat_lm_halp.pdf}
-	\captionof{figure}{Low precision training using 8-bit HALP on TIMIT using 8-bit LP RFFs. Low precision training with HALP can demonstrate similar generalization performance as full precision training with SGD.}	
+	\caption{figure}{Low precision training using 8-bit HALP on TIMIT using 8-bit LP RFFs. Low precision training with HALP can demonstrate similar generalization performance as full precision training with SGD.}	
 	\label{fig:halp}
 \end{minipage}
 \end{table}
@@ -89,6 +89,7 @@ In Table~\ref{tab:mem_saving} we present the compression ratios we can achieve w
 
 \subsubsection{Low precision training for LP-RFFs}
 \label{sec:halp}
+<<<<<<< HEAD
 In this section, we demonstrate that LP RFFs can be trained using 8-bit low precision HALP training algorithm. The generalization performance from 8-bit HALP training can closely match the performance from full precision SGD training. We uniformly use the same learning rate schedule as the one in the SGD-based comparison of LP RFFs, FP RFFs and \Nystrom. We sweep the $\mu$ parameter, which determines the value of the quantization scale in HALP, using grid search over $\{0.001, 0.01, 0.1, 1.0\}$. For each number of LP RFFs, we report the lowest heldout classification error from the grid of $\mu$. In Figure~\ref{fig:halp}, we can observe that for 8-bit LP RFFs, the generalization performance can very closely match after the number of features exceed 10k; this shows, in scenarios where large number of kernel approximation features are required~\cite{}, we can safely train LP RFFs with low precision training algorithms to reduce the memory footprint of training. 
 %\label{sec:lptrain}
 %\begin{figure}
@@ -98,6 +99,9 @@ In this section, we demonstrate that LP RFFs can be trained using 8-bit low prec
 %\caption{Low precision training using HALP can demonstrate similar generalization performance as full precision training with SGD.}	
 %\end{figure}
 
+=======
+In this section, we demonstrate that LP-RFFs can be trained using 8-bit low precision HALP training algorithm. The generalization performance from 8-bit HALP training can closely match the performance from full-precision SGD training. We use the same learning rate schedule as the one in the SGD-based experiments. We sweep the $\mu$ parameter, which determines the value of the quantization scale in HALP, using grid search over $\{0.001, 0.01, 0.1, 1.0\}$. For each number of LP-RFFs $m$, we choose the value of $\mu$ attaining lowest heldout classification error, and report this as the error. In Figure~\ref{fig:halp}, we can see that for 8-bit LP-RFFs, the generalization performance of the models trained with HALP can closely match the results from full-precision SGD, once the number of features exceed 10k. This shows, in scenarios where large numbers of kernel approximation features are required, we can safely train LP-RFFs with low precision training algorithms to reduce the memory footprint of training.
+>>>>>>> 559a5c577d02489c4ccffc67c84c7eacd90ee39c
 
 \subsection{Heldout performance vs. $\lambda$-spectral distance}
 In this section, our goal is to dig deeper into the strong generalization performance of LP-RFFs, by seeing whether these results can be understood in terms of the theory presented in Sections \ref{sec:genbound} and \ref{sec:lprff}.  In particular, the theory we presented bounds the generalization performance of the kernel approximation models using the $\lambda$-spectral distance between the kernel approximation matrix, and the exact kernel matrix.  Although the theory as presented only applies to fixed design linear regression, in this section we ask whether $\lambda$-spectral distance is predictive of generalization performance for non-fixed design kernel ridgre regression, as well as for kernel logistic regression.
@@ -108,13 +112,20 @@ In Figure~\ref{fig:specdist}, we observe that LP-RFFs can achieve significantly 
 
 \begin{figure}
 	\centering
-	\begin{tabular}{c c c}
-		\subfigure[MSE and $\lambda$-spectral distance]{\label{fig:census_delta} \includegraphics[width=0.33\linewidth]{figures/regression_l2_vs_delta.pdf} } \hfill
-		\subfigure[MSE and Frobenius norm]{\label{fig:census_f_norm} \includegraphics[width=0.33\linewidth]{figures/regression_l2_vs_f_norm.pdf} } \hfill
-		\subfigure[$\lambda$-spectral distance and memory]{\label{fig:census_s_norm}  \includegraphics[width=0.33\linewidth]{figures/regression_delta_vs_mem.pdf} } \hfill \\
-		\subfigure[MSE and $\lambda$-spectral distance]{\label{fig:covtype_delta} \includegraphics[width=0.33\linewidth]{figures/classification_acc_vs_delta.pdf} } \hfill
-		\subfigure[Error and Frobenius norm]{\label{fig:covtype_f_norm} \includegraphics[width=0.33\linewidth]{figures/classification_acc_vs_f_norm.pdf} } \hfill
-		\subfigure[$\lambda$-spectral distance and memory]{\label{fig:covtype_s_norm} \includegraphics[width=0.33\linewidth]{figures/classification_delta_vs_mem.pdf}} \hfill
+%	\begin{tabular}{c c c}
+%		\subfigure[MSE and $\lambda$-spectral distance]{\label{fig:census_delta} \includegraphics[width=0.33\linewidth]{figures/regression_l2_vs_delta.pdf} } \hfill
+%		\subfigure[MSE and Frobenius norm]{\label{fig:census_f_norm} \includegraphics[width=0.33\linewidth]{figures/regression_l2_vs_f_norm.pdf} } \hfill
+%		\subfigure[$\lambda$-spectral distance and memory]{\label{fig:census_s_norm}  \includegraphics[width=0.33\linewidth]{figures/regression_delta_vs_mem.pdf} } \hfill \\
+%		\subfigure[MSE and $\lambda$-spectral distance]{\label{fig:covtype_delta} \includegraphics[width=0.33\linewidth]{figures/classification_acc_vs_delta.pdf} } \hfill
+%		\subfigure[Error and Frobenius norm]{\label{fig:covtype_f_norm} \includegraphics[width=0.33\linewidth]{figures/classification_acc_vs_f_norm.pdf} } \hfill
+%		\subfigure[$\lambda$-spectral distance and memory]{\label{fig:covtype_s_norm} \includegraphics[width=0.33\linewidth]{figures/classification_delta_vs_mem.pdf}} \hfill
+	\begin{tabular}{c c}
+		\subfigure[Census: MSE vs. $D_{\lambda}(K,\tK)$]{\label{fig:census_delta} \includegraphics[width=0.33\linewidth]{figures/regression_l2_vs_delta.pdf} } \hfill
+		\subfigure[Census: MSE vs. Frob. norm]{\label{fig:census_f_norm} \includegraphics[width=0.33\linewidth]{figures/regression_l2_vs_f_norm.pdf} } \hfill
+		\subfigure[Census: $D_{\lambda}(K,\tK)$ vs. memory]{\label{fig:census_s_norm}  \includegraphics[width=0.33\linewidth]{figures/regression_delta_vs_mem.pdf} } \hfill \\
+		\subfigure[CovType: MSE vs. $D_{\lambda}(K,\tK)$]{\label{fig:covtype_delta} \includegraphics[width=0.33\linewidth]{figures/classification_acc_vs_delta.pdf} } \hfill
+		\subfigure[CovType: Error vs. Frob. norm]{\label{fig:covtype_f_norm} \includegraphics[width=0.33\linewidth]{figures/classification_acc_vs_f_norm.pdf} } \hfill
+		\subfigure[CovType: $D_{\lambda}(K,\tK)$ vs. memory]{\label{fig:covtype_s_norm} \includegraphics[width=0.33\linewidth]{figures/classification_delta_vs_mem.pdf}} \hfill
 	\end{tabular}
 	\caption{Generalization performance as a function of $\lambda$-spectral distance $D_{\lambda}(K,\tK)$, Frobenius norm of $K - \tK$ and spectural norm of $K - \tK$. We can observe the positive correlation between generalization performance and $\lambda$-spectral distance $D_{\lambda}(K,\tK)$ for the Census dataset (top row) and subsampled CovType dataset (bottom row) across different kernel approximation methods. The correlation between generalization performance and $\lambda$-spectral distance $D_{\lambda}(K,\tK)$ is stronger than the ones between generalization performance and Frobenius norm, spectral norm of $K - \tK$.}
 	\label{fig:specdist}
