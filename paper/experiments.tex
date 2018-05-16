@@ -7,7 +7,7 @@ We compare the generalization performance of LP-RFFs to full-precision RFFs (FP-
 
 In Figure \ref{fig:generalization_col}, we plot the generalization performance for all these experiments, as a function of the amount of memory used, as well as the number of features $m$. We show across all four datasets that LP-RFFs show systematically better generalization performance than the full precision baselines under different memory budget. Importantly, we can observe that the \Nystrom method has observably better generalization performance than LP-RFF and FP-RFF-based baselines under the same number of features. However, when we instead consider performance as a function of memory utilization, the opposite it true, with the RFF-based methods demonstrating superior generalization performance. This observation further validates the practical importance of comparing kernel approximation methods under memory budgets.
 
-In Table~\ref{tab:mem_saving} we present the compression ratios we can achieve with LP-RFF, relative to the baselines, while still attaining generalization performance within $10^{-4}$ of the full-precision baseline.  We measure this as follows:  For each baseline (FP-RFF, circulant FP-RFF, \Nystrom), we find the best performing (as well as median) model. We then find the smallest LP-RFF model, as well as the smallest baseline model, which attains within $10^{-4}$ relative performance to the best performing baseline.  We report the ratio of the memory used by these two models (baseline/LP-RFF), that are both within $10^{-4}$ of the best baseline. We compute this ratio across three independent runs using different random seeds, and report the average.  We can see that LP-RFFs demonstrate significant memory saving over FP-RFFs and circulant FP-RFFs, showing 2.8x-10.0x and 3.9x-30.7x compression ratios respectively. On the TIMIT dataset, there are 147 classes, and thus the full-precision learned parameters occupy a large portion of the total memory across all methods. Nonetheless, even though these LP-RFF experiments only quantize the feature mini-batches, they still attain 5.1x and 3.9x compression ratios relative to FP-RFF and circulant FP-RFF.
+In Table~\ref{tab:mem_saving} we present the compression ratios we can achieve with LP-RFF, relative to the baselines, while still attaining generalization performance within $10^{-4}$ of the full-precision baseline.  We measure this as follows:  For each baseline (FP-RFF, circulant FP-RFF, \Nystrom), we find the best performing (as well as median) model. We then find the smallest LP-RFF model, as well as the smallest baseline model, which attains within $10^{-4}$ relative performance to the best performing baseline.  We report the ratio of the memory used by these two models (baseline/LP-RFF), that are both within $10^{-4}$ of the best baseline. We compute this ratio across three independent runs using different random seeds, and report the average.  We can see that LP-RFFs demonstrate significant memory saving over FP-RFFs and circulant FP-RFFs, showing 2.9x-10.3x and 2.4x-15.6x compression ratios respectively. On the TIMIT dataset, there are 147 classes, and thus the full-precision learned parameters occupy a large portion of the total memory across all methods. Nonetheless, even though these LP-RFF experiments only quantize the feature mini-batches, they still attain 5.1x and 3.9x compression ratios relative to FP-RFF and circulant FP-RFF.
 
 \begin{figure}
 	\centering
@@ -68,13 +68,17 @@ In Table~\ref{tab:mem_saving} we present the compression ratios we can achieve w
 %		YearPred & 10.0x / 7.3x & 14.7x / 10.8x & 436.9x / 78.0x \\ 
 %		Covtype & 4.6x / 4.6x & 7.6x / 7.6x & 230.4x / 75.3x \\ 
 %		TIMIT & 5.1x / 2.0x & 3.9x / 3.6x & 50.6x / 8.9x \\ 
-		Census & 2.9x / 1.15x & 15.6x / 3.9x & 63.2x / 4.2x \\
-		YearPred & 10.3x / 7.7x & 7.6x / 5.7x & 461.6x / 80.3x \\ 
-		Covtype & 4.7x / 4.7x & 3.9x / 3.9x & 237.2x / 77.5x \\ 
-		TIMIT & 5.1x / 2.0x & 2.4x / 2.2x & 50.9x / 8.9x \\ 
+%		Census & 2.9x / 1.15x & 15.6x / 3.9x & 63.2x / 4.2x \\
+%		YearPred & 10.3x / 7.7x & 7.6x / 5.7x & 461.6x / 80.3x \\ 
+%		Covtype & 4.7x / 4.7x & 3.9x / 3.9x & 237.2x / 77.5x \\ 
+%		TIMIT & 5.1x / 2.0x & 2.4x / 2.2x & 50.9x / 8.9x \\ 
+		Census & 2.9x & 15.6x & 63.2x \\
+		YearPred & 10.3x & 7.6x & 461.6x \\ 
+		Covtype & 4.7x & 3.9x & 237.2x \\ 
+		TIMIT & 5.1x & 2.4x & 50.9x \\ 
 		\hline
 	\end{tabular}
-	\caption{The compression ratios achieved by LP-RFF relative to the best/median performing configurations for each baseline (FP-RFFs, circulant FP-RFFs, \NystromNS). For each baseline method, we find the best/median performing configuration (reference model), then find the smallest LP-RFF and baseline models that are within $10^{-4}$ relative performance to the reference model. The memory saving is reported with respect to both the best/median models.}
+	\caption{The compression ratios achieved by LP-RFF relative to the best performing configurations for each baseline (FP-RFFs, circulant FP-RFFs, \NystromNS). For each baseline method, we find the best performing configuration as the reference performance, then record the memory consumption of the smallest LP-RFF and baseline models that are within $10^{-4}$ relative performance to this reference. The memory saving is reported as the ratio between the two recorded memory consumption.}
 	\label{tab:mem_saving}
 \end{minipage}
 \begin{minipage}{0.05\linewidth}	
