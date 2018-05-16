@@ -1,0 +1,38 @@
+\subsection{Notation}
+We use $\{(x_i,y_i)\}_{i=1}^n$ to denote a training set, for $x_i \in \RR^d$, and $y_i \in \cY$, where $\cY = \RR$ for regression, and $\cY = \{1,\ldots,c\}$ for classification.  We let $K$ denote the kernel matrix corresponding to a kernel function $k:\RR^d\times\RR^d$, where $K_{ij} = k(x_i,x_j)$, and let $\tK$ denote an approximation to $K$. We let $z:\RR^d\rightarrow\RR^m$ denote a feature map for approximation a kernel function, such that $\tK_{ij} = z(x_i)^T z(x_j)$.  We use $s$ to denote the size of the mini-batches during training, $b$ to denote the precision used for the random features, and $\hb$ to denote the precision used for the model.  We let $\|K\|_2$ and $\|K\|_F$ denote the spectral and Frobenius norms of a matrix $K$, respectively; if the subscript is not specified, $\|K\|$ denotes the spectral norm.
+
+\subsection{Kernel Approximation Methods}
+We now review the \Nystrom method and random Fourier features, two of the most widely used and studied methods for kernel approximation.
+
+\paragraph{Random Fourier features (RFFs)}
+For shift-invariant kernels ($k(x,x') = \hat{k}(x-x')$), the random Fourier 
+feature method \citep{rahimi07random} constructs a random feature representation 
+$z(x) \in \RR^m$ such that $\expect{}{z(x)^T z(x')} = k(x,x')$. This construction 
+is based on Bochner's Theorem, which states that any positive definite kernels is 
+equal to the Fourier transform of a non-negative measure. This allows for performing
+Monte Carlo approximations of this Fourier transform in order to approximate the 
+function.  The resulting features have the following functional form: 
+$z_i(x) = \sqrt{2/m}\cos(w_i^Tx + a_i)$, where $w_i$ is drawn from the inverse Fourier
+transform of the kernel function $\hat{k}$, and $a_i$ is drawn uniformly from $[0,2\pi]$. 
+
+%One way of reducing the memory required for storing $W=[w_1;\ldots; w_m]$, is to replace $W$ by a structured matrix; in this work, we let $W$ be a concatenation of many square circulant random matrices (circ-RFFs) \citep{yu15}.
+
+\paragraph{\Nystrom method}
+The \Nystrom method constructs a finite dimensional feature representation
+$z(x) \in \RR^m$ such that $\Dotp{z(x),z(x')} \approx k(x,x')$.  It does this
+by picking a set of landmark points $\{\hx_1,\ldots,\hx_m\} \in \cX$,
+and taking the SVD $\hK = U\Lambda U^T$ of the $m$ by $m$ 
+kernel matrix $\hK$ corresponding to these landmark points 
+($\hK_{i,j} = k(\hx_i,\hx_j)$).  The \Nystrom representation for a point $x \in \cX$
+is defined as $z(x) = \Lambda^{-1/2} U^T k_x$, where $k_x = [k(x,\hx_1),\ldots,k(x,\hx_m)]^T$.
+Letting $K_{m,n} = [k_{x_1},\ldots,k_{x_n}] \in \RR^{m\times n}$, 
+the \Nystrom method can be thought of as an efficient low-rank approximation
+$K \approx K_{m,n}^T U \Lambda^{-1/2}\Lambda^{-1/2} U^T K_{m,n}$ of the full
+$n$ by $n$ kernel matrix $K$ corresponding to the full dataset $\{x_i\}_{i=1}^n$.
+One can also consider the lower dimension \Nystrom representation
+$z_r(x) = \Lambda_r^{-1/2} U_r^T k_x \in \RR^r$, where only the top $r$ eigenvalues and
+eigenvectors of $\hK$ are used, instead of all $m$.
+
+
+\subsection{$\lambda$-spectral distance vs. $\Delta$-spectral approximation}
+\citet{avron17} define $\tK+\lambda I$ to be a $\Delta$-spectral approximation of $K+\lambda I$ if $(1-\Delta)(K+\lambda I) \preceq \tK + \lambda I \preceq (1+\Delta)(K+\lambda I)$. This differs from our definition in two important ways. First, we define the distance as the \textit{minimum} value of $\Delta$ satisfying the bound.  Second of all, we use $(1+\Delta)^{-1}(K+\lambda I)$ in place of $(1-\Delta)(K+\lambda I)$. The definition using $(1-\Delta)$ has the property that the maximum value of $\Delta$ for the ``left inequality'' is 1, while the maximum value is $+\infty$ for the ``right inequality.'' Empirically, this asymmetry results in $\Delta$ only correlating strongly with generalization performance for small values of $\Delta$, at which $1-\Delta\approx (1+\Delta)^{-1}$. Our definition, on the other hand, correlates strongly for all $\Delta$, as we show in Section \ref{sec:experiments}.  From a theoretical perspective, our definition also allows us to prove generalization bounds (Proposition \ref{prop:avron}) which hold for all $\Delta \geq 0$, whereas the previous results on hold for $\Delta < 1$.
