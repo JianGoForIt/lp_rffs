@@ -203,10 +203,6 @@ def get_nystrom_memory(n, m, r):
     let n be the number of kernel approximation features, m be the minibatch size.
     r is the original number of raw features. Assume for nystrom n landmark equals n kernel
     approximation features. 
-    memory consumption for Nystrom
-    n * n + n * r + m * n
-    memory consumption for RFF
-    n * r + m * n
     '''
     return n * r + n * n + m * n
 
@@ -215,21 +211,16 @@ def get_rff_memory(n, m, r):
     let n be the number of kernel approximation features, m be the minibatch size.
     r is the original number of raw features. Assume for nystrom n landmark equals n kernel
     approximation features. 
-    memory consumption for Nystrom
-    n * n + n * r + m * n
-    memory consumption for RFF
-    n * r + m * n + n
     '''
-    return n * r + m * n + n
+    return n * r + m * n
 
 def get_cir_rff_memory(n, m, r, nbit):
     '''
     let n be the number of kernel approximation features, m be the minibatch size.
     r is the original number of raw features. 
     memory consumption for RFF:
-    n (circulant projection size) + m * n * nbit / 64 + n
     '''
-    return n + m * n * nbit / 32.0 + n
+    return n + m * n * nbit / 32.0
 
 def get_nystrom_memory_with_model(n, m, r, c):
     '''
@@ -245,16 +236,25 @@ def get_rff_memory_with_model(n, m, r, c):
     r is the original number of raw features. Assume for nystrom n landmark equals n kernel
     approximation features. c is the number of label classes. For regression c = 1
     '''
-    return n * r + m * n + n + n * c
+    return n * r + m * n + n * c
 
 def get_cir_rff_memory_with_model(n, m, r, nbit, c):
     '''
     let n be the number of kernel approximation features, m be the minibatch size.
     r is the original number of raw features. c is the number of label classes. For regression c = 1
     memory consumption for RFF:
-    n (circulant projection size) + m * n * nbit / 64 + n
     '''
-    return n + m * n * nbit / 32.0 + n + n * c
+    return n + m * n * nbit / 32.0  + n * c
+
+def get_cir_rff_memory_with_lm_halp_model(n, m, r, nbit_model, nbit_feat, c):
+    '''
+    let n be the number of kernel approximation features, m be the minibatch size.
+    r is the original number of raw features. c is the number of label classes. For regression c = 1
+    memory consumption for RFF:
+    n (circulant projection size) + m * n * nbit_feat / 32 + n * c * nbit_model / 32
+    '''
+#             return n + m * n * nbit / 32.0 + n + n * c
+    return n + m * n * nbit_feat / 32.0 + n * c * nbit_model / 32.0 * 3.0
 
 def median_results_array(results_array):
     # average list of 1d np array results
