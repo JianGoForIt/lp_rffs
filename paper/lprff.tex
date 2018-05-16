@@ -47,3 +47,16 @@ For the second experiments, we let $m = 512$, and compute the kernel approximati
 While the majority of this paper focuses on analyzing the statistical and empirical properties of LP-RFFs, it is also important to consider how a training algorithm using these features could be implemented. While in theory one could perform a matrix multiplication between a mini-batch of low-precision features and a full-precision model, this type of operation is not generally available on real systems. As a result, one would need to cast the LP-RFFs back into full-precision, in effect eliminating the computational benefit of using low-precision in the first place.  In order to avoid this, one could store the model itself in low-precision. In Section \ref{sec:halp}, we present our experimental results using a low-precision training algorithm called HALP \citep{halp18}, showing that on TIMIT, with 8 bit features and an 8 bit model, we can match the generalization performance of full-precision training on the 8 bit features.
 
 A second technical challenge is that in the current definition of LP-RFFs, the full-precision features are calculated and then quantized to $b$ bits each. If the full-precision feature calculation is done in batch, this means that enough memory is needed in order to store all of the full-precision features in the mini-batch simultaneously. One solution is to compute the low-precision features in blocks, where we quantize the output of one block before computing the next one. This lowers the memory footprint, while still allowing us to benefit from fast matrix multiplications for each block. Another option is to use low-precision for all parts of the feature generation process (\eg, quantize, $x$, $w$, and $a$, and then compute $\cos(x^T w + a)$).  We leave this for future work.
+
+\begin{figure}
+	\centering
+	\begin{tabular}{c c c}
+		\includegraphics[width=0.3\linewidth]{figures/theory_fixed_n_feat.pdf} &
+		\includegraphics[width=0.3\linewidth]{figures/theory_fixed_memory.pdf} &
+		\includegraphics[width=0.3\linewidth]{figures/theory_fixed_memory_generous_mem_to_nystrom_lamb_1.pdf} 
+	\end{tabular}
+\caption{Validation of the theory part. }
+\label{fig:theo_validation}
+\end{figure}
+
+
