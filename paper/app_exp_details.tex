@@ -6,37 +6,40 @@ Number of features for RFF related approach: $1250, 2500, 5000, 10000, 20000, 50
 Learning rate search grid for different dataset: 
 
 \begin{table}
-	\centering
-	\begin{tabular}{c | c | c}
-	\hline
+	\caption{The configuration for Gaussian kernel and the search grid for initial learning rate on the Census, YearPred, Covtype and TIMIT datasets.}
+	\label{tab:hyperparam}
+	\begin{center}
+	\begin{tabular}{lll}
+	\toprule
 	Dataset & $1/2\sigma^2$ & Learning rate grid \\
-	\hline
-	\hline
+	\midrule
 Census & 0.0006 & {0.01, 0.05, 0.1, \textbf{0.5}, 1.0} \\
 YearPred & 0.01 & {0.05, 0.1, \textbf{0.5}, 1.0, 5.0} \\
 Covtype & 0.6 & {1.0, 5.0, 10.0, \textbf{50.0}, 100.0} \\
 TIMIT & 0.0015 & {5.0, 10.0, 50.0, \textbf{100.0}, 500.0} \\
-	\hline
+	\bottomrule
 	\end{tabular}
-	\caption{The configuration for Gaussian kernel and the search grid for initial learning rate on the Census, YearPred, Covtype and TIMIT datasets.}
-	\label{tab:hyperparam}
+	\end{center}
 \end{table}
 
 \begin{table}
-\centering
-	\begin{tabular}{c | c | c | c | c }
-	\hline
-		Dataset & Task & \# train samples & \# heldout samples & \# raw features \\
-	\hline
-	\hline
-		Census & & & & \\
-		YearPred & & & & \\
-		Covtype & & & &\\
-		TIMIT & & & & \\
-	\hline
-	\end{tabular}
-	\caption{Details on the Census, YearPred, Covtype and TIMIT datasets.}
+	\caption{Dataset details.  For classification tasks, we write the number
+		of classes in parentheses in the ``task'' column.}
 	\label{tab:datasets}
+%	\small
+	\begin{center}
+		\begin{tabular}{llllll} 
+			\toprule
+			\textbf{Dataset}  & \textbf{Task} & \textbf{Train} & \textbf{Heldout} & \textbf{Test} & \textbf{\#Attr.} \\ 
+			\midrule
+			COVTYPE  & Class. (2) & 418k  & 46k     & 116k & 54  \\ 
+			TIMIT    & Class. (147) & 2.3M  & 245k    & 116k & 440 \\
+			CENSUS   & Reg.   & 16k   & 2k      & 2k   & 119 \\ 
+			YEARPRED & Reg.   & 417k  & 46k     & 52k  & 90  \\ 
+			\bottomrule
+		\end{tabular}
+
+	\end{center}
 \end{table}
 
 
