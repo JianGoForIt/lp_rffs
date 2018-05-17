@@ -42,7 +42,7 @@ class EnsembleNystrom(object):
         for learner in self.learners:
             feat_list.append(learner.get_feat(X) )
         feat = torch.cat(feat_list, dim=1)
-        print "in ensembled Nystrom ", feat.size()
+        assert feat.size(1) == self.n_feat_per_learner * self.n_learner
         return feat
 
     def get_kernel_matrix(self, X1, X2, quantizer1=None, quantizer2=None, consistent_quant_seed=True):
@@ -70,10 +70,18 @@ class EnsembleNystrom(object):
           # print("quantizer 2 scale", quantizer2.scale)
           feat_x2 = quantizer2.quantize(feat_x2)
 
-        if consistent_quant_seed and (quantizer1 is not None) and (quantizer2 is not None):
+        if consistent_quant_seed and list(feat_x1.size() ) == list(feat_x2.size() ):
             np.testing.assert_array_almost_equal(feat_x1.cpu().numpy(), feat_x2.cpu().numpy() )
 
-        return torch.mm(feat_x1, torch.transpose(feat_x2, 0, 1) )   
+        return torch.mm(feat_x1, torch.transpose(feat_x2, 0, 1) ) 
+
+    def torch(self, cuda):
+        for learner in self.learners:
+            learner.torch(cuda)
+
+    def cpu(self):
+        for learner in self.learners:
+            learner.cpu()  
 
 
 def test_ensemble_nystrom_full_prec_one_learner():
