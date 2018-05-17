@@ -9,6 +9,8 @@ The core resource we optimize for in this work is memory.  As discussed in the i
 	\item \textit{Learned parameters}: For binary classification and regression, the linear model learned on the $z(x)$ features is a vector $\theta \in \RR^m$; for $c$-class classification, it is a matrix $\theta \in \RR^{m\times c}$.	
 \end{enumerate}
 
+In this work, we focus on reducing the memory occupied by the mini-batches of random Fourier features. Our core contribution is to show, both theoretically (\S\ref{sec:lprff}) and empirically (\S\ref{sec:experiments}), that the features can in many cases be stored in 8 bits or less, without affective generalization performance.  We also show that the learned parameters themselves can be learned in low-precision (\S\ref{sec:halp}).  For feature generalization, we simply use circulant RFFs\cite{yu15}.
+
 \begin{table}
 	\caption{Kernel approximation method memory utilization. $m$ is the number of kernel approximation features, $d$ is the dimensionality of a datum, $s$ is the mini-batch size, $c$ is the number of classes ($c=1$ for regression/binary classification), $b$ is the precision used for the random features, and $\hb$ is the precision used for the model.}
 	\label{table:mem-usage}
