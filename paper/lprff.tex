@@ -6,7 +6,7 @@ The core idea behind LP-RFFs is to use $b$ bits to store each RFF, instead of $3
 
 \subsection{Theoretical results}
 
-We now lower bound the probably that $D_{\lambda}(K,\tK) \leq \Delta$, for the LP-RFF approximation $\tK$ using $m$ features and $b$ bits per feature.
+We now lower bound the probably that $D_{\lambda}(K,\tK) \leq \Delta$, for the LP-RFF approximation $\tK$ using $m$ features and $b$ bits per feature.  For the proof of the theorem below, please see Appendix \ref{sec:lprff_theory_appendix}.
 
 \begin{theorem}
 	\label{thm2}
@@ -35,8 +35,6 @@ Another way of understanding the implications of this theorem is by analyzing th
 %the choice of precision $b$ has an additive effect 
 
 %To make this more concrete, we can calculate how many bits would be needed in order for $(\Delta-\delta_b^2/\lambda)^{-2} \leq (1+\gamma)\Delta^{-2}$, for some small $\gamma > 0$.
-For the proof of this theorem please see Appendix \ref{sec:lprff_theory_appendix}.\\
-\avner{Should we include results about the kernel approximation variance of LP-RFFs in the appendix?}
 
 \paragraph{Validation} In order to validate the core message of the above theorem, we perform a series of targeted experiments. Our goal is to demonstrate the empirical affect of using low-precision on the relative spectral distance between $K$ and $\tK$. We run two experiments: (1) Keeping the number of features constant, we measure $D_{\lambda}(K,\tK)$ for various levels of precision. (2) Keeping the memory occupied by the feature vector $z(x)$ constant, we measure $D_{\lambda}(K,\tK)$ for various levels of precision $b$ and number of features $m$ (where $bm$ is held fixed). For both experiments, we use a random sub-sample of $8000$ training points from the Census UCI dataset, and use 5 random seeds.
 
@@ -48,10 +46,10 @@ Lastly, in the rightmost plot of Figure \ref{fig:theo_validation}, we compare th
 
 \begin{figure}
 	\centering
-	\begin{tabular}{c c c}
-		\includegraphics[width=0.3\linewidth]{figures/theory_fixed_n_feat.pdf} &
-		\includegraphics[width=0.3\linewidth]{figures/theory_fixed_memory.pdf} &
-		\includegraphics[width=0.3\linewidth]{figures/theory_fixed_memory_generous_mem_to_nystrom_lamb_0001.pdf} 
+	\begin{tabular}{c c}
+		\includegraphics[width=0.4\linewidth]{figures/theory_fixed_n_feat.pdf} &
+		\includegraphics[width=0.4\linewidth]{figures/theory_fixed_memory.pdf} 
+		%\includegraphics[width=0.3\linewidth]{figures/theory_fixed_memory_generous_mem_to_nystrom_lamb_0001.pdf} 
 	\end{tabular}
 	\caption{Empirical validation of Theorem \ref{thm2}.  We demonstrate that the optimal precision, in terms of lowest relative spectral distance per bit, depends on the value of $\lambda$.}
 	\label{fig:theo_validation}
