@@ -55,7 +55,7 @@ def plot_figure_with_error_bar(names, data, color_list):
     each column of data is a line
     the name follows the pattern like ['fp Nystrom-x', 'fp Nystrom-y', 'fp Nystrom-y_std', 'fp RFF-x', 'fp RFF-y', 'fp RFF-y_std']
     '''
-    marker_list = ['o', 'v', '^', 's', 'h']
+    marker_list = ['o', 'v', '^', 's', 'h', 'd', '+']
     for i in range(data.shape[1] // 3):
         idx = i * 3
         label = names[idx].split("-")[0]

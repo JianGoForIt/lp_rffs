@@ -41,7 +41,7 @@ TIMIT & 0.0015 & {5.0, 10.0, 50.0, \textbf{100.0}, 500.0} \\
 
 \begin{figure}
 	\centering
-	\begin{tabular}{c@{\hskip 0in}c@{\hskip 0in}c@{\hskip 0in}c}
+	\begin{tabular}{@{\hskip 0in}c@{\hskip 0in}c@{\hskip 0in}c@{\hskip 0in}c@{\hskip 0in}}
 %		\subfigure[Census heldout MSE]{\label{fig:census_mem} \includegraphics[width=0.3\linewidth]{figures/census_MSE_vs_n_memory.pdf} } \hfill
 %		\subfigure[Census heldout MSE]{\label{fig:census_feat}\includegraphics[width=0.3\linewidth]{figures/census_MSE_vs_n_feat.pdf} } \hfill
 %		\subfigure[CovType heldout error]{\label{fig:covtype_mem} \includegraphics[width=0.3\linewidth]{figures/covtype_error_vs_n_memory.pdf} } \hfill
@@ -51,14 +51,14 @@ TIMIT & 0.0015 & {5.0, 10.0, 50.0, \textbf{100.0}, 500.0} \\
 %		\includegraphics[width=0.3\linewidth]{figures/timit_error_vs_n_memory_all_line.pdf} &
 %		\includegraphics[width=0.3\linewidth]{figures/timit_error_vs_n_feat_all_line.pdf} \\
 %		(a) Census & (b) YearPred & (c) Covtype & (d) TIMIT \\
-		\includegraphics[width=0.3\linewidth]{figures/census_MSE_vs_n_memory_all_line.pdf} &
-		\includegraphics[width=0.3\linewidth]{figures/yearpred_MSE_vs_n_memory_all_line.pdf} &
-		\includegraphics[width=0.3\linewidth]{figures/covtype_error_vs_n_memory_all_line.pdf} &
-		\includegraphics[width=0.3\linewidth]{figures/timit_error_vs_n_memory_all_line.pdf} \\
-		\includegraphics[width=0.3\linewidth]{figures/census_MSE_vs_n_feat_all_line.pdf} &
-		\includegraphics[width=0.3\linewidth]{figures/yearpred_MSE_vs_n_feat_all_line.pdf} &
-		\includegraphics[width=0.3\linewidth]{figures/covtype_error_vs_n_feat_all_line.pdf} &
-		\includegraphics[width=0.3\linewidth]{figures/timit_error_vs_n_feat_all_line.pdf} \\
+		\includegraphics[width=0.26\linewidth]{figures/census_MSE_vs_n_memory_all_line.pdf} &
+		\includegraphics[width=0.26\linewidth]{figures/yearpred_MSE_vs_n_memory_all_line.pdf} &
+		\includegraphics[width=0.26\linewidth]{figures/covtype_error_vs_n_memory_all_line.pdf} &
+		\includegraphics[width=0.26\linewidth]{figures/timit_error_vs_n_memory_all_line.pdf} \\
+		\includegraphics[width=0.26\linewidth]{figures/census_MSE_vs_n_feat_all_line.pdf} &
+		\includegraphics[width=0.26\linewidth]{figures/yearpred_MSE_vs_n_feat_all_line.pdf} &
+		\includegraphics[width=0.26\linewidth]{figures/covtype_error_vs_n_feat_all_line.pdf} &
+		\includegraphics[width=0.26\linewidth]{figures/timit_error_vs_n_feat_all_line.pdf} \\
 		(a) Census & (b) YearPred & (c) Covtype & (d) TIMIT \\
 	\end{tabular}
 	\caption{Generalization performance of LP RFF, full precision RFF and \Nystrom with respect to number of features and memory budgets. We can observe that LP RFFs demonstrate better generalization performance than full precision baselines under memory budget. Noticeably, the comparison of different methods on generalization performance behaves differently under memory budget and under number off features. E.g., \Nystrom shows better generalization performance than RFF based approach with the same number of features. However, \Nystrom can be significantly worse under memory budgets.}
@@ -67,7 +67,7 @@ TIMIT & 0.0015 & {5.0, 10.0, 50.0, \textbf{100.0}, 500.0} \\
 
 \begin{figure}
 	\centering
-	\begin{tabular}{c c}
+	\begin{tabular}{@{\hskip -0.25in}c@{\hskip -0.25in}c@{\hskip -0.25in}c@{\hskip -0.25in}}
 		\subfigure[MSE and Rel. spectral distance distance]{\label{fig:census_delta_all_line} \includegraphics[width=0.33\linewidth]{figures/regression_l2_vs_delta_all_line.pdf} } \hfill
 		\subfigure[MSE and Frobenius norm]{\label{fig:census_f_norm_all_line} \includegraphics[width=0.33\linewidth]{figures/regression_l2_vs_f_norm_all_line.pdf} } \hfill
 		\subfigure[Rel. spectral distance distance and memory]{\label{fig:census_s_norm_all_line}  \includegraphics[width=0.33\linewidth]{figures/regression_l2_vs_s_norm_all_line.pdf} } \hfill \\

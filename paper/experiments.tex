@@ -11,11 +11,17 @@ In Table~\ref{tab:mem_saving} we present the compression ratios we achieve with 
 
 \begin{figure}
 	\centering
-	\begin{tabular}{c@{\hskip 0in}c@{\hskip 0in}}
-		\subfigure[YearPred: MSE vs. Memory]{\label{fig:year_pred_mem} \includegraphics[width=0.4\linewidth]{figures/yearpred_MSE_vs_n_memory.pdf} } \hfill
-		\subfigure[TIMIT: Error vs. Memory]{\label{fig:year_pred_mem} \includegraphics[width=0.4\linewidth]{figures/timit_error_vs_n_memory.pdf} } \hfill \\
-		\subfigure[YearPred: MSE vs. \# Features]{\label{fig:year_pred_feat}\includegraphics[width=0.4\linewidth]{figures/yearpred_MSE_vs_n_feat.pdf} } \hfill
-		\subfigure[TIMIT: Error vs. \# Features]{\label{fig:year_pred_feat}\includegraphics[width=0.4\linewidth]{figures/timit_error_vs_n_feat.pdf} } \hfill
+	\begin{small}
+	\begin{tabular}{@{\hskip -0.05in}c@{\hskip -0.1in}c@{\hskip -0.1in}c@{\hskip -0.1in}c@{\hskip -0.05in}}
+%		\subfigure[YearPred MSE vs. Mem.]{\label{fig:year_pred_mem} \includegraphics[width=0.27\linewidth]{figures/yearpred_MSE_vs_n_memory.pdf} } \hfill
+%		\subfigure[TIMIT Err. vs. Mem.]{\label{fig:year_pred_mem} \includegraphics[width=0.27\linewidth]{figures/timit_error_vs_n_memory.pdf} } \hfill
+%		\subfigure[YearPred MSE vs. Feat.]{\label{fig:year_pred_feat}\includegraphics[width=0.27\linewidth]{figures/yearpred_MSE_vs_n_feat.pdf} } \hfill
+%		\subfigure[TIMIT Err vs. Feat.]{\label{fig:year_pred_feat}\includegraphics[width=0.27\linewidth]{figures/timit_error_vs_n_feat.pdf} } \hfill
+		\includegraphics[width=0.27\linewidth]{figures/yearpred_MSE_vs_n_memory.pdf} &
+		\includegraphics[width=0.27\linewidth]{figures/timit_error_vs_n_memory.pdf} &
+		\includegraphics[width=0.27\linewidth]{figures/yearpred_MSE_vs_n_feat.pdf} &
+		\includegraphics[width=0.27\linewidth]{figures/timit_error_vs_n_feat.pdf} \\
+		(a) YearPred MSE vs. Mem. & (b) TIMIT Err. vs. Mem. & (c) YearPred MSE vs. Feat. & (d) TIMIT Err vs. Feat.\\
 %		\includegraphics[width=0.3\linewidth]{figures/yearpred_MSE_vs_n_memory.pdf} &
 %		\includegraphics[width=0.3\linewidth]{figures/yearpred_MSE_vs_n_feat.pdf} &
 %		\includegraphics[width=0.3\linewidth]{figures/timit_error_vs_n_memory.pdf} &
@@ -31,6 +37,7 @@ In Table~\ref{tab:mem_saving} we present the compression ratios we achieve with 
 %		\includegraphics[width=0.3\linewidth]{figures/timit_error_vs_n_feat.pdf} \\
 %		(a) Census & (b) YearPred & (c) Covtype & (d) TIMIT \\
 	\end{tabular}
+	\end{small}
 	\caption{Generalization performance of LP-RFFs, FP-RFFs, and \Nystrom with respect to memory budgets (top) and number of features (bottom), on TIMIT and YearPred datasets.  LP-RFFs demonstrate better generalization performance than the full precision methods, under a memory budget. It is also informative to observe that while the \Nystrom method attains the best generalization performance with respect to the number of features, it is the worst performance method as a function of memory.
 	For results on the CovType and Census datasets, please see Figure~\ref{fig:generalization_col_app} in Appendix~\ref{sec:exp_details}
 }
@@ -118,15 +125,15 @@ In Figure~\ref{fig:specdist} (leftmost plots), we observe that LP-RFFs can achie
 %		\subfigure[MSE and relative spectral distance]{\label{fig:covtype_delta} \includegraphics[width=0.33\linewidth]{figures/classification_acc_vs_delta.pdf} } \hfill
 %		\subfigure[Error and Frobenius norm]{\label{fig:covtype_f_norm} \includegraphics[width=0.33\linewidth]{figures/classification_acc_vs_f_norm.pdf} } \hfill
 %		\subfigure[relative spectral distance and memory]{\label{fig:covtype_s_norm} \includegraphics[width=0.33\linewidth]{figures/classification_delta_vs_mem.pdf}} \hfill
-	\begin{tabular}{c c}
+	\begin{tabular}{@{\hskip -0.1in}c@{\hskip -0.1in}c@{\hskip -0.1in}c@{\hskip -0.1in}}
 		\subfigure[Census: $D_{\lambda}(K,\tK)$ vs. memory]{\label{fig:census_s_norm}  \includegraphics[width=0.33\linewidth]{figures/regression_delta_vs_mem.pdf} } \hfill 
 		\subfigure[Census: MSE vs. $D_{\lambda}(K,\tK)$]{\label{fig:census_delta} \includegraphics[width=0.33\linewidth]{figures/regression_l2_vs_delta.pdf} } \hfill
 		\subfigure[Census: MSE vs. Frob. norm]{\label{fig:census_f_norm} \includegraphics[width=0.33\linewidth]{figures/regression_l2_vs_f_norm.pdf} } \hfill \\
-		\subfigure[CovType: $D_{\lambda}(K,\tK)$ vs. memory]{\label{fig:covtype_s_norm} \includegraphics[width=0.33\linewidth]{figures/classification_delta_vs_mem.pdf}} \hfill
+		\subfigure[CovType: $D_{\lambda}(K,\tK)$ vs. mem.]{\label{fig:covtype_s_norm} \includegraphics[width=0.33\linewidth]{figures/classification_delta_vs_mem.pdf}} \hfill
 		\subfigure[CovType: MSE vs. $D_{\lambda}(K,\tK)$]{\label{fig:covtype_delta} \includegraphics[width=0.33\linewidth]{figures/classification_acc_vs_delta.pdf} } \hfill
 		\subfigure[CovType: Error vs. Frob. norm]{\label{fig:covtype_f_norm} \includegraphics[width=0.33\linewidth]{figures/classification_acc_vs_f_norm.pdf} } \hfill
 	\end{tabular}
-	\caption{Analysis of generalization performance for Census and sub-sampled CovType. We measure the relative spectral distance $D_{\lambda}(K,\tK)$ for LP-RFFs, FP-RFFs, and \NystromNS, as a function of the memory utilization, and observe that LP-RFFs attain lower relative spectral distance per bit (rightmost plot). We then plot generalization performance as a function of relative spectral distance (middle), and Frobenius norm of $K - \tK$ (right). We observe a tigher correspondance between the generalization performance and relative spectral distance, relative to the Frobenius norm, on both datasets.}
+	\caption{Analysis of generalization performance for Census and sub-sampled CovType. We measure the relative spectral distance $D_{\lambda}(K,\tK)$ for LP-RFFs, FP-RFFs, and \Nystrom, as a function of the memory utilization, and observe that LP-RFFs attain lower relative spectral distance per bit (rightmost plot). We then plot generalization performance as a function of relative spectral distance (middle), and Frobenius norm of $K - \tK$ (right). We observe a tigher correspondance between the generalization performance and relative spectral distance, relative to the Frobenius norm, on both datasets.}
 	\label{fig:specdist}
 \end{figure}
 
