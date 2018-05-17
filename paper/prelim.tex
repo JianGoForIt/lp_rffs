@@ -40,11 +40,12 @@ where $\by = (\by_1,\ldots,\by_n)$ is the vector of ``noiseless labels.'' See Ap
 We proceed to bound the expected loss $\cR(f_{\tK})$ of a kernel ridge regression model $f_{\tK}$ learned using an approximate kernel matrix $\tK$, in place of the exact kernel matrix $K$. First, we define the following notion of distance\footnote{Importantly, this isn't a properly defined ``distance function'' in the formal sense.  In particular, it is non-negative and symmetric, but only satisfies a weaker version of the triangle inequality: $D_{\lambda}(K_1,K_3) \leq D_{\lambda}(K_1,K_2) + D_{\lambda}(K_2,K_3) + D_{\lambda}(K_1,K_2)D_{\lambda}(K_2,K_3)$.} between $K$ and $\tK$:
 
 \begin{definition}
-	Given a kernel matrix $K$ and an approximation to it $\tK$, we define the \textbf{$\lambda$-spectral distance} $D_{\lambda}(K,\tK)\geq 0$ between $K$ and $\tK$ as:
+	\label{def:specdist}
+	Given a kernel matrix $K$, an approximation to it $\tK$, and a scalar $\lambda \geq 0$, we define the \textbf{relative spectral distance} $D_{\lambda}(K,\tK)\geq 0$ between $K$ and $\tK$ as:
 	$$D_{\lambda}(K,\tK) = \min \Big\{\Delta \in \RR_{+} \;\;\Big|\;\; \frac{1}{1+\Delta}(K+\lambda I) \preceq \tK + \lambda I \preceq (1+\Delta)(K+\lambda I)\Big\}.$$
 \end{definition}
 
-We note that this definition is tightly related to the notion of $\Delta$-spectral approximation from \citet{avron17}.  For a discussion of the differences between our definition and theirs, please see Appendix \todo{X}. Following \citet{avron17}, if we then define 
+We note that this definition is tightly related to the notion of $\Delta$-spectral approximation from \citet{avron17}.  For a discussion of the differences between our definition and theirs, please see Appendix~\ref{sec:appendix_blob}. Following \citet{avron17}, if we then define 
 $$\hcR(f_K) = \frac{1}{n}\lambda \by^T(K+\lambda I)^{-1}\by + \frac{1}{n}\sigma^2 Tr\Big(K(K+\lambda)^{-1}\Big) \geq \cR(f_K),$$ 
 we can bound the expected loss of $f_{\tK}$ as follows:
 
