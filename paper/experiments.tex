@@ -5,9 +5,9 @@ For all our experiments, we use the Gaussian kernel with the kernel width value 
 \subsection{Empirical evaluation of LP-RFFs}
 We compare the generalization performance of LP-RFFs to FP-RFFs, circulant FP-RFFs, and \Nystrom features, across four datasets, for various memory budgets.  We sweep the following hyperparameters: For LP-RFFs, we choose the precision $b \in \{1,2,4,8,16\}$. For \NystromNS, we use $m \in \{1250, 2500, 5000, 10000, 20000\}$.  For the RFF-based methods, we use $m\in \{1250, 2500, 5000, 10000, 20000, 50000, 100000, 200000, 400000\}$. We choose these limits differently because $\num[group-separator={,}]{20000}$ \Nystrom features have roughly the same memory footprint as $\num[group-separator={,}]{400000}$ FP-RFFs. For all experiments, we use a mini-batch size of $250$. We avoid the prohibitively large computational expense of performing a grid search to tune the initial learning rate, the regularizer, the learning rate decay, and the number of training epochs, by using the heldout set in order to determine learning rate decay \citep{morgan1990generalization,sainath2013b,sainath2013low}. The scheme works as follows: at the end of each epoch, we decay the learning rate in half if the heldout performance is less than $1\%$ better relative to the previous best model, using MSE for regression and cross entropy for classification. Furthermore, if the model performs \textit{worse} than the previous best, we revert the model. The training terminates after the learning rate has been decayed 10 times. Early stopping can be seen as a form of regularization \citep{zhang2005boosting,wei2017early}.  We use a single initial learning rate per dataset across all experiments, which we tune via grid search using $20\text{k}$ \Nystrom features. We choose to use \Nystrom features to tune the initial learning rate in order to avoid biasing the results in favor of RFF-based approaches. 
 
-In Figure \ref{fig:generalization_col}, we plot the generalization performance for all these experiments, as a function of the amount of memory used, as well as the number of features $m$. We show across all four datasets that LP-RFFs show systematically better generalization performance than the full precision baselines under various memory budgets. Importantly, we see that the \Nystrom method has observably better generalization performance than LP-RFF and FP-RFF-based baselines under the same number of features. However, when we instead consider performance as a function of memory utilization, the opposite it true, with the RFF-based methods demonstrating superior generalization performance. This observation further validates the practical importance of comparing kernel approximation methods under memory budgets.
+In Figure \ref{fig:generalization_col}, we plot the generalization performance for these experiments, as a function of the amount of memory used, as well as the number of features $m$, for the TIMIT and YearPred datasets (for CovType and Census, see Appendix~\ref{sec:exp_details}). We show that LP-RFFs show systematically better generalization performance than the full precision baselines under various memory budgets. Importantly, we see that the \Nystrom method has observably better generalization performance than LP-RFF and FP-RFF-based baselines under the same number of features. However, when we instead consider performance as a function of memory utilization, the opposite it true, with the RFF-based methods demonstrating superior generalization performance. This observation further validates the practical importance of comparing kernel approximation methods under memory budgets.
 
-In Table~\ref{tab:mem_saving} we present the compression ratios we achieve with LP-RFFs, relative to the baselines, while still attaining generalization performance within $10^{-4}$ of the full-precision baseline.  We measure this as follows: For each baseline (FP-RFFs, circulant FP-RFFs, \Nystrom), we find the best performing (as well as median) model. We then find the smallest LP-RFF model, as well as the smallest baseline model, which attains within $10^{-4}$ relative performance to the best performing baseline.  We report the ratio of the memory used by these two models (baseline/LP-RFF), that are both within $10^{-4}$ of the best baseline. We compute this ratio across three independent runs using different random seeds, and report the average.  We can see that LP-RFFs demonstrate significant memory saving over FP-RFFs and circulant FP-RFFs, showing 2.9x-10.3x and 2.4x-15.6x compression ratios respectively. On the TIMIT dataset, there are 147 classes, and thus the full-precision learned parameters occupy a large portion of the total memory across all methods. Nonetheless, even though these LP-RFF experiments only quantize the feature mini-batches, they still attain 5.1x and 2.4x compression ratios relative to FP-RFF and circulant FP-RFF.
+In Table~\ref{tab:mem_saving} we present the compression ratios we achieve with LP-RFFs, relative to the baselines, while still attaining generalization performance within $10^{-4}$ of the full-precision baseline.  We measure this as follows: For each baseline (FP-RFFs, circulant FP-RFFs, \NystromNS), we find the best performing model. We then find the smallest LP-RFF model, as well as the smallest baseline model, which attains within $10^{-4}$ relative performance to the best performing baseline. We report the ratio of the memory used by these two models (baseline/LP-RFF), that are both within $10^{-4}$ of the best baseline. We compute this ratio across three independent runs using different random seeds, and report the average.  We can see that LP-RFFs demonstrate significant memory saving over FP-RFFs, circulant FP-RFFs, and \NystromNS, showing 2.9x-10.3x, 2.4x-15.6x, and 50.9x-461.6x compression ratios respectively. On the TIMIT dataset, there are 147 classes, and thus the full-precision learned parameters occupy a large portion of the total memory across all methods. Nonetheless, even though these LP-RFF experiments only quantize the feature mini-batches, they still attain 5.1x and 2.4x compression ratios relative to FP-RFF and circulant FP-RFF.
 
 \begin{figure}
 	\centering
@@ -17,11 +17,12 @@ In Table~\ref{tab:mem_saving} we present the compression ratios we achieve with 
 %		\subfigure[TIMIT Err. vs. Mem.]{\label{fig:year_pred_mem} \includegraphics[width=0.27\linewidth]{figures/timit_error_vs_n_memory.pdf} } \hfill
 %		\subfigure[YearPred MSE vs. Feat.]{\label{fig:year_pred_feat}\includegraphics[width=0.27\linewidth]{figures/yearpred_MSE_vs_n_feat.pdf} } \hfill
 %		\subfigure[TIMIT Err vs. Feat.]{\label{fig:year_pred_feat}\includegraphics[width=0.27\linewidth]{figures/timit_error_vs_n_feat.pdf} } \hfill
-		\includegraphics[width=0.27\linewidth]{figures/yearpred_MSE_vs_n_memory.pdf} &
-		\includegraphics[width=0.27\linewidth]{figures/timit_error_vs_n_memory.pdf} &
-		\includegraphics[width=0.27\linewidth]{figures/yearpred_MSE_vs_n_feat.pdf} &
-		\includegraphics[width=0.27\linewidth]{figures/timit_error_vs_n_feat.pdf} \\
-		(a) YearPred MSE vs. Mem. & (b) TIMIT Err. vs. Mem. & (c) YearPred MSE vs. Feat. & (d) TIMIT Err vs. Feat.\\
+		\includegraphics[width=0.26\linewidth]{figures/timit_error_vs_n_feat.pdf} &
+		\includegraphics[width=0.26\linewidth]{figures/timit_error_vs_n_memory.pdf} &
+		\includegraphics[width=0.26\linewidth]{figures/yearpred_MSE_vs_n_feat.pdf} & 
+		\includegraphics[width=0.26\linewidth]{figures/yearpred_MSE_vs_n_memory.pdf}
+\\
+		(a) TIMIT: Err. vs. Feat. & (b) TIMIT: Err. vs. Mem. & (c) YearPred: MSE vs. Feat. & (d) YearPred: MSE vs. Feat. \\
 %		\includegraphics[width=0.3\linewidth]{figures/yearpred_MSE_vs_n_memory.pdf} &
 %		\includegraphics[width=0.3\linewidth]{figures/yearpred_MSE_vs_n_feat.pdf} &
 %		\includegraphics[width=0.3\linewidth]{figures/timit_error_vs_n_memory.pdf} &
@@ -38,8 +39,8 @@ In Table~\ref{tab:mem_saving} we present the compression ratios we achieve with 
 %		(a) Census & (b) YearPred & (c) Covtype & (d) TIMIT \\
 	\end{tabular}
 	\end{small}
-	\caption{Generalization performance of LP-RFFs, FP-RFFs, and \Nystrom with respect to memory budgets (top) and number of features (bottom), on TIMIT and YearPred datasets.  LP-RFFs demonstrate better generalization performance than the full precision methods, under a memory budget. It is also informative to observe that while the \Nystrom method attains the best generalization performance with respect to the number of features, it is the worst performance method as a function of memory.
-	For results on the CovType and Census datasets, please see Figure~\ref{fig:generalization_col_app} in Appendix~\ref{sec:exp_details}
+	\caption{Generalization performance of LP-RFFs, FP-RFFs, and \Nystrom with respect to memory and number of features, on TIMIT and YearPred.  For CovType \& Census, see Appendix~\ref{sec:exp_details}.
+		%  LP-RFFs demonstrate better generalization performance than the full precision methods, under a memory budget. It is also informative to observe that while the \Nystrom method attains the best generalization performance with respect to the number of features, it is the worst performance method as a function of memory.  For results on the CovType and Census datasets, please see Figure~\ref{fig:generalization_col_app} in Appendix~\ref{sec:exp_details}
 }
 	\label{fig:generalization_col}
 \end{figure}
@@ -64,13 +65,13 @@ In Table~\ref{tab:mem_saving} we present the compression ratios we achieve with 
 
 % version with model memory
 \begin{table}[ht]
-\begin{minipage}{.6\linewidth}
+\begin{minipage}{.54\linewidth}
 \centering
+\vspace{0.3in}
 	\begin{tabular}{c c c c}
-		\hline
+		\toprule
 		& FP-RFFs & Cir. FP-RFFs & \Nystrom \\
-		\hline
-		\hline
+		\midrule
 %		Census & 2.8x / 1.13x & 30.7x / 7.7x & 62.2x / 4.09x \\
 %		YearPred & 10.0x / 7.3x & 14.7x / 10.8x & 436.9x / 78.0x \\ 
 %		Covtype & 4.6x / 4.6x & 7.6x / 7.6x & 230.4x / 75.3x \\ 
@@ -83,19 +84,41 @@ In Table~\ref{tab:mem_saving} we present the compression ratios we achieve with 
 		YearPred & 10.3x & 7.6x & 461.6x \\ 
 		Covtype & 4.7x & 3.9x & 237.2x \\ 
 		TIMIT & 5.1x & 2.4x & 50.9x \\ 
-		\hline
+		\bottomrule \\ \\
 	\end{tabular}
-	\caption{The compression ratios achieved by LP-RFF relative to the best performing configurations for each baseline (FP-RFFs, circulant FP-RFFs, \NystromNS). For each baseline method, we find the best performing configuration as the reference performance, then record the memory consumption of the smallest LP-RFF and baseline models that are within $10^{-4}$ relative performance to this reference. The memory saving is reported as the ratio between the two recorded memory consumption.}
+	\caption{The compression ratios achieved by LP-RFF relative to the best performing configurations for each baseline (FP-RFFs, circulant FP-RFFs, \NystromNS). 
+		%For each baseline method, we find the best performing configuration as the reference performance, then record the memory consumption of the smallest LP-RFF and baseline models that are within $10^{-4}$ relative performance to this reference. The memory saving is reported as the ratio between the two recorded memory consumption.
+	}
 	\label{tab:mem_saving}
 \end{minipage}
-\begin{minipage}{0.05\linewidth}	
-\end{minipage}
-\begin{minipage}{0.35\linewidth}
+\hspace{0.22in}
+\begin{minipage}{0.4\linewidth}
 	\includegraphics[width=\linewidth]{figures/timit_error_vs_n_feat_lm_halp.pdf}
-	\caption{figure}{Low precision training using 8-bit HALP on TIMIT using 8-bit LP RFFs. Low precision training with HALP can demonstrate similar generalization performance as full precision training with SGD.}	
+	\caption{Low-precision training on TIMIT using 8-bit HALP on 8-bit LP-RFFs, relative to full-precision SGD.
+		%Low precision training with HALP can demonstrate similar generalization performance as full precision training with SGD.
+	}	
 	\label{fig:halp}
 \end{minipage}
 \end{table}
+
+%\begin{figure}
+%	\begin{floatrow}
+%		\ffigbox{%
+%			\rule{3cm}{3cm}%
+%		}{%
+%			\caption{A figure}%
+%		}
+%		\capbtabbox{%
+%			\begin{tabular}{cc} \hline
+%				Author & Title \\ \hline
+%				Knuth & The \TeX book \\
+%				Lamport & \LaTeX \\ \hline
+%			\end{tabular}
+%		}{%
+%			\caption{A table}%
+%		}
+%	\end{floatrow}
+%\end{figure}
 
 
 \subsubsection{Low precision training for LP-RFFs}
@@ -133,7 +156,9 @@ In Figure~\ref{fig:specdist} (leftmost plots), we observe that LP-RFFs can achie
 		\subfigure[CovType: MSE vs. $D_{\lambda}(K,\tK)$]{\label{fig:covtype_delta} \includegraphics[width=0.33\linewidth]{figures/classification_acc_vs_delta.pdf} } \hfill
 		\subfigure[CovType: Error vs. Frob. norm]{\label{fig:covtype_f_norm} \includegraphics[width=0.33\linewidth]{figures/classification_acc_vs_f_norm.pdf} } \hfill
 	\end{tabular}
-	\caption{Analysis of generalization performance for Census and sub-sampled CovType. We measure the relative spectral distance $D_{\lambda}(K,\tK)$ for LP-RFFs, FP-RFFs, and \Nystrom, as a function of the memory utilization, and observe that LP-RFFs attain lower relative spectral distance per bit (rightmost plot). We then plot generalization performance as a function of relative spectral distance (middle), and Frobenius norm of $K - \tK$ (right). We observe a tigher correspondance between the generalization performance and relative spectral distance, relative to the Frobenius norm, on both datasets.}
+	\caption{Analysis of generalization performance for Census and sub-sampled CovType, in terms of relative spectral distance $D_{\lambda}(K,\tK)$ and Frobenius norm $\frac{1}{n^2}\|K-\tK\|_F^2$.
+	%as a function of the memory utilization, and observe that LP-RFFs attain lower relative spectral distance per bit (rightmost plot). We then plot generalization performance as a function of relative spectral distance (middle), and Frobenius norm of $K - \tK$ (right). We observe a tigher correspondance between the generalization performance and relative spectral distance, relative to the Frobenius norm, on both datasets.
+	}
 	\label{fig:specdist}
 \end{figure}
 
