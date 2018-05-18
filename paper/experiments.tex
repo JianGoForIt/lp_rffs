@@ -44,7 +44,7 @@ In Table~\ref{tab:mem_saving} we present the compression ratios we achieve with 
 %		(a) Census & (b) YearPred & (c) Covtype & (d) TIMIT \\
 	\end{tabular}
 	\end{small}
-	\caption{Generalization performance of LP-RFFs, FP-RFFs, and \Nystrom with respect to memory, on TIMIT and YearPred and CovType. The same trend holds for Census; see Appendix~\ref{subsec:app_exp_detail}.
+	\caption{Generalization performance of LP-RFFs, FP-RFFs, and \Nystrom with respect to memory and \# features, on TIMIT, YearPred and CovType. The same trend holds for Census in Appendix~\ref{subsec:app_exp_detail}.
 		%  LP-RFFs demonstrate better generalization performance than the full precision methods, under a memory budget. It is also informative to observe that while the \Nystrom method attains the best generalization performance with respect to the number of features, it is the worst performance method as a function of memory.  For results on the CovType and Census datasets, please see Figure~\ref{fig:generalization_col_app} in Appendix~\ref{sec:exp_details}
 }
 	\label{fig:generalization_col}
@@ -178,9 +178,9 @@ In Figure~\ref{fig:specdist} (left), we observe that LP-RFFs can achieve signifi
 %		\subfigure[CovType: Error vs. Frob. norm]{\label{fig:covtype_f_norm} \includegraphics[width=0.33\linewidth]{figures/classification_acc_vs_f_norm.pdf} } \hfill
 %	\end{tabular}
 \begin{tabular}{@{\hskip -0.1in}c@{\hskip -0.1in}c@{\hskip -0.1in}c@{\hskip -0.1in}}
-		\includegraphics[width=0.33\linewidth]{figures/regression_delta_vs_mem.pdf} &
+		\includegraphics[width=0.33\linewidth]{figures/regression_l2_vs_f_norm.pdf} & %\vspace{-.1in}\\
 		\includegraphics[width=0.33\linewidth]{figures/regression_l2_vs_delta.pdf} &
-		\includegraphics[width=0.33\linewidth]{figures/regression_l2_vs_f_norm.pdf} %\vspace{-.1in}\\
+		\includegraphics[width=0.33\linewidth]{figures/regression_delta_vs_mem.pdf}
 %		\includegraphics[width=0.33\linewidth]{figures/classification_delta_vs_mem.pdf} &
 %		\includegraphics[width=0.33\linewidth]{figures/classification_acc_vs_delta.pdf}&
 %		\includegraphics[width=0.33\linewidth]{figures/classification_acc_vs_f_norm.pdf}
