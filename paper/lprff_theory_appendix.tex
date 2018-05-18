@@ -114,7 +114,7 @@ approximation to the kernel matrix.
 
 \begin{theorem}
   Suppose that $\tK = (Z+C)(Z+C)^\top$, $\norm{K} \geq \lambda$ and $\delta^2_b \leq \lambda$.
-  Then for any $\Delta \in \Big[\frac{3}{2}\sqrt{\frac{2n/\lambda}{m}} + \frac{2n/\lambda}{m} + \frac{3}{2}\frac{\delta^2_b}{\lambda}, \frac{1}{2} \Big]$,
+  Then for any $\Delta \leq 1/2$,
   \begin{equation*}
   %(1 + \Delta)^{-1}(K + \lambda I_n) \preceq (Z + C) (Z + C)^\top + \lambda I_n \preceq (1 + \Delta)(K + \lambda I_n)
     \Prob\Big[D_{\lambda}(K,\tK) \leq \Delta\Big] \geq 1 - 16 \tr((K +
@@ -166,7 +166,8 @@ Then since $0 \preceq D \preceq \delta^2_b I_n$, $\norm{B(K + D - K) B} = \norm{
 &\leq \Delta_0 + \delta^2_b \norm{B}^2 \\
 &\leq \Delta_0 + \delta^2_b/\lambda.
 \end{align*}
-We can now let $\Delta' = \Delta_0 + \delta^2_b/\lambda$.  Given that $\Delta' = \frac{2}{3}\Delta$, and $\Delta \in \Big[\frac{3}{2}\sqrt{\frac{2n/\lambda}{m}} + \frac{2n/\lambda}{m} + \frac{3}{2}\frac{\delta^2_b}{\lambda}, \frac{1}{2} \Big]$, this implies that $\Delta_0 \in \Big[\sqrt{\frac{2n/\lambda}{m}} + \frac{4n/\lambda}{3m}, \frac{1}{3}-\frac{\delta^2_b}{\lambda}\Big]$.
+We can now let $\Delta' = \Delta_0 + \delta^2_b/\lambda$.  Given that $\Delta' = \frac{2}{3}\Delta$, and
+$\Delta \leq 1/2$, this implies that $\Delta_0 \leq 1/3$.
 
 Now, it suffices to show that
 \begin{equation*}
@@ -195,8 +196,29 @@ The bound of Proposition~\ref{prop:quantized_concentration} becomes:
 \leq&\ \frac{8 \tr((K + \lambda I_n)^{-1} (K + \delta^2_b I_n))}{1/2} \exp \left( -\frac{m
   \Delta_0^2}{4\frac{n}{\lambda} (1 + 2\Delta_0/3)} \right) \\
 \leq&\ 16 \tr((K + \lambda I_n)^{-1} (K + \delta^2_b I_n)) \exp \left( -\frac{9m\Delta_0^2}{44n/\lambda} \right)
+\numberthis \label{eq:concentration_bound}
 \end{align*}
 where we get the last inequality from $\Delta_0 \leq 1/3$.
+
+In the case where $\Delta_0 \leq \sqrt{\frac{2n/\lambda}{m}} + \frac{4n/\lambda}{3m}$, the bound is
+vacuous (greater than 1).
+Indeed, since $\Delta_0 \leq 1/2$, we can assume $\sqrt{\frac{2n/\lambda}{m}} \leq 1/2$, so
+$\frac{4n/\lambda}{3m} = \frac{2}{3} \frac{2n/\lambda}{m} \leq \frac{2}{3} \frac{1}{2}
+\sqrt{\frac{2n/\lambda}{m}} = 1/3 \sqrt{\frac{2n/\lambda}{m}}$.
+Hence we have $\Delta_0 \leq 4/3 \sqrt{\frac{2n/\lambda}{m}}$, and so
+\begin{equation*}
+  16 \exp \left( -\frac{9m \Delta_0^2}{44 n/\lambda} \right) \geq 16 \exp \left( -\frac{9 \cdot
+      16/9 \cdot 2n/\lambda}{44 n/\lambda} \right) = 16 \exp(-8/11) \geq 7.
+\end{equation*}
+Since we assume that $\norm{K} \geq \lambda$,
+\begin{equation*}
+  \tr ((K + \lambda I_n)^{-1} (K + \delta^2_b I_n)) \geq \frac{\lambda_1 + \delta^2_b}{\lambda_1 + \lambda} \geq \frac{1}{2}.
+\end{equation*}
+Thus the bound in equation~\eqref{eq:concentration_bound} is at least $7/2$,
+which is vacuous.
+Hence we do not need to include the condition $\Delta_0 \geq \sqrt{\frac{2n/\lambda}{m}} +
+\frac{4n/\lambda}{3m}$,
+and the bound~\eqref{eq:concentration_bound} holds for all $\Delta_0 \leq 1/2$.
 
 Letting this probability be $\rho$ and solving for $m$ yields
 \begin{eqnarray*}
@@ -218,7 +240,7 @@ If we let the number of bits $b$ goes to $\infty$, we recover the
 result of \citet{avron17}.
 \begin{corollary}
   Suppose that $\tK = ZZ^\top$, $\norm{K} \geq \lambda$.
-Then for any $\Delta \in \Big[\frac{3}{2}\sqrt{\frac{2n/\lambda}{m}} + \frac{2n/\lambda}{m}, \frac{1}{2} \Big]$,
+Then for any $\Delta \leq 1/2$,
 \begin{equation*}
 %(1 + \Delta)^{-1}(K + \lambda I_n) \preceq (Z + C) (Z + C)^\top + \lambda I_n \preceq (1 + \Delta)(K + \lambda I_n)
 \Prob\Big[D_{\lambda}(K,\tK) \leq \Delta\Big] \geq 1 - 16 \tr((K +

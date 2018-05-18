@@ -10,7 +10,7 @@ We now show that $D_{\lambda}(K,\tK) \leq \Delta$ with high probability, for the
 
 \begin{theorem}
 	\label{thm2}
-	Let $\tK = (Z+C)(Z+C)^T$ be the LP-RFF approximation of a kernel matrix $K$, where $Z\in\RR^{n\times m}$ denotes the full precision RFF matrix, and $C$ denotes the quantization noise, with $\expect{}{C_{ij} \mid Z} = 0$ and $\var[C_{ij} \mid Z] \leq \delta_b^2 \;\;\forall i,j$, where $b$ is the number of bits used per feature. Suppose that $\norm{K} \geq \lambda$ and $\delta^2_b \leq \lambda$. Then for any $\Delta \in \Big[\frac{3}{2}\sqrt{\frac{2n/\lambda}{m}} + \frac{2n/\lambda}{m} + \frac{3}{2}\frac{\delta^2_b}{\lambda}, \frac{1}{2} \Big]$,
+	Let $\tK = (Z+C)(Z+C)^T$ be the LP-RFF approximation of a kernel matrix $K$, where $Z\in\RR^{n\times m}$ denotes the full precision RFF matrix, and $C$ denotes the quantization noise, with $\expect{}{C_{ij} \mid Z} = 0$ and $\var[C_{ij} \mid Z] \leq \delta_b^2 \;\;\forall i,j$, where $b$ is the number of bits used per feature. Suppose that $\norm{K} \geq \lambda$ and $\delta^2_b \leq \lambda$. Then for any $\Delta \leq 1/2$,
 	\begin{equation*}
 	%(1 + \Delta)^{-1}(K + \lambda I_n) \preceq (Z + C) (Z + C)^\top + \lambda I_n \preceq (1 + \Delta)(K + \lambda I_n)
 	\Prob\Big[D_{\lambda}(K,\tK) \leq \Delta\Big] \geq 1 - 16 \tr((K + \lambda I_n)^{-1} (K + \delta^2_b I_n)) \exp \left( -\frac{9m \big(\frac{2}{3}\Delta - \delta^2_b / \lambda\big)^2}{44n/\lambda} \right).
