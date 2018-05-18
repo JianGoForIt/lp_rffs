@@ -175,11 +175,16 @@ In Section~\ref{subsec:perf_vs_rel_spec_dist}, we empirically demonstrate correl
 \begin{figure}
 \centering
 \begin{tabular}{c c}
-	\includegraphics[width=0.4\linewidth]{figures/lp_ensemble_nystrom_mse_vs_mem.pdf} &
-	\includegraphics[width=0.4\linewidth]{figures/lp_nystrom_mse_vs_mem.pdf}
+	\includegraphics[width=0.4\linewidth]{figures/lp_nystrom_mse_vs_mem.pdf} &
+	\includegraphics[width=0.4\linewidth]{figures/lp_ensemble_nystrom_mse_vs_mem.pdf} \\
+	\includegraphics[width=0.4\linewidth]{figures/lp_nystrom_delta_vs_mem.pdf} &
+	\includegraphics[width=0.4\linewidth]{figures/lp_ensemble_nystrom_delta_vs_mem.pdf} \\
+	(a) LP-\Nystrom & (b) Ensemble LP-\Nystrom
 \end{tabular}
-\caption{The generalization performance of Low-precision \Nystrom and low-precision ensembled \Nystrom in comparison to LP-RFF.}	
+\caption{The generalization performance and relative spectral distance of Low-precision \Nystrom and low-precision ensemble \Nystrom.}	
 \end{figure}
+
+In our initial experiments, we also apply the same stochastic quantization to \Nystrom as to RFFs on Census dataset. For both LP-\Nystrom and 10 learner-based Ensemble LP-\Nystrom~\cite{ensemble09}, we determine the quantization dynamic range with the maximum and minimum value from the \Nystrom features generated from training set. Due to the large dynamic range, we observe for LP-\Nystrom, the generalization performance degrades significant with equal or less than 8 bits comparing to full precision \Nystrom. To reduced the dynamic range by a factor of $\sqrt{r}$ with $r$ learners, we also apply stochastic quantization to ensemble \Nystrom; ensemble \Nystrom has the additional benefits on reducing the memory requirement in generating \Nystrom features. However, we observe ensemble \Nystrom can demonstrate large relative spectral distance, implying the worse generalization performance for 16 and 8-bit low precision ensemble \Nystrom. 
 
 
 
