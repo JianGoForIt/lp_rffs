@@ -1,6 +1,3 @@
-Number of features for \Nystrom: $1250, 2500, 5000, 10000, 20000$
-Number of features for RFF related approach: $1250, 2500, 5000, 10000, 20000, 50000, 100000, 200000, 400000$
-
 \begin{table}
 	\caption{The configuration for Gaussian kernel and the search grid for initial learning rate on the Census, YearPred, Covtype and TIMIT datasets.}
 	\label{tab:hyperparam}
@@ -16,8 +13,11 @@ TIMIT & 0.0015 & {5.0, 10.0, 50.0, \textbf{100.0}, 500.0} \\
 	\bottomrule
 	\end{tabular}
 	\end{center}
+	\label{tab:kernel_hyper}
 \end{table}
 
+\subsection{Dataset details and kernel configuration}
+In section~\ref{sec:experiments}, we demonstrate the performance of LP-RFFs on the TIMIT, YearPred, CovType and Census datasets, with SGD-based minibatch training. These datasets spans over regression, binary and multi-class classification tasks. We present the details, including task specification, dataset size and the number of raw data attributes in Table~\ref{tab:dataset_details}. In these experiments we use Gaussian kernel with the kernel width hyperparameter $\sigma$ recommended by~\cite{may2017} in Table~\ref{tab:kernel_hyper}. 
 \begin{table}
 	\caption{Dataset details.  For classification tasks, we write the number
 		of classes in parentheses in the ``task'' column.}
@@ -34,68 +34,12 @@ TIMIT & 0.0015 & {5.0, 10.0, 50.0, \textbf{100.0}, 500.0} \\
 			YEARPRED & Reg.   & 417k  & 46k     & 52k  & 90  \\ 
 			\bottomrule
 		\end{tabular}
-
 	\end{center}
+	\label{tab:dataset_details}
 \end{table}
 
+\subsection{Hyperparameter tuning for SGD-based training}
+We use the heldout set in order to perform early stopping and determine when to decay the learning rate, as in \citep{morgan1990generalization,sainath2013b,sainath2013low}. Early stopping can be seen as a form of regularization \citep{zhang2005boosting,wei2017early}, and this saves us the effort of manually tuning the initial learning rate, the learning rate decay, the regularizer, and the number of training epochs.  The scheme works as follows: at the end of each epoch, we decay the learning rate in half if the heldout performance is less than $1\%$ better relative to the previous best model, using MSE for regression and cross entropy for classification. Furthermore, if the model performs \textit{worse} than the previous best, we revert the model. The training terminates after the learning rate has been decayed 10 times. Early stopping can be seen as a form of regularization \citep{zhang2005boosting,wei2017early}.  We use a single initial learning rate per dataset across all experiments, which we tune via grid search using $20\text{k}$ \Nystrom features. We choose to use \Nystrom features to tune the initial learning rate in order to avoid biasing the results in favor of RFF-based approaches.
 
-\begin{figure}
-	\centering
-	\begin{tabular}{@{\hskip 0in}c@{\hskip 0in}c@{\hskip 0in}c@{\hskip 0in}c@{\hskip 0in}}
-%		\subfigure[Census heldout MSE]{\label{fig:census_mem} \includegraphics[width=0.3\linewidth]{figures/census_MSE_vs_n_memory.pdf} } \hfill
-%		\subfigure[Census heldout MSE]{\label{fig:census_feat}\includegraphics[width=0.3\linewidth]{figures/census_MSE_vs_n_feat.pdf} } \hfill
-%		\subfigure[CovType heldout error]{\label{fig:covtype_mem} \includegraphics[width=0.3\linewidth]{figures/covtype_error_vs_n_memory.pdf} } \hfill
-%		\subfigure[CovType heldout error]{\label{fig:covtype_feat}\includegraphics[width=0.3\linewidth]{figures/covtype_error_vs_n_feat.pdf} } \hfill
-%		\includegraphics[width=0.3\linewidth]{figures/yearpred_MSE_vs_n_memory_all_line.pdf} &
-%		\includegraphics[width=0.3\linewidth]{figures/yearpred_MSE_vs_n_feat_all_line.pdf} &
-%		\includegraphics[width=0.3\linewidth]{figures/timit_error_vs_n_memory_all_line.pdf} &
-%		\includegraphics[width=0.3\linewidth]{figures/timit_error_vs_n_feat_all_line.pdf} \\
-%		(a) Census & (b) YearPred & (c) Covtype & (d) TIMIT \\
-		\includegraphics[width=0.26\linewidth]{figures/census_MSE_vs_n_memory_all_line.pdf} &
-		\includegraphics[width=0.26\linewidth]{figures/yearpred_MSE_vs_n_memory_all_line.pdf} &
-		\includegraphics[width=0.26\linewidth]{figures/covtype_error_vs_n_memory_all_line.pdf} &
-		\includegraphics[width=0.26\linewidth]{figures/timit_error_vs_n_memory_all_line.pdf} \\
-		\includegraphics[width=0.26\linewidth]{figures/census_MSE_vs_n_feat_all_line.pdf} &
-		\includegraphics[width=0.26\linewidth]{figures/yearpred_MSE_vs_n_feat_all_line.pdf} &
-		\includegraphics[width=0.26\linewidth]{figures/covtype_error_vs_n_feat_all_line.pdf} &
-		\includegraphics[width=0.26\linewidth]{figures/timit_error_vs_n_feat_all_line.pdf} \\
-%		(a) Census & (b) YearPred & (c) Covtype & (d) TIMIT \\
-	\end{tabular}
-	\caption{Generalization performance of LP RFF, full precision RFF and \Nystrom with respect to number of features and memory budgets. We can observe that LP RFFs demonstrate better generalization performance than full precision baselines under memory budget. Noticeably, the comparison of different methods on generalization performance behaves differently under memory budget and under number off features. E.g., \Nystrom shows better generalization performance than RFF based approach with the same number of features. However, \Nystrom can be significantly worse under memory budgets.}
-	\label{fig:generalization_col_app}
-\end{figure}
-
-\begin{figure}
-	\centering
-	\begin{tabular}{@{\hskip -0.25in}c@{\hskip -0.25in}c@{\hskip -0.25in}c@{\hskip -0.25in}}
-		\includegraphics[width=0.33\linewidth]{figures/regression_l2_vs_delta_all_line.pdf} &
-		\includegraphics[width=0.33\linewidth]{figures/regression_l2_vs_f_norm_all_line.pdf} &
-		\includegraphics[width=0.33\linewidth]{figures/regression_l2_vs_s_norm_all_line.pdf} \\
-		\includegraphics[width=0.33\linewidth]{figures/classification_acc_vs_delta_all_line.pdf} &
-		\includegraphics[width=0.33\linewidth]{figures/classification_acc_vs_f_norm_all_line.pdf} &
-		\includegraphics[width=0.33\linewidth]{figures/classification_acc_vs_s_norm_all_line.pdf} \\
-	\end{tabular}
-%	\begin{tabular}{@{\hskip -0.25in}c@{\hskip -0.25in}c@{\hskip -0.25in}c@{\hskip -0.25in}}
-%		\subfigure[MSE and Rel. spectral distance distance]{\label{fig:census_delta_all_line} \includegraphics[width=0.33\linewidth]{figures/regression_l2_vs_delta_all_line.pdf} } \hfill
-%		\subfigure[MSE and Frobenius norm]{\label{fig:census_f_norm_all_line} \includegraphics[width=0.33\linewidth]{figures/regression_l2_vs_f_norm_all_line.pdf} } \hfill
-%		\subfigure[Rel. spectral distance distance and memory]{\label{fig:census_s_norm_all_line}  \includegraphics[width=0.33\linewidth]{figures/regression_l2_vs_s_norm_all_line.pdf} } \hfill \\
-%		\subfigure[MSE and Frobenius norm]{\label{fig:covtype_delta_all_line} \includegraphics[width=0.33\linewidth]{figures/classification_acc_vs_delta_all_line.pdf} } \hfill
-%		\subfigure[Error and Frobenius norm]{\label{fig:covtype_f_norm_all_line} \includegraphics[width=0.33\linewidth]{figures/classification_acc_vs_f_norm_all_line.pdf} } \hfill
-%		\subfigure[Error and spectral norm]{\label{fig:covtype_s_norm_all_line} \includegraphics[width=0.33\linewidth]{figures/classification_acc_vs_s_norm_all_line.pdf}} \hfill
-%	\end{tabular}
-	\caption{Generalization performance vs. relative spectral distance $D_{\lambda}(K,\tK)$, and that Frobenius and spectral norms of $K - \tK$. We observe that $D_{\lambda}(K,\tK)$ aligns much better with generalization performance than the Frobenius and spectral norms, for both the Census and sub-sampled CovType datasets.}
-	\label{fig:specdist_app}	
-%	\begin{tabular}{c c c}
-%		\includegraphics[width=0.33\linewidth]{figures/regression_delta_vs_mem_all_line.pdf} &
-%		\includegraphics[width=0.33\linewidth]{figures/regression_l2_vs_mem_all_line.pdf} &
-%		\includegraphics[width=0.33\linewidth]{figures/regression_l2_vs_delta_all_line.pdf} \\
-%		\includegraphics[width=0.33\linewidth]{figures/classification_delta_vs_mem_all_line.pdf} &
-%		\includegraphics[width=0.33\linewidth]{figures/classification_acc_vs_mem_all_line.pdf} &
-%		\includegraphics[width=0.33\linewidth]{figures/classification_acc_vs_delta_all_line.pdf} \\
-%		(a) & (b) & (c)
-%	\end{tabular}
-%	\caption{The strong correlation between generalization performance and $\lambda$-spectral distance $D_{\lambda}(K,\tK)$ under memory budgets for the Census dataset (top) and subsampled CovType dataset (bottom). Under different memory budget in (a) and (b), the precision demonstrates smaller $D_{\lambda}(K,\tK)$ tends to have better generalization performance. In (c), different kernel approximation approaches demonstrate similar generalization performance for similar $\lambda$-spectral distance.}
-%	\label{fig:specdist_app}
-\end{figure}
-
-
+\subsection{Hyperparameter tuning for LM-HALP-based training}
+We use the same learning rate schedule as the one in the SGD-based experiments. We sweep the $\mu$ parameter, which determines the value of the quantization scale in HALP, using grid search over $\{0.001, 0.01, 0.1, 1.0\}$. For each number of LP-RFFs $m$, we choose the value of $\mu$ attaining lowest heldout classification error, and report this as the error.
