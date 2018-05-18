@@ -20,9 +20,9 @@ def save_csv_with_error_bar(data_list, file_name="./test/test.csv", ave_x=False)
         x = np.array(x)
         average_y = np.array(average_y)
         std_y = np.array(std_y)
-        df_list.append(pd.DataFrame(np.reshape(x, [x.size, 1] ), columns = [label + "-x" ] ) )
-        df_list.append(pd.DataFrame(np.reshape(average_y, [average_y.size, 1] ), columns = [label + "-y" ] ) )
-        df_list.append(pd.DataFrame(np.reshape(std_y, [std_y.size, 1] ), columns = [label + "-y_std" ] ) )
+        df_list.append(pd.DataFrame(np.reshape(x, [x.size, 1] ), columns = [label + "|x" ] ) )
+        df_list.append(pd.DataFrame(np.reshape(average_y, [average_y.size, 1] ), columns = [label + "|y" ] ) )
+        df_list.append(pd.DataFrame(np.reshape(std_y, [std_y.size, 1] ), columns = [label + "|y_std" ] ) )
     pd.concat(df_list, axis=1).to_csv(file_name)
 
 
@@ -58,7 +58,7 @@ def plot_figure_with_error_bar(names, data, color_list):
     marker_list = ['o', 'v', '^', 's', 'h', 'd', '+']
     for i in range(data.shape[1] // 3):
         idx = i * 3
-        label = names[idx].split("-")[0]
+        label = names[idx].split("|")[0]
         print "label ", names[idx], label
         x = data[:, idx]
         average_y = data[:, idx + 1]
