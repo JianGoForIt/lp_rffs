@@ -44,7 +44,7 @@ In Table~\ref{tab:mem_saving} we present the compression ratios we achieve with 
 %		(a) Census & (b) YearPred & (c) Covtype & (d) TIMIT \\
 	\end{tabular}
 	\end{small}
-	\caption{Generalization performance of LP-RFFs, FP-RFFs, and \Nystrom with respect to memory, on TIMIT and YearPred and CovType. The same trend holds for CovType \& Census; see Appendix~\ref{subsec:app_exp_detail}.
+	\caption{Generalization performance of LP-RFFs, FP-RFFs, and \Nystrom with respect to memory, on TIMIT and YearPred and CovType. The same trend holds for Census; see Appendix~\ref{subsec:app_exp_detail}.
 		%  LP-RFFs demonstrate better generalization performance than the full precision methods, under a memory budget. It is also informative to observe that while the \Nystrom method attains the best generalization performance with respect to the number of features, it is the worst performance method as a function of memory.  For results on the CovType and Census datasets, please see Figure~\ref{fig:generalization_col_app} in Appendix~\ref{sec:exp_details}
 }
 	\label{fig:generalization_col}
@@ -185,7 +185,7 @@ In Figure~\ref{fig:specdist} (left), we observe that LP-RFFs can achieve signifi
 %		\includegraphics[width=0.33\linewidth]{figures/classification_acc_vs_delta.pdf}&
 %		\includegraphics[width=0.33\linewidth]{figures/classification_acc_vs_f_norm.pdf}
 	\end{tabular}
-	\caption{Analysis of generalization performance for Census, in terms of relative spectral distance $D_{\lambda}(K,\tK)$ and Frobenius norm $\frac{1}{n^2}\|K-\tK\|_F^2$. For CovType plots, see Appendix~\ref{sec:exp_details}.
+	\caption{Analysis of generalization performance for Census, in terms of relative spectral distance $D_{\lambda}(K,\tK)$ and Frobenius norm $\frac{1}{n^2}\|K-\tK\|_F^2$. Comparing to Frobenius norm, relative spectral distance correlates stronger with generalization performance. For CovType, see Figure~\ref{fig:specdist_app} in Appendix~\ref{sec:exp_details}.
 	%as a function of the memory utilization, and observe that LP-RFFs attain lower relative spectral distance per bit (rightmost plot). We then plot generalization performance as a function of relative spectral distance (middle), and Frobenius norm of $K - \tK$ (right). We observe a tigher correspondance between the generalization performance and relative spectral distance, relative to the Frobenius norm, on both datasets.
 	}
 	\label{fig:specdist}
