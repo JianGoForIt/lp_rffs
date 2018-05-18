@@ -4,15 +4,17 @@ We now discuss the memory utilization of kernel approximation methods, and revie
 \label{subsec:memory_utils}
 The core resource we optimize for in this work is memory.  As discussed in the introduction, we consider the setting of large-scale mini-batch training for kernel approximation methods. We summarize the memory utilization of the different parts of the training pipeline in Table \ref{table:mem-usage}, assuming full-precision numbers are stored in 32 bits. The three components are:
 \begin{enumerate}
-	\item \textit{Feature generation}: Computing RFFs, for example, requires storing the random projection matrix $W \in \RR^{m\times d}$.
-	\item \textit{Mini-batch storage}: The vectors $z(x_i)\in\RR^m$ for all $x_i$ in the current mini-batch, must be stored.
+	\item \textit{Feature generation}: Computing random Fourier features (RFFs), for example, requires storing the random projection matrix $W \in \RR^{m\times d}$. The \Nystrom method requires storing $m$ ``landmark points'' $\hx_i \in \RR^d$, along with a rotation matrix of size $m^2$.
+	\item \textit{Mini-batch storage}: The vectors $z(x_i)\in\RR^m$ for all $x_i$ in a mini-batch must be stored.
 	\item \textit{Learned parameters}: For binary classification and regression, the linear model learned on the $z(x)$ features is a vector $\theta \in \RR^m$; for $c$-class classification, it is a matrix $\theta \in \RR^{m\times c}$.	
 \end{enumerate}
 
-In this work, we focus on reducing the memory occupied by the mini-batches of random Fourier features. Our core contribution is to show, both theoretically (\S\ref{sec:lprff}) and empirically (\S\ref{sec:experiments}), that the features can in many cases be stored in 8 bits or less, without affecting generalization performance.  We also show that the learned parameters themselves can be learned in low-precision (\S\ref{sec:halp}). To reduce the memory required for generating our low-precision features, we simply use circulant RFFs \cite{yu15}.
+In this work, we focus on reducing the memory occupied by the mini-batches of random Fourier features. Our core contribution is to show, both theoretically (\S\ref{sec:lprff}) and empirically (\S\ref{sec:experiments}), that the features can in many cases be stored in 8 bits or less, without affecting generalization performance. We also show that the model updates can be performed in low-precision  (\S\ref{sec:halp}). To reduce the memory required for generating our low-precision RFFs, we simply use circulant RFFs \cite{yu15}.
 
-\begin{table}
-	\caption{Kernel approximation method memory utilization. $m$ is the number of kernel approximation features, $d$ is the dimensionality of a datum, $s$ is the mini-batch size, $c$ is the number of classes ($c=1$ for regression/binary classification), $b$ is the precision used for the random features, and $\hb$ is the precision used for the model.}
+% (1) how does memory utilization relate to generalization guarantees, and (2) how do these results look empirically?
+
+\begin{table}[h]
+	\caption{Kernel approximation method memory utilization. We consider data $x\in\RR^d$, kernel features $z(x)\in\RR^m$, $s$ as the mini-batch size, $c$ as the number of classes ($c=1$ for regression/binary classification), $b$ as the precision of $z(x)$, and $\hb$ as the precision of the model.}
 	\label{table:mem-usage}
 	\centering
 	\begin{tabular}{llll}
@@ -29,16 +31,13 @@ In this work, we focus on reducing the memory occupied by the mini-batches of ra
 
 \subsection{Fixed design kernel ridge regression generalization bounds}
 \label{sec:genbound}
-%In fixed design linear regression, one is given a set of labeled points $\{(x_i,y_i)\}_{i=1}^n$, where $x_i \in \RR^d$, $y_i = \by_i + \eps_i \in \RR$, and the $\eps_i$ are uncorrelated random variables with shared variance $\sigma^2 > 0$.  Given such a sample, the goal is to learn a regressor $f(x) = \beta^T x$ such that $\cR(f) = \expect{\eps}{\frac{1}{n}\sum_{i=1}^n (f(x_i) - \by_i)^2}$ is small. Note that for a fixed learning method the learned regressor $f$ seen as a random function, based on the random label noise $\eps_i$.
-%One approach to solving this problem is kernel ridge regression (KRR).  In kernel ridge regression, one chooses a kernel function $k:\RR^d\times\RR^d\rightarrow \RR$, and a regularizing constant $\lambda$, and learns a function of the form $f(x) = \sum_i \alpha_i k(x,x_i)$.  Letting $K\in\RR^{n\times n}$ denote the kernel matrix such that $K_{ij} = k(x_i,x_j)$, and $y = (y_1,\ldots,y_n)$, the closed form solution for this problem is $\alpha = (K+\lambda I)^{-1}y$. It can then be shown that the expected error of this regressor $f_K$, under the fixed design setting, is:
-
-In fixed design kernel ridge regression, one is given a set of labeled points $\{(x_i,y_i)\}_{i=1}^n$, where $x_i \in \RR^d$, $y_i = \by_i + \eps_i \in \RR$, and the $\eps_i$ are uncorrelated random variables with shared variance $\sigma^2 > 0$. Given such a sample, and a kernel function $k:\RR^d\times\RR^d\rightarrow \RR$, the goal is to learn a regressor $f(x) = \sum_i \alpha_i k(x,x_i)$ such that the expected error $\cR(f) = \expect{\eps}{\frac{1}{n}\sum_{i=1}^n (f(x_i) - \by_i)^2}$ is small. Given a regularization parameter $\lambda$, and letting $K\in\RR^{n\times n}$ denote the kernel matrix, and $y = (y_1,\ldots,y_n)$, the closed form solution for this problem is $\alpha = (K+\lambda I)^{-1}y$. It is then easy to show \citep{alaoui15} that the expected error of this regressor $f_K$ under the fixed design setting is:
+We consider fixed design kernel ridge regression (for an overview, see Appendix~\ref{sec:appendix_blob}). Given a kernel function $K\in\RR^{n\times n}$, a regularization parameter $\lambda > 0$, and a set of labeled points $\{(x_i,y_i)\}_{i=1}^n$ where the labels $y_i=\by_i + \eps_i$ are randomly perturbed versions of the ``true labels'' $\by_i \in \RR$ (noise variance $\sigma^2$), it is easy to show \citep{alaoui15} that the optimal kernel regressor $f_K$ has expected error:
 \begin{eqnarray}
 \cR(f_K) = \frac{1}{n}\lambda^2 \by^T(K+\lambda I)^{-2}\by + \frac{1}{n}\sigma^2 Tr\Big(K^2(K+\lambda \id)^{-2}\Big),
 \end{eqnarray}
-where $\by = (\by_1,\ldots,\by_n)$ is the vector of ``noiseless labels.''
+where $\by = (\by_1,\ldots,\by_n)$ is the vector of ``true labels.''
 
-We proceed to bound the expected loss $\cR(f_{\tK})$ of a kernel ridge regression model $f_{\tK}$ learned using an approximate kernel matrix $\tK$, in place of the exact kernel matrix $K$. First, we define the following notion of distance\footnote{Importantly, this isn't a properly defined ``distance function'' in the formal sense.  In particular, it is non-negative and symmetric, but only satisfies a weaker version of the triangle inequality: $D_{\lambda}(K_1,K_3) \leq D_{\lambda}(K_1,K_2) + D_{\lambda}(K_2,K_3) + D_{\lambda}(K_1,K_2)D_{\lambda}(K_2,K_3)$.} between $K$ and $\tK$:
+We proceed to bound the expected loss $\cR(f_{\tK})$ of a kernel ridge regression model $f_{\tK}$ learned using an approximate kernel matrix $\tK$, in place of the exact kernel matrix $K$. First, we define the following notion of distance\footnote{Importantly, this isn't a ``distance function'' in the formal sense.} between $K$ and $\tK$:
 
 \begin{definition}
 	\label{def:specdist}
@@ -57,6 +56,4 @@ we can bound the expected loss of $f_{\tK}$ as follows:
 	\cR(f_{\tK}) \leq \Big(1+D_{\lambda}(K,\tK)\Big)\cdot \hcR(f_K) + \frac{D_{\lambda}(K,\tK)}{1+D_{\lambda}(K,\tK)}\cdot \frac{rank(\tK)}{n}\cdot\sigma^2.
 	\end{eqnarray}
 \end{proposition}
-We include a proof in Appendix \ref{sec:appendix_blob}.
-
-An important consequence of the above definition is that if $\tK$ is a rank $r$ matrix, in order for $D_{\lambda}(K,\tK) \leq \Delta$, it must hold that $\lambda_{r+1}(K) \leq \Delta \lambda$, where $\lambda_i(K)$ denote the $i^{th}$ largest eigenvalues of $A$.  This follows from $A\preceq B \Rightarrow \lambda_i(A) \leq \lambda_i(B)$, $(\lambda_i(K) + \lambda)/(1+\Delta) \leq \lambda_i(\tK) + \lambda$, and $\lambda_{r+1}(\tK) = 0$.  This sets a lower bound on the rank necessary for $D_{\lambda}(K,\tK) \leq \Delta$, which holds regardless of the approximation method used. This insight motivates our proposed low-precision random Fourier features method, which generates high-rank kernel approximations, under a fixed memory budget.
+We include a proof in Appendix \ref{sec:appendix_blob}. An important consequence of the above definition is that if $\tK$ is a rank $r$ matrix, in order for $D_{\lambda}(K,\tK) \leq \Delta$, it must hold that $\lambda_{r+1}(K) \leq \Delta \lambda$, where $\lambda_i(K)$ denote the $i^{th}$ largest eigenvalues of $K$.  This follows from $A\preceq B \Rightarrow \lambda_i(A) \leq \lambda_i(B)$, $(\lambda_i(K) + \lambda)/(1+\Delta) \leq \lambda_i(\tK) + \lambda$, and $\lambda_{r+1}(\tK) = 0$.  This sets a lower bound on the rank necessary for $D_{\lambda}(K,\tK) \leq \Delta$, which holds regardless of the approximation method used. This insight motivates our proposed low-precision random Fourier features method, which generates high-rank kernel approximations under a fixed memory budget.
