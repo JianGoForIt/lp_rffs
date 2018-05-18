@@ -1,7 +1,7 @@
 For an extended discussion of the related work, see Appendix \ref{sec:app_extended_related}. We provide a brief overview here.
 
 %\paragraph{Low-memory kernel approximation}
-\textbf{Low-memory kernel approximation}: For RFFs, there has been work on using structured random projections \citep{fastfood,yu15,sphereRKS}, and feature selection \citep{sparseRKS, may2016} to reduce memory utilization. Our work is orthogonal to these, because LP-RFFs can be used in conjunctions with both. For \NystromNS, there has been extensive work on improving the choice of landmark points, and reducing the memory footprint in other ways \cite{ensemble09,fastpred14,meka14}. In our work, we specifically focus on the effect of \textit{quantization} on kernel approximation performance per bit, and note that RFFs are much more amenable to quantization. 
+\textbf{Low-memory kernel approximation}: For RFFs, there has been work on using structured random projections \citep{fastfood,yu15,sphereRKS}, and feature selection \citep{sparseRKS, may2016} to reduce memory utilization. Our work is orthogonal to these, because LP-RFFs can be used in conjunctions with both. For \NystromNS, there has been extensive work on improving the choice of landmark points, and reducing the memory footprint in other ways \cite{ensemble09,fastpred14,meka14}. In our work, we specifically focus on the effect of \textit{quantization} on generalization performance per bit, and note that RFFs are much more amenable to quantization. For our initial experiments quantizing \Nystrom features, see Appendix~\ref{sec:lpnystrom}.
 %For a more extended discussion on quantization and \NystromNS, see Appendix~\ref{sec:appendix_blob}.
 
 %\paragraph{Low-precision} 

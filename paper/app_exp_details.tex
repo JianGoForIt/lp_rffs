@@ -172,6 +172,7 @@ In Section~\ref{subsec:perf_vs_rel_spec_dist}, we empirically demonstrate correl
 %\end{figure}
 
 \subsection{Low-precision \Nystrom}
+\label{sec:lpnystrom}
 \begin{figure}
 \centering
 \begin{tabular}{c c}
@@ -184,7 +185,7 @@ In Section~\ref{subsec:perf_vs_rel_spec_dist}, we empirically demonstrate correl
 \caption{The generalization performance and relative spectral distance of Low-precision \Nystrom and low-precision ensemble \Nystrom.}	
 \end{figure}
 
-In our initial experiments, we also apply the same stochastic quantization to \Nystrom as to RFFs on Census dataset. For both LP-\Nystrom and 10 learner-based Ensemble LP-\Nystrom~\cite{ensemble09}, we determine the quantization dynamic range with the maximum and minimum value from the \Nystrom features generated from training set. Due to the large dynamic range, we observe for LP-\Nystrom, the generalization performance degrades significant with equal or less than 8 bits comparing to full precision \Nystrom. To reduced the dynamic range by a factor of $\sqrt{r}$ with $r$ learners, we also apply stochastic quantization to ensemble \Nystrom; ensemble \Nystrom has the additional benefits on reducing the memory requirement in generating \Nystrom features. However, we observe ensemble \Nystrom can demonstrate large relative spectral distance, implying the worse generalization performance for 16 and 8-bit low precision ensemble \Nystrom. 
+For our initial experiments, we applied the same stochastic quantization to \Nystrom as to RFFs on the Census dataset. For both LP-\Nystrom and ensemble \Nystrom with 10 blocks~\cite{ensemble09}, we determine the quantization dynamic range with the maximum and minimum value from the \Nystrom features generated from training set. Due to the large dynamic range, we observe for LP-\NystromNS, the generalization performance degrades significant with less than or equal to 8 bits compared to full-precision \NystromNS. We reduce the dynamic range by a factor of $\sqrt{r}$ with $r$ learners using ensemble \NystromNS. Ensemble \Nystrom has the additional benefits on reducing the memory requirement in generating \Nystrom features. However, we observe ensemble \Nystrom demonstrates larger relative spectral distance compared to FP-\Nystrom.
 
 
 
