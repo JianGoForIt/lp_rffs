@@ -1,14 +1,14 @@
-\subsection{Relative spectral distance vs. $\Delta$-spectral approximation}
-\citet{avron17} define $\tK+\lambda I$ to be a $\Delta$-spectral approximation of $K+\lambda I$ if $(1-\Delta)(K+\lambda I) \preceq \tK + \lambda I \preceq (1+\Delta)(K+\lambda I)$. This differs from our definition in two important ways. First, we define the distance as the \textit{minimum} value of $\Delta$ satisfying the bound.  Second of all, we use $(1+\Delta)^{-1}(K+\lambda I)$ in place of $(1-\Delta)(K+\lambda I)$. The definition using $(1-\Delta)$ has the property that the maximum value of $\Delta$ for the ``left inequality'' is 1, while the maximum value is $+\infty$ for the ``right inequality.'' Empirically, this asymmetry results in $\Delta$ only correlating strongly with generalization performance for small values of $\Delta$, at which $1-\Delta\approx (1+\Delta)^{-1}$. Our definition, on the other hand, correlates strongly for all $\Delta$, as we show in Section \ref{sec:experiments}.  From a theoretical perspective, our definition also allows us to prove generalization bounds (Proposition \ref{prop:avron}) which hold for all $\Delta \geq 0$, whereas the previous results on hold for $\Delta < 1$.
-
-
-\subsection{Generalization bound in terms of relative spectral distance}
-\begin{proposition}{Adapted from \citep{avron17}:}
-	Suppose $\tK$ is an approximation to a kernel matrix $K$, and $f_{K}$ and $f_{\tK}$ are the KRR estimators learned using these matrices, with regularizing constant $\lambda$ and label noise variance $\sigma^2$. Then the following bound holds:
-	\begin{eqnarray}
-	\cR(f_{\tK}) \leq \Big(1+D_{\lambda}(K,\tK)\Big)\cdot \hcR(f_K) + \frac{D_{\lambda}(K,\tK)}{1+D_{\lambda}(K,\tK)}\cdot \frac{rank(\tK)}{n}\cdot\sigma^2.
-	\end{eqnarray}
-\end{proposition}
-\begin{proof}
-	The proof exactly follows the proof of \citep{avron17}, with the only differences being that we (1) replace every appearance of $(1-\Delta)^{-1}$ with $(1+D_{\lambda}(K,\tK))$, and (2) replace every appearance of $(1+\Delta)$ with $(1+D_{\lambda}(K,\tK))$.  This is a a result of the difference between the way we define relative spectral distance, and how they define $\Delta$-spectral approximation.
-\end{proof}
+%\subsection{Relative spectral distance vs. $\Delta$-spectral approximation}
+%\citet{avron17} define $\tK+\lambda I$ to be a $\Delta$-spectral approximation of $K+\lambda I$ if $(1-\Delta)(K+\lambda I) \preceq \tK + \lambda I \preceq (1+\Delta)(K+\lambda I)$. This differs from our definition in two important ways. First, we define the distance as the \textit{minimum} value of $\Delta$ satisfying the bound.  Second of all, we use $(1+\Delta)^{-1}(K+\lambda I)$ in place of $(1-\Delta)(K+\lambda I)$. The definition using $(1-\Delta)$ has the property that the maximum value of $\Delta$ for the ``left inequality'' is 1, while the maximum value is $+\infty$ for the ``right inequality.'' Empirically, this asymmetry results in $\Delta$ only correlating strongly with generalization performance for small values of $\Delta$, at which $1-\Delta\approx (1+\Delta)^{-1}$. Our definition, on the other hand, correlates strongly for all $\Delta$, as we show in Section \ref{sec:experiments}.  From a theoretical perspective, our definition also allows us to prove generalization bounds (Proposition \ref{prop:avron}) which hold for all $\Delta \geq 0$, whereas the previous results on hold for $\Delta < 1$.
+%
+%
+%\subsection{Generalization bound in terms of relative spectral distance}
+%\begin{proposition}{Adapted from \citep{avron17}:}
+%	Suppose $\tK$ is an approximation to a kernel matrix $K$, and $f_{K}$ and $f_{\tK}$ are the KRR estimators learned using these matrices, with regularizing constant $\lambda$ and label noise variance $\sigma^2$. Then the following bound holds:
+%	\begin{eqnarray}
+%	\cR(f_{\tK}) \leq \Big(1+D_{\lambda}(K,\tK)\Big)\cdot \hcR(f_K) + \frac{D_{\lambda}(K,\tK)}{1+D_{\lambda}(K,\tK)}\cdot \frac{rank(\tK)}{n}\cdot\sigma^2.
+%	\end{eqnarray}
+%\end{proposition}
+%\begin{proof}
+%	The proof exactly follows the proof of \citep{avron17}, with the only differences being that we (1) replace every appearance of $(1-\Delta)^{-1}$ with $(1+D_{\lambda}(K,\tK))$, and (2) replace every appearance of $(1+\Delta)$ with $(1+D_{\lambda}(K,\tK))$.  This is a a result of the difference between the way we define relative spectral distance, and how they define $\Delta$-spectral approximation.
+%\end{proof}

@@ -1,4 +1,4 @@
-We now discuss the memory utilization of kernel approximation methods, and review generalization bounds for these methods in the context of kernel ridge regression. For background on kernel approximation methods, or for an overview of the notation we use in this paper, see Appendix \ref{sec:appendix_blob}.
+We now discuss the memory utilization of kernel approximation methods, and review generalization bounds for these methods in the context of kernel ridge regression. For background on kernel approximation methods, or for an overview of the notation we use in this paper, see Appendix \ref{sec:background_appendix}.
 
 \subsection{Memory utilization}
 \label{subsec:memory_utils}
@@ -31,7 +31,7 @@ In this work, we focus on reducing the memory occupied by the mini-batches of ra
 
 \subsection{Fixed design kernel ridge regression generalization bounds}
 \label{sec:genbound}
-We consider fixed design kernel ridge regression (for an overview, see Appendix~\ref{sec:appendix_blob}). Given a kernel function $K\in\RR^{n\times n}$, a regularization parameter $\lambda > 0$, and a set of labeled points $\{(x_i,y_i)\}_{i=1}^n$ where the labels $y_i=\by_i + \eps_i$ are randomly perturbed versions of the ``true labels'' $\by_i \in \RR$ (noise variance $\sigma^2$), it is easy to show \citep{alaoui15} that the optimal kernel regressor $f_K$ has expected error:
+We consider fixed design kernel ridge regression (for an overview, see Appendix~\ref{subsec:app_fix_design}). Given a kernel function $K\in\RR^{n\times n}$, a regularization parameter $\lambda > 0$, and a set of labeled points $\{(x_i,y_i)\}_{i=1}^n$ where the labels $y_i=\by_i + \eps_i$ are randomly perturbed versions of the ``true labels'' $\by_i \in \RR$ (noise variance $\sigma^2$), it is easy to show \citep{alaoui15} that the optimal kernel regressor $f_K$ has expected error:
 \begin{eqnarray}
 \cR(f_K) = \frac{1}{n}\lambda^2 \by^T(K+\lambda I)^{-2}\by + \frac{1}{n}\sigma^2 Tr\Big(K^2(K+\lambda \id)^{-2}\Big),
 \end{eqnarray}
@@ -45,7 +45,7 @@ We proceed to bound the expected loss $\cR(f_{\tK})$ of a kernel ridge regressio
 	$$D_{\lambda}(K,\tK) = \min \Big\{\Delta \in \RR_{+} \;\;\Big|\;\; \frac{1}{1+\Delta}(K+\lambda I) \preceq \tK + \lambda I \preceq (1+\Delta)(K+\lambda I)\Big\}.$$
 \end{definition}
 
-We note that this definition is tightly related to the notion of $\Delta$-spectral approximation from \citet{avron17}.  For a discussion of the differences between our definition and theirs, please see Appendix~\ref{sec:appendix_blob}. Following \citet{avron17}, if we then define 
+We note that this definition is tightly related to the notion of $\Delta$-spectral approximation from \citet{avron17}. For a discussion of the differences between our definition and theirs, please see Appendix~\ref{subsec:app_def_diff}. Following \citet{avron17}, if we then define 
 $$\hcR(f_K) = \frac{1}{n}\lambda \by^T(K+\lambda I)^{-1}\by + \frac{1}{n}\sigma^2 Tr\Big(K(K+\lambda)^{-1}\Big) \geq \cR(f_K),$$ 
 we can bound the expected loss of $f_{\tK}$ as follows:
 
@@ -56,4 +56,4 @@ we can bound the expected loss of $f_{\tK}$ as follows:
 	\cR(f_{\tK}) \leq \Big(1+D_{\lambda}(K,\tK)\Big)\cdot \hcR(f_K) + \frac{D_{\lambda}(K,\tK)}{1+D_{\lambda}(K,\tK)}\cdot \frac{rank(\tK)}{n}\cdot\sigma^2.
 	\end{eqnarray}
 \end{proposition}
-We include a proof in Appendix \ref{sec:appendix_blob}. An important consequence of the above definition is that if $\tK$ is a rank $r$ matrix, in order for $D_{\lambda}(K,\tK) \leq \Delta$, it must hold that $\lambda_{r+1}(K) \leq \Delta \lambda$, where $\lambda_i(K)$ denote the $i^{th}$ largest eigenvalues of $K$.  This follows from $A\preceq B \Rightarrow \lambda_i(A) \leq \lambda_i(B)$, $(\lambda_i(K) + \lambda)/(1+\Delta) \leq \lambda_i(\tK) + \lambda$, and $\lambda_{r+1}(\tK) = 0$.  This sets a lower bound on the rank necessary for $D_{\lambda}(K,\tK) \leq \Delta$, which holds regardless of the approximation method used. This insight motivates our proposed low-precision random Fourier features method, which generates high-rank kernel approximations under a fixed memory budget.
+We include a proof in Appendix~\ref{subsec:generalization_and_rel_spec_dist}. An important consequence of the above definition is that if $\tK$ is a rank $r$ matrix, in order for $D_{\lambda}(K,\tK) \leq \Delta$, it must hold that $\lambda_{r+1}(K) \leq \Delta \lambda$, where $\lambda_i(K)$ denote the $i^{th}$ largest eigenvalues of $K$.  This follows from $A\preceq B \Rightarrow \lambda_i(A) \leq \lambda_i(B)$, $(\lambda_i(K) + \lambda)/(1+\Delta) \leq \lambda_i(\tK) + \lambda$, and $\lambda_{r+1}(\tK) = 0$.  This sets a lower bound on the rank necessary for $D_{\lambda}(K,\tK) \leq \Delta$, which holds regardless of the approximation method used. This insight motivates our proposed low-precision random Fourier features method, which generates high-rank kernel approximations under a fixed memory budget.
