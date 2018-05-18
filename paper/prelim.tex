@@ -1,5 +1,5 @@
-We discuss the memory utilization of kernel approximation methods, and review generalization bounds for these methods in the context of kernel ridge regression. For background on kernel approximation methods, or for an overview of the notation we use in this paper, see Appendix \ref{sec:background_appendix}.
-
+We discuss the memory utilization of kernel approximation methods, and review generalization bounds for these methods in the context of kernel ridge regression. For background on kernel approximation methods, and for a summary of the notation we use in this paper, see Appendix \ref{sec:background_appendix}.
+\vsp
 \subsection{Memory utilization}
 \label{subsec:memory_utils}
 The core resource we optimize for in this work is memory.  As discussed in the introduction, we consider the setting of large-scale mini-batch training for kernel approximation methods. We summarize the memory utilization of the different parts of the training pipeline in Table \ref{table:mem-usage}, assuming full-precision numbers are stored in 32 bits. The three components are:
@@ -28,6 +28,7 @@ In this work, we focus on reducing the memory occupied by the mini-batches of ra
 		\bottomrule
 	\end{tabular}
 \end{table}
+\vsp
 
 \subsection{Fixed design kernel ridge regression generalization bounds}
 \label{sec:genbound}
@@ -56,4 +57,4 @@ we can bound the expected loss of $f_{\tK}$ as follows:
 	\cR(f_{\tK}) \leq \Big(1+D_{\lambda}(K,\tK)\Big)\cdot \hcR(f_K) + \frac{D_{\lambda}(K,\tK)}{1+D_{\lambda}(K,\tK)}\cdot \frac{rank(\tK)}{n}\cdot\sigma^2.
 	\end{eqnarray}
 \end{proposition}
-We include a proof in Appendix~\ref{subsec:generalization_and_rel_spec_dist}. An important consequence of Definition~\ref{def:specdist} is that if $\tK$ is a rank $r$ matrix, in order for $D_{\lambda}(K,\tK) \leq \Delta$, it must hold that $\lambda_{r+1}(K) \leq \Delta \lambda$, where $\lambda_i(K)$ denote the $i^{th}$ largest eigenvalues of $K$.  This follows from $A\preceq B \Rightarrow \lambda_i(A) \leq \lambda_i(B)$, $(\lambda_i(K) + \lambda)/(1+\Delta) \leq \lambda_i(\tK) + \lambda$, and $\lambda_{r+1}(\tK) = 0$.  This sets a lower bound on the rank necessary for $D_{\lambda}(K,\tK) \leq \Delta$, which holds regardless of the approximation method used. This insight motivates our proposed low-precision random Fourier features method, which generates high-rank kernel approximations under a fixed memory budget.
+We include a proof in Appendix~\ref{subsec:generalization_and_rel_spec_dist}. An important consequence of Definition~\ref{def:specdist} is that if $\tK$ is a rank $r$ matrix, in order for $D_{\lambda}(K,\tK) \leq \Delta$, it must hold that $\lambda_{r+1}(K) \leq \Delta \lambda$, where $\lambda_i(K)$ denote the $i^{th}$ largest eigenvalues of $K$.\footnote{This follows from $A\preceq B \Rightarrow \lambda_i(A) \leq \lambda_i(B)$, $(\lambda_i(K) + \lambda)/(1+\Delta) \leq \lambda_i(\tK) + \lambda$, and $\lambda_{r+1}(\tK) = 0$.}  This sets a lower bound on the rank necessary for $D_{\lambda}(K,\tK) \leq \Delta$, which holds regardless of the approximation method used. This insight motivates our proposed low-precision random Fourier features method, which generates high-rank kernel approximations under a fixed memory budget.
