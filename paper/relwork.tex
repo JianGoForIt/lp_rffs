@@ -1,8 +1,13 @@
-For an extended discussion of the related work, see Appendix \ref{sec:appendix_blob}. We provide a brief overview here:
-\paragraph{Low-memory kernel approximation} For RFFs, there has been work on using structured random projections \citep{fastfood,yu15,sphereRKS}, and feature selection \citep{sparseRKS, may2016} to reduce memory utilization. Our work is orthogonal to these, because LP-RFFs can be used in conjunctions with both. For \NystromNS, there has been extensive work on improving the choice of landmark points, and reducing the memory footprint in other ways \cite{ensemble09,fastpred14,meka14}. In our work, we specifically focus on the effect of \textit{quantization} on kernel approximation performance per bit, and note that RFFs are much more amenable to quantization. For a more extended discussion on quantization and \NystromNS, see Appendix~\ref{sec:appendix_blob}.
-%\paragraph{Large-scale kernel methods} The most relevant works are \citet{block16,may2017}, and we believe both of these directions could benefit from lower footprint training.
-\paragraph{Low-precision} There has been much recent interest in the topic of low-precision for accelerating training and/or inference, as well as for compressing models \citep{gupta15,hogwild15,hubara16,halp18,desa17,han15}.  There have been many advances in hardware support for low-precision as well\citep{tpu17,brainwave17}.
-\paragraph{\Nystrom vs. RFF} Our work responds to the claim in \citet{nysvsrff12} that \Nystrom is categorically better than RFFs by showing that when memory is considered, the opposite is true.
+For an extended discussion of the related work, see Appendix \ref{sec:appendix_blob}. We provide a brief overview here.
+
+%\paragraph{Low-memory kernel approximation}
+\textbf{Low-memory kernel approximation}: For RFFs, there has been work on using structured random projections \citep{fastfood,yu15,sphereRKS}, and feature selection \citep{sparseRKS, may2016} to reduce memory utilization. Our work is orthogonal to these, because LP-RFFs can be used in conjunctions with both. For \NystromNS, there has been extensive work on improving the choice of landmark points, and reducing the memory footprint in other ways \cite{ensemble09,fastpred14,meka14}. In our work, we specifically focus on the effect of \textit{quantization} on kernel approximation performance per bit, and note that RFFs are much more amenable to quantization. For a more extended discussion on quantization and \NystromNS, see Appendix~\ref{sec:appendix_blob}.
+
+%\paragraph{Low-precision} 
+\textbf{Low-precision}: There has been much recent interest in the topic of low-precision for accelerating training and/or inference of machine learning models, as well as for model compression \citep{gupta15,hogwild15,hubara16,halp18,desa17,han15}.  There have been many advances in hardware support for low-precision as well\citep{tpu17,brainwave17}.
+
+%\paragraph{\Nystrom vs. RFF} 
+\textbf{\Nystrom vs. RFF}: Our work responds to the claim in \citet{nysvsrff12} that \Nystrom is categorically better than RFFs by showing that when memory is considered, the opposite is true.
 
 %
 %\begin{itemize}
