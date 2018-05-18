@@ -1,4 +1,4 @@
-We introduce LP-RFFs and present our theoretical results, which shows that $D_{\lambda}(K,\tK) \leq \Delta$ with high probability, where $\tK$ is the kernel approximation matrix corresponding to $m$ low-precision random Fourier features (LP-RFFs). This directly implies a bound on the generalization performance of LP-RFFs, using Proposition \ref{prop:avron}. We illustrate our theoretical results on a subset of the Census UCI dataset, showing that one can achieve lower relative spectral distance per bit by using LP-RFFs, relative to full-precision RFFs. \vsp
+We introduce LP-RFFs and present our theoretical results, which show that $D_{\lambda}(K,\tK) \leq \Delta$ with high probability, where $\tK$ is the kernel approximation matrix corresponding to $m$ low-precision random Fourier features (LP-RFFs). This directly implies a bound on the generalization performance of LP-RFFs, using Proposition \ref{prop:avron}. We illustrate our theoretical results on a subset of the Census UCI dataset, showing that one can achieve lower relative spectral distance per bit by using LP-RFFs, relative to full-precision RFFs. \vsp
 
 \subsection{Method details}
 \label{subsec:method_details}
@@ -37,7 +37,7 @@ Another way of understanding the implications of this theorem is by analyzing th
 
 %To make this more concrete, we can calculate how many bits would be needed for $(\Delta-\delta_b^2/\lambda)^{-2} \leq (1+\gamma)\Delta^{-2}$, for some small $\gamma > 0$.
 
-\paragraph{Validation} To empirically validate the affect of low-precision on relative spectral distance implied by Theorem~\ref{thm2}, we perform two targeted experiments: (1) Keeping the number of features constant, we measure $D_{\lambda}(K,\tK)$ for various levels of precision. 
+\paragraph{Validation} To empirically validate the effect of low-precision on relative spectral distance implied by Theorem~\ref{thm2}, we perform two targeted experiments: (1) Keeping the number of features constant, we measure $D_{\lambda}(K,\tK)$ for various levels of precision. 
 (2) Keeping the memory occupied by the feature vector $z(x)$ constant, we measure $D_{\lambda}(K,\tK)$ for various levels of precision $b$ and number of features $m$ (where $bm$ is held fixed). For both experiments, we use a random sub-sample of $8000$ training points from the Census UCI dataset, and use 5 random seeds.  We plot the results in Figure \ref{fig:theo_validation}. 
 
 For the first experiment (left plot), we sample 2000 RFFs, and quantize these features using $b \in \{1,2,4,8,16,32\}$. For large enough precision $b$, the increase to the relative spectral distance is minimal, compared to the full-precision distance. Furthermore, the larger the value of $\lambda$, the smaller the precision $b$ can be without significantly affecting the distance.  This aligns with the theory.% This matches the theory, which showed that $\frac{3}{2}\delta_b^2/\lambda$ is added to the upper bound on $D_{\lambda}(K,\tK)$.
