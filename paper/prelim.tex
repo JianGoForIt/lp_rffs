@@ -1,4 +1,4 @@
-We now discuss the memory utilization of kernel approximation methods, and review generalization bounds for these methods in the context of kernel ridge regression. For background on kernel approximation methods, or for an overview of the notation we use in this paper, see Appendix \ref{sec:background_appendix}.
+We discuss the memory utilization of kernel approximation methods, and review generalization bounds for these methods in the context of kernel ridge regression. For background on kernel approximation methods, or for an overview of the notation we use in this paper, see Appendix \ref{sec:background_appendix}.
 
 \subsection{Memory utilization}
 \label{subsec:memory_utils}
@@ -9,7 +9,7 @@ The core resource we optimize for in this work is memory.  As discussed in the i
 	\item \textit{Learned parameters}: For binary classification and regression, the linear model learned on the $z(x)$ features is a vector $\theta \in \RR^m$; for $c$-class classification, it is a matrix $\theta \in \RR^{m\times c}$.	
 \end{enumerate}
 
-In this work, we focus on reducing the memory occupied by the mini-batches of random Fourier features. Our core contribution is to show, both theoretically (\S\ref{sec:lprff}) and empirically (\S\ref{sec:experiments}), that the features can in many cases be stored in 8 bits or less, without affecting generalization performance. We also show that the model updates can be performed in low-precision  (\S\ref{sec:halp}). To reduce the memory required for generating our low-precision RFFs, we simply use circulant RFFs \cite{yu15}.
+In this work, we focus on reducing the memory occupied by the mini-batches of random Fourier features. Our core contribution is to show, both theoretically (\S\ref{sec:lprff}) and empirically (\S\ref{sec:experiments}), that the features can in many cases be stored in 8 bits or fewer, without affecting generalization performance. We also show that the model updates can be performed in low-precision  (\S\ref{sec:halp}). To reduce the memory required for generating our low-precision RFFs, we simply use circulant RFFs \cite{yu15}.
 
 % (1) how does memory utilization relate to generalization guarantees, and (2) how do these results look empirically?
 
@@ -19,25 +19,25 @@ In this work, we focus on reducing the memory occupied by the mini-batches of ra
 	\centering
 	\begin{tabular}{llll}
 		\toprule
-		Approximation Method & Feature generation & Mini-batch storage & Learned parameters \\
+		Approximation Method        & Feature generation & Mini-batch storage & Learned parameters \\
 		\midrule
-		\Nystrom \citep{nystrom} & $32(md + m^2)$ & $32ms$ & $32mc$ \\
-		RFFs \citep{rahimi07random} &  $32md$ & $32ms$ & $32mc$ \\
-		Circulant RFFs \citep{yu15} & $32m$ & $32ms$ & $32mc$ \\
-		Low-precision RFFs (ours)& $32m$ & $bms$ & $\hb mc$ \\
+		\Nystrom \citep{nystrom}    & $32(md + m^2)$     & $32ms$             & $32mc$ \\
+		RFFs \citep{rahimi07random} & $32md$             & $32ms$             & $32mc$ \\
+		Circulant RFFs \citep{yu15} & $32m$              & $32ms$             & $32mc$ \\
+		Low-precision RFFs (ours)   & $32m$              & $bms$              & $\hb mc$ \\
 		\bottomrule
 	\end{tabular}
 \end{table}
 
 \subsection{Fixed design kernel ridge regression generalization bounds}
 \label{sec:genbound}
-We consider fixed design kernel ridge regression (for an overview, see Appendix~\ref{subsec:app_fix_design}). Given a kernel function $K\in\RR^{n\times n}$, a regularization parameter $\lambda > 0$, and a set of labeled points $\{(x_i,y_i)\}_{i=1}^n$ where the labels $y_i=\by_i + \eps_i$ are randomly perturbed versions of the ``true labels'' $\by_i \in \RR$ (noise variance $\sigma^2$), it is easy to show \citep{alaoui15} that the optimal kernel regressor $f_K$ has expected error:
+We consider fixed design kernel ridge regression (for an overview, see Appendix~\ref{subsec:app_fix_design}). Given a kernel function $K\in\RR^{n\times n}$, a regularization parameter $\lambda > 0$, and a set of labeled points $\{(x_i,y_i)\}_{i=1}^n$ where the labels $y_i=\by_i + \eps_i$ are randomly perturbed versions of the true labels $\by_i \in \RR$ (with noise variance $\sigma^2$), it is easy to show \citep{alaoui15} that the optimal kernel regressor $f_K$ has expected error:
 \begin{eqnarray}
-\cR(f_K) = \frac{1}{n}\lambda^2 \by^T(K+\lambda I)^{-2}\by + \frac{1}{n}\sigma^2 Tr\Big(K^2(K+\lambda \id)^{-2}\Big),
+\cR(f_K) = \frac{1}{n}\lambda^2 \by^T(K+\lambda I)^{-2}\by + \frac{1}{n}\sigma^2 \tr\Big(K^2(K+\lambda \id)^{-2}\Big),
 \end{eqnarray}
-where $\by = (\by_1,\ldots,\by_n)$ is the vector of ``true labels.''
+where $\by = (\by_1,\ldots,\by_n)$ is the vector of true labels.
 
-We proceed to bound the expected loss $\cR(f_{\tK})$ of a kernel ridge regression model $f_{\tK}$ learned using an approximate kernel matrix $\tK$, in place of the exact kernel matrix $K$. First, we define the following notion of distance\footnote{Importantly, this isn't a ``distance function'' in the formal sense.} between $K$ and $\tK$:
+We proceed to bound the expected loss $\cR(f_{\tK})$ of a kernel ridge regression model $f_{\tK}$ learned using an approximate kernel matrix $\tK$, in place of the exact kernel matrix $K$. First, we define the following notion of distance\footnote{Importantly, this isn't a ``distance function'' in the formal sense, i.e., it is not a metric.} between $K$ and $\tK$:
 
 \begin{definition}
 	\label{def:specdist}
@@ -45,15 +45,15 @@ We proceed to bound the expected loss $\cR(f_{\tK})$ of a kernel ridge regressio
 	$$D_{\lambda}(K,\tK) = \min \Big\{\Delta \in \RR_{+} \;\;\Big|\;\; \frac{1}{1+\Delta}(K+\lambda I) \preceq \tK + \lambda I \preceq (1+\Delta)(K+\lambda I)\Big\}.$$
 \end{definition}
 
-We note that this definition is tightly related to the notion of $\Delta$-spectral approximation from \citet{avron17}. For a discussion of the differences between our definition and theirs, please see Appendix~\ref{subsec:app_def_diff}. Following \citet{avron17}, if we then define 
-$$\hcR(f_K) = \frac{1}{n}\lambda \by^T(K+\lambda I)^{-1}\by + \frac{1}{n}\sigma^2 Tr\Big(K(K+\lambda)^{-1}\Big) \geq \cR(f_K),$$ 
+this definition is tightly related to the notion of $\Delta$-spectral approximation from \citet{avron17}. For a discussion of the differences between our definition and theirs, please see Appendix~\ref{subsec:app_def_diff}. Following \citet{avron17}, if we then define
+$$\hcR(f_K) = \frac{1}{n}\lambda \by^T(K+\lambda I)^{-1}\by + \frac{1}{n}\sigma^2 \tr\Big(K(K+\lambda)^{-1}\Big) \geq \cR(f_K),$$
 we can bound the expected loss of $f_{\tK}$ as follows:
 
 \begin{proposition}{Adapted from \citep{avron17}:}
 	\label{prop:avron}
-	Suppose $\tK$ is an approximation to a kernel matrix $K$, and $f_{K}$ and $f_{\tK}$ are the KRR estimators learned using these matrices, with regularizing constant $\lambda$ and label noise variance $\sigma^2$. Then the following bound holds:
+	Suppose $\tK$ that is an approximation to a kernel matrix $K$, and $f_{K}$ and $f_{\tK}$ are the kernel ridge regression estimators learned using these matrices, with regularizing constant $\lambda$ and label noise variance $\sigma^2$. Then the following bound holds:
 	\begin{eqnarray}
 	\cR(f_{\tK}) \leq \Big(1+D_{\lambda}(K,\tK)\Big)\cdot \hcR(f_K) + \frac{D_{\lambda}(K,\tK)}{1+D_{\lambda}(K,\tK)}\cdot \frac{rank(\tK)}{n}\cdot\sigma^2.
 	\end{eqnarray}
 \end{proposition}
-We include a proof in Appendix~\ref{subsec:generalization_and_rel_spec_dist}. An important consequence of the above definition is that if $\tK$ is a rank $r$ matrix, in order for $D_{\lambda}(K,\tK) \leq \Delta$, it must hold that $\lambda_{r+1}(K) \leq \Delta \lambda$, where $\lambda_i(K)$ denote the $i^{th}$ largest eigenvalues of $K$.  This follows from $A\preceq B \Rightarrow \lambda_i(A) \leq \lambda_i(B)$, $(\lambda_i(K) + \lambda)/(1+\Delta) \leq \lambda_i(\tK) + \lambda$, and $\lambda_{r+1}(\tK) = 0$.  This sets a lower bound on the rank necessary for $D_{\lambda}(K,\tK) \leq \Delta$, which holds regardless of the approximation method used. This insight motivates our proposed low-precision random Fourier features method, which generates high-rank kernel approximations under a fixed memory budget.
+We include a proof in Appendix~\ref{subsec:generalization_and_rel_spec_dist}. An important consequence of Definition~\ref{def:specdist} is that if $\tK$ is a rank $r$ matrix, in order for $D_{\lambda}(K,\tK) \leq \Delta$, it must hold that $\lambda_{r+1}(K) \leq \Delta \lambda$, where $\lambda_i(K)$ denote the $i^{th}$ largest eigenvalues of $K$.  This follows from $A\preceq B \Rightarrow \lambda_i(A) \leq \lambda_i(B)$, $(\lambda_i(K) + \lambda)/(1+\Delta) \leq \lambda_i(\tK) + \lambda$, and $\lambda_{r+1}(\tK) = 0$.  This sets a lower bound on the rank necessary for $D_{\lambda}(K,\tK) \leq \Delta$, which holds regardless of the approximation method used. This insight motivates our proposed low-precision random Fourier features method, which generates high-rank kernel approximations under a fixed memory budget.
