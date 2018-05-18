@@ -10,19 +10,23 @@ In Figure \ref{fig:generalization_col}, we plot the generalization performance f
 
 In Table~\ref{tab:mem_saving} we present the compression ratios we achieve with LP-RFFs, relative to the baseline methods, while still attaining generalization performance within $10^{-4}$ of the full-precision baseline.  We measure this as follows: For each baseline (FP-RFFs, circulant FP-RFFs, \NystromNS), we find the best performing model. We then find the smallest LP-RFF model, as well as the smallest baseline model, which attains within $10^{-4}$ relative performance to the best performing baseline. We report the ratio of the memory used by these two models (baseline/LP-RFF), that are both within $10^{-4}$ of the best baseline. We compute this ratio across three independent runs using different random seeds, and report the average.  We can see that LP-RFFs demonstrate significant memory saving over FP-RFFs, circulant FP-RFFs, and \NystromNS, showing 2.9x-10.3x, 2.4x-15.6x, and 50.9x-461.6x compression ratios respectively. On the TIMIT dataset, there are 147 classes, and thus the full-precision learned parameters occupy a large portion of the total memory across all methods. Nonetheless, even though these LP-RFF experiments only quantize the feature mini-batches, they still attain 5.1x and 2.4x compression ratios relative to FP-RFF and circulant FP-RFF.
 
+
 \begin{figure}
 	\centering
 	\begin{small}
-	\begin{tabular}{@{\hskip -0.05in}c@{\hskip -0.1in}c@{\hskip -0.1in}c@{\hskip -0.1in}c@{\hskip -0.05in}}
-%		\subfigure[YearPred MSE vs. Mem.]{\label{fig:year_pred_mem} \includegraphics[width=0.27\linewidth]{figures/yearpred_MSE_vs_n_memory.pdf} } \hfill
-%		\subfigure[TIMIT Err. vs. Mem.]{\label{fig:year_pred_mem} \includegraphics[width=0.27\linewidth]{figures/timit_error_vs_n_memory.pdf} } \hfill
-%		\subfigure[YearPred MSE vs. Feat.]{\label{fig:year_pred_feat}\includegraphics[width=0.27\linewidth]{figures/yearpred_MSE_vs_n_feat.pdf} } \hfill
-%		\subfigure[TIMIT Err vs. Feat.]{\label{fig:year_pred_feat}\includegraphics[width=0.27\linewidth]{figures/timit_error_vs_n_feat.pdf} } \hfill
-		\includegraphics[width=0.26\linewidth]{figures/timit_error_vs_n_feat.pdf} &
-		\includegraphics[width=0.26\linewidth]{figures/timit_error_vs_n_memory.pdf} &
-		\includegraphics[width=0.26\linewidth]{figures/yearpred_MSE_vs_n_feat.pdf} & 
-		\includegraphics[width=0.26\linewidth]{figures/yearpred_MSE_vs_n_memory.pdf}
-\\
+	\begin{tabular}{@{\hskip -0.05in}c@{\hskip -0.1in}c@{\hskip -0.1in}c@{\hskip -0.05in}}
+		\includegraphics[width=0.34\linewidth]{figures/timit_error_vs_n_memory.pdf} &	
+		\includegraphics[width=0.34\linewidth]{figures/yearpred_MSE_vs_n_memory.pdf} &
+		\includegraphics[width=0.34\linewidth]{figures/covtype_error_vs_n_memory.pdf}
+%		\includegraphics[width=0.34\linewidth]{figures/timit_error_vs_n_feat.pdf} &	
+%		\includegraphics[width=0.34\linewidth]{figures/yearpred_MSE_vs_n_feat.pdf} &
+%		\includegraphics[width=0.34\linewidth]{figures/covtype_error_vs_n_feat.pdf}	
+%		\includegraphics[width=0.26\linewidth]{figures/yearpred_MSE_vs_n_feat.pdf} &	
+%		\includegraphics[width=0.26\linewidth]{figures/timit_error_vs_n_feat.pdf} &
+%		\includegraphics[width=0.26\linewidth]{figures/timit_error_vs_n_memory.pdf} &
+%		\includegraphics[width=0.26\linewidth]{figures/yearpred_MSE_vs_n_feat.pdf} & 
+%		\includegraphics[width=0.26\linewidth]{figures/yearpred_MSE_vs_n_memory.pdf}
+%\\
 %		(a) TIMIT: Err. vs. Feat. & (b) TIMIT: Err. vs. Mem. & (c) YearPred: MSE vs. Feat. & (d) YearPred: MSE vs. Feat. \\
 %		\includegraphics[width=0.3\linewidth]{figures/yearpred_MSE_vs_n_memory.pdf} &
 %		\includegraphics[width=0.3\linewidth]{figures/yearpred_MSE_vs_n_feat.pdf} &
@@ -46,6 +50,42 @@ In Table~\ref{tab:mem_saving} we present the compression ratios we achieve with 
 	\label{fig:generalization_col}
 \end{figure}
 
+%\begin{figure}
+%	\centering
+%	\begin{small}
+%	\begin{tabular}{@{\hskip -0.05in}c@{\hskip -0.1in}c@{\hskip -0.1in}c@{\hskip -0.1in}c@{\hskip -0.05in}}
+%%		\subfigure[YearPred MSE vs. Mem.]{\label{fig:year_pred_mem} \includegraphics[width=0.27\linewidth]{figures/yearpred_MSE_vs_n_memory.pdf} } \hfill
+%%		\subfigure[TIMIT Err. vs. Mem.]{\label{fig:year_pred_mem} \includegraphics[width=0.27\linewidth]{figures/timit_error_vs_n_memory.pdf} } \hfill
+%%		\subfigure[YearPred MSE vs. Feat.]{\label{fig:year_pred_feat}\includegraphics[width=0.27\linewidth]{figures/yearpred_MSE_vs_n_feat.pdf} } \hfill
+%%		\subfigure[TIMIT Err vs. Feat.]{\label{fig:year_pred_feat}\includegraphics[width=0.27\linewidth]{figures/timit_error_vs_n_feat.pdf} } \hfill
+%		\includegraphics[width=0.26\linewidth]{figures/timit_error_vs_n_feat.pdf} &
+%		\includegraphics[width=0.26\linewidth]{figures/timit_error_vs_n_memory.pdf} &
+%		\includegraphics[width=0.26\linewidth]{figures/yearpred_MSE_vs_n_feat.pdf} & 
+%		\includegraphics[width=0.26\linewidth]{figures/yearpred_MSE_vs_n_memory.pdf}
+%\\
+%%		(a) TIMIT: Err. vs. Feat. & (b) TIMIT: Err. vs. Mem. & (c) YearPred: MSE vs. Feat. & (d) YearPred: MSE vs. Feat. \\
+%%		\includegraphics[width=0.3\linewidth]{figures/yearpred_MSE_vs_n_memory.pdf} &
+%%		\includegraphics[width=0.3\linewidth]{figures/yearpred_MSE_vs_n_feat.pdf} &
+%%		\includegraphics[width=0.3\linewidth]{figures/timit_error_vs_n_memory.pdf} &
+%%		\includegraphics[width=0.3\linewidth]{figures/timit_error_vs_n_feat.pdf} \\
+%%		(a) Census & (b) YearPred & (c) Covtype & (d) TIMIT \\
+%%		\includegraphics[width=0.3\linewidth]{figures/census_MSE_vs_n_memory.pdf} &
+%%		\includegraphics[width=0.3\linewidth]{figures/yearpred_MSE_vs_n_memory.pdf} &
+%%		\includegraphics[width=0.3\linewidth]{figures/covtype_error_vs_n_memory.pdf} &
+%%		\includegraphics[width=0.3\linewidth]{figures/timit_error_vs_n_memory.pdf} \\
+%%		\includegraphics[width=0.3\linewidth]{figures/census_MSE_vs_n_feat.pdf} &
+%%		\includegraphics[width=0.3\linewidth]{figures/yearpred_MSE_vs_n_feat.pdf} &
+%%		\includegraphics[width=0.3\linewidth]{figures/covtype_error_vs_n_feat.pdf} &
+%%		\includegraphics[width=0.3\linewidth]{figures/timit_error_vs_n_feat.pdf} \\
+%%		(a) Census & (b) YearPred & (c) Covtype & (d) TIMIT \\
+%	\end{tabular}
+%	\end{small}
+%	\caption{Generalization performance of LP-RFFs, FP-RFFs, and \Nystrom with respect to memory and number of features, on TIMIT and YearPred.  For CovType \& Census, see Appendix~\ref{subsec:app_exp_detail}.
+%		%  LP-RFFs demonstrate better generalization performance than the full precision methods, under a memory budget. It is also informative to observe that while the \Nystrom method attains the best generalization performance with respect to the number of features, it is the worst performance method as a function of memory.  For results on the CovType and Census datasets, please see Figure~\ref{fig:generalization_col_app} in Appendix~\ref{sec:exp_details}
+%}
+%	\label{fig:generalization_col}
+%\end{figure}
+
 %% version with out model memory
 %\begin{table}
 %	\centering
@@ -66,9 +106,9 @@ In Table~\ref{tab:mem_saving} we present the compression ratios we achieve with 
 
 % version with model memory
 \begin{table}[ht]
-\begin{minipage}{.54\linewidth}
+\begin{minipage}{.57\linewidth}
 \centering
-\vspace{0.42in}
+%\vspace{0.42in}
 	\begin{tabular}{c c c c}
 		\toprule
 		& FP-RFFs & Cir. FP-RFFs & \Nystrom \\
@@ -87,17 +127,19 @@ In Table~\ref{tab:mem_saving} we present the compression ratios we achieve with 
 		TIMIT & 5.1x & 2.4x & 50.9x \\ 
 		\bottomrule \\ \\
 	\end{tabular}
-	\caption{The compression ratios achieved by LP-RFF relative to the best performing configurations for each baseline (FP-RFFs, circulant FP-RFFs, \NystromNS).  \todo{Put optimal \# bits in parentheses?}
+	\caption{The compression ratios achieved by LP-RFF relative to the best performing configurations for each baseline (FP-RFFs, circulant FP-RFFs, \NystromNS).  %\todo{Put optimal \# bits in parentheses?}
 		%For each baseline method, we find the best performing configuration as the reference performance, then record the memory consumption of the smallest LP-RFF and baseline models that are within $10^{-4}$ relative performance to this reference. The memory saving is reported as the ratio between the two recorded memory consumption.
 	}
 	\label{tab:mem_saving}
 \end{minipage}
-\hspace{0.22in}
-\begin{minipage}{0.4\linewidth}
-	\includegraphics[width=\linewidth]{figures/timit_error_vs_n_feat_lm_halp.pdf}
-	\caption{Low-precision training on TIMIT using 8-bit LM-HALP on 8-bit LP-RFFs, relative to full-precision SGD.
-		%Low precision training with HALP can demonstrate similar generalization performance as full precision training with SGD.
-	}	
+\hspace{0.15in}
+\begin{minipage}{0.375\linewidth}
+\vspace{-0.78em}
+	\includegraphics[width=0.975\linewidth]{figures/timit_error_vs_n_feat_lm_halp.pdf}
+%	\caption{Low-precision training on TIMIT using 8-bit LM-HALP on 8-bit LP-RFFs, relative to full-precision SGD.
+%		%Low precision training with HALP can demonstrate similar generalization performance as full precision training with SGD.
+%	}	
+	\caption{Low-precision 8-bit LM-HALP and full-precision SGD training on TIMIT using 8-bit LP-RFFs.}	
 	\label{fig:halp}
 \end{minipage}
 \end{table}
@@ -138,10 +180,10 @@ In Figure~\ref{fig:specdist} (leftmost plots), we observe that LP-RFFs can achie
 \begin{tabular}{@{\hskip -0.1in}c@{\hskip -0.1in}c@{\hskip -0.1in}c@{\hskip -0.1in}}
 		\includegraphics[width=0.33\linewidth]{figures/regression_delta_vs_mem.pdf} &
 		\includegraphics[width=0.33\linewidth]{figures/regression_l2_vs_delta.pdf} &
-		\includegraphics[width=0.33\linewidth]{figures/regression_l2_vs_f_norm.pdf} \\
-		\includegraphics[width=0.33\linewidth]{figures/classification_delta_vs_mem.pdf} &
-		\includegraphics[width=0.33\linewidth]{figures/classification_acc_vs_delta.pdf}&
-		\includegraphics[width=0.33\linewidth]{figures/classification_acc_vs_f_norm.pdf}
+		\includegraphics[width=0.33\linewidth]{figures/regression_l2_vs_f_norm.pdf} %\\
+%		\includegraphics[width=0.33\linewidth]{figures/classification_delta_vs_mem.pdf} &
+%		\includegraphics[width=0.33\linewidth]{figures/classification_acc_vs_delta.pdf}&
+%		\includegraphics[width=0.33\linewidth]{figures/classification_acc_vs_f_norm.pdf}
 	\end{tabular}
 	\caption{Analysis of generalization performance for Census and sub-sampled CovType, in terms of relative spectral distance $D_{\lambda}(K,\tK)$ and Frobenius norm $\frac{1}{n^2}\|K-\tK\|_F^2$.
 	%as a function of the memory utilization, and observe that LP-RFFs attain lower relative spectral distance per bit (rightmost plot). We then plot generalization performance as a function of relative spectral distance (middle), and Frobenius norm of $K - \tK$ (right). We observe a tigher correspondance between the generalization performance and relative spectral distance, relative to the Frobenius norm, on both datasets.
