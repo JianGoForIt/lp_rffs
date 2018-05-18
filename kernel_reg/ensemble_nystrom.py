@@ -7,6 +7,7 @@ from kernel_regressor import Quantizer
 import sys
 sys.path.append("../utils")
 from misc_utils import set_random_seed
+import math
 
 EPS = 1e-15
 
@@ -25,6 +26,8 @@ class EnsembleNystrom(object):
         '''
         if self.n_feat > X.size(0):
             self.n_feat = X.size(0)
+            self.n_feat_per_learner = self.n_feat // self.n_learner
+
         self.learners = []
         np.random.seed(self.rand_seed)
         perm = np.random.permutation(np.arange(X.size(0) ) )
@@ -33,15 +36,15 @@ class EnsembleNystrom(object):
             self.learners.append(
                 Nystrom(self.n_feat_per_learner, self.kernel, self.rand_seed) )
             start_idx = i * self.n_feat_per_learner
-            end_idx = (i + 1) * self.n_feat_per_learner
+            end_idx = min( (i + 1) * self.n_feat_per_learner, X.size(0) )
             self.learners[-1].setup(X[perm[start_idx:end_idx], :] )
-
 
     def get_feat(self, X):
         feat_list = []
         for learner in self.learners:
             feat_list.append(learner.get_feat(X) )
-        feat = torch.cat(feat_list, dim=1)
+        feat = torch.cat(feat_list, dim=1) / math.sqrt(float(len(self.learners) ) ) 
+        print("normalizing features with ", math.sqrt(float(len(self.learners) ) ) )
         assert feat.size(1) == self.n_feat_per_learner * self.n_learner
         return feat
 
