@@ -102,15 +102,16 @@ In Section~\ref{sec:full_run}, we demonstrate the generalization performance of 
 
 In Section~\ref{subsec:perf_vs_rel_spec_dist}, we empirically demonstrate correlation between generalization performance and relative spectral distance. To give an extended view on the correlation, we demonstrate full results on 8, 4, 1-bits LP-RFFs, together with the full precision baselines in Figure~\ref{fig:specdist_app}. In Figure~\ref{fig:specdist_app} (left), we can observe, on both the Census and CovType datasets, relative spectral distance can be predictive for the performance across different methods; i.e. similar relative spectral distance can imply similar generalization performance across different methods. In the contrast, \Nystrom and RFF based approaches can demonstrate significantly different spectral norm and Frobenius norm of $K - \tilde{K}$, the difference of the exact kernel matrix and its approximation.
 
+
 \begin{figure}
 	\centering
-	\begin{tabular}{@{\hskip -0.25in}c@{\hskip -0.25in}c@{\hskip -0.25in}c@{\hskip -0.25in}}
-		\includegraphics[width=0.33\linewidth]{figures/regression_l2_vs_delta_all_line.pdf} &
-		\includegraphics[width=0.33\linewidth]{figures/regression_l2_vs_f_norm_all_line.pdf} &
-		\includegraphics[width=0.33\linewidth]{figures/regression_l2_vs_s_norm_all_line.pdf} \\
-		\includegraphics[width=0.33\linewidth]{figures/classification_acc_vs_delta_all_line.pdf} &
-		\includegraphics[width=0.33\linewidth]{figures/classification_acc_vs_f_norm_all_line.pdf} &
-		\includegraphics[width=0.33\linewidth]{figures/classification_acc_vs_s_norm_all_line.pdf} \\
+	\begin{tabular}{c c c}
+		\includegraphics[width=0.4\linewidth]{figures/regression_l2_vs_f_norm_all_line.pdf} &
+		\includegraphics[width=0.4\linewidth]{figures/classification_acc_vs_f_norm_all_line.pdf} \\
+		\includegraphics[width=0.4\linewidth]{figures/regression_l2_vs_s_norm_all_line.pdf} &
+		\includegraphics[width=0.4\linewidth]{figures/classification_acc_vs_s_norm_all_line.pdf} \\
+		\includegraphics[width=0.4\linewidth]{figures/regression_l2_vs_delta_all_line.pdf} &
+		\includegraphics[width=0.4\linewidth]{figures/classification_acc_vs_delta_all_line.pdf} \\
 	\end{tabular}
 %	\begin{tabular}{@{\hskip -0.25in}c@{\hskip -0.25in}c@{\hskip -0.25in}c@{\hskip -0.25in}}
 %		\subfigure[MSE and Rel. spectral distance distance]{\label{fig:census_delta_all_line} \includegraphics[width=0.33\linewidth]{figures/regression_l2_vs_delta_all_line.pdf} } \hfill
@@ -134,4 +135,39 @@ In Section~\ref{subsec:perf_vs_rel_spec_dist}, we empirically demonstrate correl
 %	\caption{The strong correlation between generalization performance and $\lambda$-spectral distance $D_{\lambda}(K,\tK)$ under memory budgets for the Census dataset (top) and subsampled CovType dataset (bottom). Under different memory budget in (a) and (b), the precision demonstrates smaller $D_{\lambda}(K,\tK)$ tends to have better generalization performance. In (c), different kernel approximation approaches demonstrate similar generalization performance for similar $\lambda$-spectral distance.}
 %	\label{fig:specdist_app}
 \end{figure}
+
+
+
+%\begin{figure}
+%	\centering
+%	\begin{tabular}{@{\hskip -0.25in}c@{\hskip -0.25in}c@{\hskip -0.25in}c@{\hskip -0.25in}}
+%		\includegraphics[width=0.33\linewidth]{figures/regression_l2_vs_delta_all_line.pdf} &
+%		\includegraphics[width=0.33\linewidth]{figures/regression_l2_vs_f_norm_all_line.pdf} &
+%		\includegraphics[width=0.33\linewidth]{figures/regression_l2_vs_s_norm_all_line.pdf} \\
+%		\includegraphics[width=0.33\linewidth]{figures/classification_acc_vs_delta_all_line.pdf} &
+%		\includegraphics[width=0.33\linewidth]{figures/classification_acc_vs_f_norm_all_line.pdf} &
+%		\includegraphics[width=0.33\linewidth]{figures/classification_acc_vs_s_norm_all_line.pdf} \\
+%	\end{tabular}
+%%	\begin{tabular}{@{\hskip -0.25in}c@{\hskip -0.25in}c@{\hskip -0.25in}c@{\hskip -0.25in}}
+%%		\subfigure[MSE and Rel. spectral distance distance]{\label{fig:census_delta_all_line} \includegraphics[width=0.33\linewidth]{figures/regression_l2_vs_delta_all_line.pdf} } \hfill
+%%		\subfigure[MSE and Frobenius norm]{\label{fig:census_f_norm_all_line} \includegraphics[width=0.33\linewidth]{figures/regression_l2_vs_f_norm_all_line.pdf} } \hfill
+%%		\subfigure[Rel. spectral distance distance and memory]{\label{fig:census_s_norm_all_line}  \includegraphics[width=0.33\linewidth]{figures/regression_l2_vs_s_norm_all_line.pdf} } \hfill \\
+%%		\subfigure[MSE and Frobenius norm]{\label{fig:covtype_delta_all_line} \includegraphics[width=0.33\linewidth]{figures/classification_acc_vs_delta_all_line.pdf} } \hfill
+%%		\subfigure[Error and Frobenius norm]{\label{fig:covtype_f_norm_all_line} \includegraphics[width=0.33\linewidth]{figures/classification_acc_vs_f_norm_all_line.pdf} } \hfill
+%%		\subfigure[Error and spectral norm]{\label{fig:covtype_s_norm_all_line} \includegraphics[width=0.33\linewidth]{figures/classification_acc_vs_s_norm_all_line.pdf}} \hfill
+%%	\end{tabular}
+%	\caption{Generalization performance vs. relative spectral distance $D_{\lambda}(K,\tK)$, and that Frobenius and spectral norms of $K - \tK$. We observe that $D_{\lambda}(K,\tK)$ aligns much better with generalization performance than the Frobenius and spectral norms, for both the Census and sub-sampled CovType datasets.}
+%	\label{fig:specdist_app}	
+%%	\begin{tabular}{c c c}
+%%		\includegraphics[width=0.33\linewidth]{figures/regression_delta_vs_mem_all_line.pdf} &
+%%		\includegraphics[width=0.33\linewidth]{figures/regression_l2_vs_mem_all_line.pdf} &
+%%		\includegraphics[width=0.33\linewidth]{figures/regression_l2_vs_delta_all_line.pdf} \\
+%%		\includegraphics[width=0.33\linewidth]{figures/classification_delta_vs_mem_all_line.pdf} &
+%%		\includegraphics[width=0.33\linewidth]{figures/classification_acc_vs_mem_all_line.pdf} &
+%%		\includegraphics[width=0.33\linewidth]{figures/classification_acc_vs_delta_all_line.pdf} \\
+%%		(a) & (b) & (c)
+%%	\end{tabular}
+%%	\caption{The strong correlation between generalization performance and $\lambda$-spectral distance $D_{\lambda}(K,\tK)$ under memory budgets for the Census dataset (top) and subsampled CovType dataset (bottom). Under different memory budget in (a) and (b), the precision demonstrates smaller $D_{\lambda}(K,\tK)$ tends to have better generalization performance. In (c), different kernel approximation approaches demonstrate similar generalization performance for similar $\lambda$-spectral distance.}
+%%	\label{fig:specdist_app}
+%\end{figure}
 
