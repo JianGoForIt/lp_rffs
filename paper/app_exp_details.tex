@@ -49,9 +49,34 @@ We use the same learning rate schedule as the one in the SGD-based experiments. 
 \subsection{Additional experiment results}
 \label{subsec:app_additional_exp_res}
 In Section~\ref{sec:full_run}, we demonstrate the generalization performance of LP-RFFs on the TIMIT and YearPred datasets. In this section, we demonstrate the full generalization performance comparison on the TIMIT, YearPred, CovType and Census datasets. In Figure~\ref{fig:generalization_col_app}, we show the generalization performance of 8, 4, 1 bit LP-RFFs, with FP-\Nystrom, FP-RFF and circulant FP-RFF as the full precision baselines. We can observe that LP-RFF, by using 4 or 8-bit quantized representation, can systematically outperform full precision baselines across the four datasets under different memory budgets.
+%\begin{figure}
+%	\centering
+%	\begin{tabular}{@{\hskip 0in}c@{\hskip 0in}c@{\hskip 0in}c@{\hskip 0in}c@{\hskip 0in}}
+%%		\subfigure[Census heldout MSE]{\label{fig:census_mem} \includegraphics[width=0.3\linewidth]{figures/census_MSE_vs_n_memory.pdf} } \hfill
+%%		\subfigure[Census heldout MSE]{\label{fig:census_feat}\includegraphics[width=0.3\linewidth]{figures/census_MSE_vs_n_feat.pdf} } \hfill
+%%		\subfigure[CovType heldout error]{\label{fig:covtype_mem} \includegraphics[width=0.3\linewidth]{figures/covtype_error_vs_n_memory.pdf} } \hfill
+%%		\subfigure[CovType heldout error]{\label{fig:covtype_feat}\includegraphics[width=0.3\linewidth]{figures/covtype_error_vs_n_feat.pdf} } \hfill
+%%		\includegraphics[width=0.3\linewidth]{figures/yearpred_MSE_vs_n_memory_all_line.pdf} &
+%%		\includegraphics[width=0.3\linewidth]{figures/yearpred_MSE_vs_n_feat_all_line.pdf} &
+%%		\includegraphics[width=0.3\linewidth]{figures/timit_error_vs_n_memory_all_line.pdf} &
+%%		\includegraphics[width=0.3\linewidth]{figures/timit_error_vs_n_feat_all_line.pdf} \\
+%%		(a) Census & (b) YearPred & (c) Covtype & (d) TIMIT \\
+%		\includegraphics[width=0.26\linewidth]{figures/census_MSE_vs_n_feat_all_line.pdf} &
+%		\includegraphics[width=0.26\linewidth]{figures/yearpred_MSE_vs_n_feat_all_line.pdf} &
+%		\includegraphics[width=0.26\linewidth]{figures/covtype_error_vs_n_feat_all_line.pdf} &
+%		\includegraphics[width=0.26\linewidth]{figures/timit_error_vs_n_feat_all_line.pdf} \\
+%		\includegraphics[width=0.26\linewidth]{figures/census_MSE_vs_n_memory_all_line.pdf} &
+%		\includegraphics[width=0.26\linewidth]{figures/yearpred_MSE_vs_n_memory_all_line.pdf} &
+%		\includegraphics[width=0.26\linewidth]{figures/covtype_error_vs_n_memory_all_line.pdf} &
+%		\includegraphics[width=0.26\linewidth]{figures/timit_error_vs_n_memory_all_line.pdf} \\
+%%		(a) Census & (b) YearPred & (c) Covtype & (d) TIMIT \\
+%	\end{tabular}
+%	\caption{Generalization performance of LP RFF, full precision RFF and \Nystrom with respect to number of features and memory budgets. We can observe that LP RFFs demonstrate better generalization performance than full precision baselines under memory budget. Noticeably, the comparison of different methods on generalization performance behaves differently under memory budget and under number off features. E.g., \Nystrom shows better generalization performance than RFF based approach with the same number of features. However, \Nystrom can be significantly worse under memory budgets.}
+%	\label{fig:generalization_col_app}
+%\end{figure}
 \begin{figure}
 	\centering
-	\begin{tabular}{@{\hskip 0in}c@{\hskip 0in}c@{\hskip 0in}c@{\hskip 0in}c@{\hskip 0in}}
+	\begin{tabular}{c c}
 %		\subfigure[Census heldout MSE]{\label{fig:census_mem} \includegraphics[width=0.3\linewidth]{figures/census_MSE_vs_n_memory.pdf} } \hfill
 %		\subfigure[Census heldout MSE]{\label{fig:census_feat}\includegraphics[width=0.3\linewidth]{figures/census_MSE_vs_n_feat.pdf} } \hfill
 %		\subfigure[CovType heldout error]{\label{fig:covtype_mem} \includegraphics[width=0.3\linewidth]{figures/covtype_error_vs_n_memory.pdf} } \hfill
@@ -61,14 +86,14 @@ In Section~\ref{sec:full_run}, we demonstrate the generalization performance of 
 %		\includegraphics[width=0.3\linewidth]{figures/timit_error_vs_n_memory_all_line.pdf} &
 %		\includegraphics[width=0.3\linewidth]{figures/timit_error_vs_n_feat_all_line.pdf} \\
 %		(a) Census & (b) YearPred & (c) Covtype & (d) TIMIT \\
-		\includegraphics[width=0.26\linewidth]{figures/census_MSE_vs_n_feat_all_line.pdf} &
-		\includegraphics[width=0.26\linewidth]{figures/yearpred_MSE_vs_n_feat_all_line.pdf} &
-		\includegraphics[width=0.26\linewidth]{figures/covtype_error_vs_n_feat_all_line.pdf} &
-		\includegraphics[width=0.26\linewidth]{figures/timit_error_vs_n_feat_all_line.pdf} \\
-		\includegraphics[width=0.26\linewidth]{figures/census_MSE_vs_n_memory_all_line.pdf} &
-		\includegraphics[width=0.26\linewidth]{figures/yearpred_MSE_vs_n_memory_all_line.pdf} &
-		\includegraphics[width=0.26\linewidth]{figures/covtype_error_vs_n_memory_all_line.pdf} &
-		\includegraphics[width=0.26\linewidth]{figures/timit_error_vs_n_memory_all_line.pdf} \\
+		\includegraphics[width=0.4\linewidth]{figures/census_MSE_vs_n_feat_all_line.pdf} &
+		\includegraphics[width=0.4\linewidth]{figures/census_MSE_vs_n_memory_all_line.pdf} \\
+		\includegraphics[width=0.4\linewidth]{figures/yearpred_MSE_vs_n_feat_all_line.pdf} &
+		\includegraphics[width=0.4\linewidth]{figures/yearpred_MSE_vs_n_memory_all_line.pdf} \\
+		\includegraphics[width=0.4\linewidth]{figures/covtype_error_vs_n_feat_all_line.pdf} &
+		\includegraphics[width=0.4\linewidth]{figures/covtype_error_vs_n_memory_all_line.pdf} \\
+		\includegraphics[width=0.4\linewidth]{figures/timit_error_vs_n_feat_all_line.pdf} &
+		\includegraphics[width=0.4\linewidth]{figures/timit_error_vs_n_memory_all_line.pdf} \\
 %		(a) Census & (b) YearPred & (c) Covtype & (d) TIMIT \\
 	\end{tabular}
 	\caption{Generalization performance of LP RFF, full precision RFF and \Nystrom with respect to number of features and memory budgets. We can observe that LP RFFs demonstrate better generalization performance than full precision baselines under memory budget. Noticeably, the comparison of different methods on generalization performance behaves differently under memory budget and under number off features. E.g., \Nystrom shows better generalization performance than RFF based approach with the same number of features. However, \Nystrom can be significantly worse under memory budgets.}
