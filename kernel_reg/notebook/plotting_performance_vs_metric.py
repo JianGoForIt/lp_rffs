@@ -3,6 +3,7 @@ import os, sys
 import cPickle as cp
 from copy import deepcopy
 import matplotlib.pyplot as plt
+import pandas as pd
 
 #def get_results_for_one_precision(n_rff_feat, general_folder_measurement, 
 #                                  general_folder_performance, general_folder_delta,
@@ -54,6 +55,34 @@ import matplotlib.pyplot as plt
 #    delta_list_rff = average_results_array(delta_list_rff)
 ##     memory_list_rff = np.array( [rff_mem_func(n_feat) for n_feat in n_rff_feat] )
 #    return f_norm_list_rff, l2_loss_list_rff, delta_list_rff#, memory_list_rff
+
+def save_csv_with_error_bar(data_list, file_name="./test/test.csv", ave_x=False):
+    '''
+    data is a list of tuple (label, x_pt, y_pt), it is plotted using color named as label in the color_dict.
+    x_pt is a 1d list, y_pt is list of list, each inner list is from a random seed.
+    '''
+    df_list = []
+    for i in range(len(data_list) ):
+        label = data_list[i][0]
+        x = data_list[i][1]
+        y = data_list[i][2]
+        average_y = average_results_array(y)
+        std_y = std_results_array(y)
+        if ave_x:
+            x = average_results_array(x)
+        x = np.array(x)
+        if len(x.shape) == 2:
+            n_pt = x.shape[1]
+            x = np.mean(x, axis=0).reshape((n_pt, ) )
+        average_y = np.array(average_y)
+        std_y = np.array(std_y)
+        assert x.shape == average_y.shape
+        assert x.shape == std_y.shape
+        df_list.append(pd.DataFrame(np.reshape(x, [x.size, 1] ), columns = [label + "|x" ] ) )
+        df_list.append(pd.DataFrame(np.reshape(average_y, [average_y.size, 1] ), columns = [label + "|y" ] ) )
+        df_list.append(pd.DataFrame(np.reshape(std_y, [std_y.size, 1] ), columns = [label + "|y_std" ] ) )
+    pd.concat(df_list, axis=1).to_csv(file_name)
+
 
 def plot_figure(data_list, color_dict, ave_x=False):
     '''
@@ -204,7 +233,7 @@ def get_nystrom_memory(n, m, r):
     r is the original number of raw features. Assume for nystrom n landmark equals n kernel
     approximation features. 
     '''
-    return n * r + n * n + m * n
+    return (n * r + n * n + m * n) * 32.0
 
 def get_rff_memory(n, m, r):
     '''
@@ -212,7 +241,7 @@ def get_rff_memory(n, m, r):
     r is the original number of raw features. Assume for nystrom n landmark equals n kernel
     approximation features. 
     '''
-    return n * r + m * n
+    return (n * r + m * n) * 32.0
 
 def get_cir_rff_memory(n, m, r, nbit):
     '''
@@ -220,7 +249,7 @@ def get_cir_rff_memory(n, m, r, nbit):
     r is the original number of raw features. 
     memory consumption for RFF:
     '''
-    return n + m * n * nbit / 32.0
+    return (n + m * n * nbit / 32.0) * 32.0
 
 def get_nystrom_memory_with_model(n, m, r, c):
     '''
@@ -228,7 +257,7 @@ def get_nystrom_memory_with_model(n, m, r, c):
     r is the original number of raw features. Assume for nystrom n landmark equals n kernel
     approximation features. c is the number of label classes. For regression c = 1
     '''
-    return n * r + n * n + m * n + n * c
+    return (n * r + n * n + m * n + n * c) * 32.0
 
 def get_rff_memory_with_model(n, m, r, c):
     '''
@@ -236,7 +265,7 @@ def get_rff_memory_with_model(n, m, r, c):
     r is the original number of raw features. Assume for nystrom n landmark equals n kernel
     approximation features. c is the number of label classes. For regression c = 1
     '''
-    return n * r + m * n + n * c
+    return (n * r + m * n + n * c) * 32.0
 
 def get_cir_rff_memory_with_model(n, m, r, nbit, c):
     '''
@@ -244,7 +273,7 @@ def get_cir_rff_memory_with_model(n, m, r, nbit, c):
     r is the original number of raw features. c is the number of label classes. For regression c = 1
     memory consumption for RFF:
     '''
-    return n + m * n * nbit / 32.0  + n * c
+    return (n + m * n * nbit / 32.0  + n * c) * 32.0
 
 def get_cir_rff_memory_with_lm_halp_model(n, m, r, nbit_model, nbit_feat, c):
     '''
@@ -254,7 +283,7 @@ def get_cir_rff_memory_with_lm_halp_model(n, m, r, nbit_model, nbit_feat, c):
     n (circulant projection size) + m * n * nbit_feat / 32 + n * c * nbit_model / 32
     '''
 #             return n + m * n * nbit / 32.0 + n + n * c
-    return n + m * n * nbit_feat / 32.0 + n * c * nbit_model / 32.0 * 3.0
+    return (n + m * n * nbit_feat / 32.0 + n * c * nbit_model / 32.0 * 3.0) * 32.0
 
 def median_results_array(results_array):
     # average list of 1d np array results
