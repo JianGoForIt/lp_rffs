@@ -3,7 +3,7 @@ import math
 from copy import deepcopy
 
 # example
-#python launch_jobs_nystrom_closed_form_sol_delta_ensemble.py census lp_nystrom/regression_real_setting starcluster with_metric cpu dryrun &
+#python launch_jobs_nystrom_closed_form_sol_delta_ensemble.py census lp_ensemble_nystrom/regression_real_setting starcluster with_metric cpu dryrun &
 
 #dataset = "census"
 #exp_name = "nystrom_vs_rff"
@@ -37,6 +37,7 @@ if dataset == "census":
 #    n_fp_rff_list = [2500, 10000, 50000, 200000, 800000]    
     seed_list = [1,2,3,4,5]
     nbit_list = [4, 8, 64, 16]
+    n_learner_list = [10]
 
 data_path = "/dfs/scratch0/zjian/data/lp_kernel_data/" + dataset
 save_path = "/dfs/scratch0/zjian/lp_kernel/" + exp_name + "/" + dataset
@@ -46,51 +47,53 @@ for seed in seed_list:
 	for l2_reg in l2_reg_list:
 		for n_fp_rff in n_fp_rff_list:
 			for nbit in nbit_list:
-				for approx_type in ["ensemble_nystrom"]:
-					if approx_type == "nystrom" and n_fp_rff > 20000:
-						continue
-					save_suffix = "_type_" + approx_type + "_l2_reg_" + str(l2_reg) + "_n_feat_" + str(n_fp_rff) + "_n_bit_" + str(nbit) + "_seed_" + str(seed)
-					command = deepcopy(template)
-					command = command.replace("--l2_reg=unk", "--l2_reg="+str(l2_reg) )
-					command = command.replace("--kernel_sigma=unk", "--kernel_sigma="+str(kernel_sigma) )
-					command = command.replace("--n_fp_rff=unk", "--n_fp_rff="+str(n_fp_rff) )
-					command = command.replace("--random_seed=unk", "--random_seed="+str(seed) )
-					command = command.replace("--data_path=unk", "--data_path="+str(data_path) )
-					command = command.replace("--save_path=unk", "--save_path="+save_path + save_suffix)
-					command = command.replace("--approx_type=unk", "--approx_type="+approx_type)
-					if do_metric == "with_metric":
-						command += " --collect_sample_metrics"
-					if nbit == "64":
-						# do full precision
-						command = command + " --do_fp_feat "
-					else:
-						command = command + " --n_bit_feat=" + str(nbit)
-					if closed_form == "closed_form_sol":
+				for n_learner in n_learner_list:
+					for approx_type in ["ensemble_nystrom"]:
+						if n_fp_rff > 20000:
+							continue
+						save_suffix = "_type_" + approx_type + "_l2_reg_" + str(l2_reg) + "_n_feat_" + str(n_fp_rff) + "_n_bit_" + str(nbit) + "_n_learner_" + str(n_learner) + "_seed_" + str(seed)
+						command = deepcopy(template)
+						command = command.replace("--l2_reg=unk", "--l2_reg="+str(l2_reg) )
+						command = command.replace("--kernel_sigma=unk", "--kernel_sigma="+str(kernel_sigma) )
+						command = command.replace("--n_fp_rff=unk", "--n_fp_rff="+str(n_fp_rff) )
+						command = command.replace("--random_seed=unk", "--random_seed="+str(seed) )
+						command = command.replace("--data_path=unk", "--data_path="+str(data_path) )
+						command = command.replace("--save_path=unk", "--save_path="+save_path + save_suffix)
+						command = command.replace("--approx_type=unk", "--approx_type="+approx_type)
+						command += " --n_ensemble_nystrom="+str(n_learner)
+						if do_metric == "with_metric":
+							command += " --collect_sample_metrics"
+						if nbit == 64:
+							# do full precision
+							command = command + " --do_fp_feat "
+						else:
+							command = command + " --n_bit_feat=" + str(nbit)
+						#if closed_form == "closed_form_sol":
 						command = command + " --closed_form_sol"
-					if do_cuda == "cuda":
-						command += " --cuda"
-					os.system("mkdir -p " + save_path + save_suffix)
-					if cluster == "starcluster":
-						command = "cd /dfs/scratch0/zjian/lp_kernel_code/lp_kernel/models && " + command
-					else:
-						command = "cd /lfs/1/zjian/lp_kernel/lp_kernel/models && " + command
-					f = open(save_path + save_suffix + "/job.sh", "w")
-					f.write(command)
-					f.close()
-					if cluster == "starcluster":
-						# distinguish the log from runs calculating closeness related metrics or not
-						launch_command = "qsub -V " \
-						+ " -o " + save_path + save_suffix + "/run.log" \
-	                            	        + " -e " + save_path + save_suffix + "/run.err " + save_path + save_suffix + "/job.sh"
-					else:
-						launch_command = "bash " + save_path + save_suffix + "/job.sh"
-					if run_option == "dryrun":
-						print(launch_command)
-					else:
-						print(launch_command)	
-						os.system(launch_command)
+						if do_cuda == "cuda":
+							command += " --cuda"
+						os.system("mkdir -p " + save_path + save_suffix)
+						if cluster == "starcluster":
+							command = "cd /dfs/scratch0/zjian/lp_kernel_code/lp_kernel/models && " + command
+						else:
+							command = "cd /lfs/1/zjian/lp_kernel/lp_kernel/models && " + command
+						f = open(save_path + save_suffix + "/job.sh", "w")
+						f.write(command)
+						f.close()
+						if cluster == "starcluster":
+							# distinguish the log from runs calculating closeness related metrics or not
+							launch_command = "qsub -V " \
+							+ " -o " + save_path + save_suffix + "/run.log" \
+	                        	    	        + " -e " + save_path + save_suffix + "/run.err " + save_path + save_suffix + "/job.sh"
+						else:
+							launch_command = "bash " + save_path + save_suffix + "/job.sh"
+						if run_option == "dryrun":
+							print(launch_command)
+						else:
+							print(launch_command)	
+							os.system(launch_command)
 
-					cnt += 1
-				#exit(0)
+						cnt += 1
+					#exit(0)
 print(cnt, "jobs submitted!")
 
