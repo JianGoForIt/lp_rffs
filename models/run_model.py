@@ -18,6 +18,7 @@ sys.path.append("../..")
 from rff import RFF, GaussianKernel
 from circulant_rff import  CirculantRFF
 from nystrom import Nystrom
+from ensemble_nystrom import EnsembleNystrom
 from kernel_regressor import Quantizer, KernelRidgeRegression
 from data_loader import load_data
 import halp
@@ -68,6 +69,7 @@ parser.add_argument("--closed_form_sol", action="store_true", help="use closed f
 parser.add_argument("--fixed_epoch_number", action="store_true", help="if false, use early stopping")
 parser.add_argument("--exit_after_collect_metric", action="store_true", help="if yes, \
     we only do metric collection on kernel matrix without doing trainining")
+parser.add_argument("--n_ensemble_nystrom", type=int, default=1, help="number of learners in ensembled nystrom")
 parser.add_argument("--only_collect_kernel_approx_error", action="store_true", 
     help="if True, we only calculate F norm kernel approximation error to save computation")
 args = parser.parse_args()
@@ -134,6 +136,21 @@ if __name__ == "__main__":
         kernel_approx = Nystrom(args.n_fp_rff, kernel=kernel, rand_seed=args.random_seed) 
         kernel_approx.setup(X_train) 
         quantizer = None
+    elif args.approx_type == "ensemble_nystrom":
+        print("ensembled nystrom mode with ", args.n_ensemble_nystrom, "learner")
+        kernel_approx = EnsembleNystrom(args.n_fp_rff, n_learner=args.n_ensemble_nystrom, kernel=kernel, rand_seed=args.random_seed)
+        kernel_approx.setup(X_train)
+        if args.do_fp_feat:
+            quantizer = None
+        else:
+            # decide on the range of representation from training sample based features
+            train_feat = kernel_approx.get_feat(X_train)
+            min_val = torch.min(train_feat)
+            max_val = torch.max(train_feat)
+            quantizer = Quantizer(args.n_bit_feat, min_val, max_val, 
+                rand_seed=args.random_seed, use_cuda=use_cuda)
+            print("range for quantizing nystrom ensemble ", min_val, max_val)
+            print("feature quantization scale, bit ", quantizer.scale, quantizer.nbit)
     elif args.approx_type == "rff" and args.do_fp_feat == False:
         print("lp rff feature mode")
         assert args.n_bit_feat >= 1
