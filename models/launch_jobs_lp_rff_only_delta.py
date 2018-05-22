@@ -134,6 +134,11 @@ for seed in seed_list:
 							command += " --collect_sample_metrics"
 						if do_cuda == "cuda":
 							command += " --cuda"
+						# judge if already finished
+						if os.path.isfile(save_path + save_suffix + "/metric_sample_eval.txt"):
+							print("already exists: ", save_path + save_suffix + "/metric_sample_eval.txt")
+							continue						
+	
 						os.system("mkdir -p " + save_path + save_suffix)
 						if cluster == "starcluster":
 							command = "cd /dfs/scratch0/zjian/lp_kernel_code/lp_kernel/models && " + command
