@@ -2,6 +2,9 @@ import torch
 from torch.autograd import Variable
 import numpy as np
 from copy import deepcopy
+import sys
+sys.path.append("../utils")
+from misc_utils import delta_approximation
 
 def train(args, model, epoch, train_loader, optimizer, quantizer, kernel):
     train_loss = []
@@ -15,9 +18,12 @@ def train(args, model, epoch, train_loader, optimizer, quantizer, kernel):
         if args.opt == "halp":
             # We need to add this function to models when we want to use SVRG
             def closure(data=X, target=Y):
+                if use_cuda:
+                    data = data.cuda()
+                    target = target.cuda()
                 # print "test 123", type(data), type(target)
-                if args.approx_type == "rff":
-                    data = kernel.get_cos_feat(data, dtype="float")
+                if args.approx_type == "rff" or args.approx_type == "cir_rff":
+                    data = kernel.get_cos_feat(data)
                 elif args.approx_type == "nystrom":
                     data = kernel.get_feat(data)
                 else:
@@ -39,9 +45,48 @@ def train(args, model, epoch, train_loader, optimizer, quantizer, kernel):
                 return cost
             loss = optimizer.step(closure)
             train_loss.append(loss[0].data.cpu().numpy() )
+        elif args.opt == "lm_halp":
+            # We need to add this function to models when we want to use SVRG
+            def closure(data=X, target=Y, feat=None):
+                if use_cuda:
+                    data = data.cuda()
+                    target = target.cuda()
+                    if feat is not None:
+                        feat = feat.cuda()
+                if feat is None:
+                    if args.approx_type == "rff" or args.approx_type == "cir_rff":
+                        data = kernel.get_cos_feat(data)
+                    elif args.approx_type == "nystrom":
+                        data = kernel.get_feat(data)
+                    else:
+                        raise Exception("kernel approximation type not supported!")
+                    if quantizer != None:
+                        # print("halp use quantizer")
+                        data = quantizer.quantize(data)
+                    if data.size(0) != target.size(0):
+                        raise Exception("minibatch on data and target does not agree in closure")
+                    if not isinstance(data, torch.autograd.variable.Variable):
+                        data = Variable(data, requires_grad=False)
+                else:
+                    # if we directly pass in the quantized feature, we directly use it without regeneration
+                    # this is for the case of LM halp where we need to sync the quantization for prev and curr model.
+                    data = feat
+
+                if not isinstance(target, torch.autograd.variable.Variable):
+                    target = Variable(target, requires_grad=False)
+
+                # if use_cuda:
+                #     data, target = data.cuda(), target.cuda()
+                cost = model.forward(data, target)
+                model.output.retain_grad()
+                cost.backward()
+                # extract the data X and grad of the output of 
+                return cost, data, model.output.grad
+            loss = optimizer.step(closure)
+            train_loss.append(loss[0].data.cpu().numpy() )
         else:
-            if args.approx_type == "rff":
-                X = kernel.get_cos_feat(X, dtype="float")
+            if args.approx_type == "rff" or args.approx_type == "cir_rff":
+                X = kernel.get_cos_feat(X)
             elif args.approx_type == "nystrom":
                 X = kernel.get_feat(X)
             else:
@@ -70,8 +115,8 @@ def evaluate(args, model, epoch, val_loader, quantizer, kernel):
             if use_cuda:
                 X = X.cuda()
                 Y = Y.cuda()
-            if args.approx_type == "rff":
-                X = kernel.get_cos_feat(X, dtype="float")
+            if args.approx_type == "rff" or args.approx_type == "cir_rff":
+                X = kernel.get_cos_feat(X)
             elif args.approx_type == "nystrom":
                 X = kernel.get_feat(X)
             else:
@@ -99,8 +144,8 @@ def evaluate(args, model, epoch, val_loader, quantizer, kernel):
             if use_cuda:
                 X = X.cuda()
                 Y = Y.cuda()
-            if args.approx_type == "rff":
-                X = kernel.get_cos_feat(X, dtype="float")
+            if args.approx_type == "rff" or args.approx_type == "cir_rff":
+                X = kernel.get_cos_feat(X)
             elif args.approx_type == "nystrom":
                 X = kernel.get_feat(X)
             else:
@@ -120,13 +165,24 @@ def evaluate(args, model, epoch, val_loader, quantizer, kernel):
         return l2_accum / float(sample_cnt), l2_accum / float(sample_cnt)
 
 
-def sample_data(X, n_sample):
+def sample_data(X, Y, n_sample):
     '''
     X is in the shape of [n_sample, n_feat]
     '''
-    perm = np.random.permutation(np.arange(X.size(0) ) )
-    X_sample = X[perm[:min(n_sample, X.size(0) ) ], :]
-    return X_sample
+    if isinstance(X, np.ndarray):
+        # perm = np.random.permutation(np.arange(X.shape[0] ) )
+        total_sample = X.shape[0]
+        n_sample = min(n_sample, X.shape[0])
+    else:
+        total_sample = X.size(0)
+        n_sample = min(n_sample, X.size(0) )
+    if n_sample == total_sample:
+        return X, Y
+    else:
+        perm = np.random.permutation(np.arange(total_sample) )
+        X_sample = X[perm[:n_sample], :]
+        Y_sample = Y[perm[:n_sample] ]
+    return X_sample, Y_sample
 
 def get_matrix_spectrum(X):
     # linalg.eigh can give negative value on cencus regression dataset
@@ -143,31 +199,189 @@ def get_matrix_spectrum(X):
     U, S, _ = np.linalg.svd(X.cpu().numpy().astype(np.float64) )
     return S 
 
-def get_sample_kernel_metrics(X_all, kernel, kernel_approx, quantizer, n_sample):
-    #X = sample_data(X_all, n_sample)
-    X = X_all
-    kernel_mat = kernel.get_kernel_matrix(X, X, dtype="double")
-    kernel_mat_approx = kernel_approx.get_kernel_matrix(X, X, quantizer, quantizer, dtype="double")
+#####################################################################
+# function to calculate LSD
+#####################################################################
+# def get_sample_kernel_metrics(X, kernel, kernel_approx, quantizer):
+#     # X = sample_data(X_all, n_sample)
+#     is_cuda_tensor = X.is_cuda
+#     if is_cuda_tensor:
+#         kernel.cpu()
+#         kernel_approx.cpu()
+#         X = X.cpu()    
+#     kernel_mat = kernel.get_kernel_matrix(X, X)
+#     kernel_mat_approx = kernel_approx.get_kernel_matrix(X, X, quantizer, quantizer)
+#     # # need to use double for XXT if we want the torch equal to hold.
+#     # if not torch.equal(kernel_mat_approx, torch.transpose(kernel_mat_approx, 0, 1) ):
+#     #     raise Exception("Kernel matrix is not symetric!")
+#     error_matrix = kernel_mat_approx.cpu() - kernel_mat.cpu()
+#     F_norm_error = torch.sum(error_matrix**2)
+#     spectral_norm_error = np.max(np.abs(get_matrix_spectrum(error_matrix) ) )
+#     spectrum = get_matrix_spectrum(kernel_mat_approx)
+#     spectrum_exact = get_matrix_spectrum(kernel_mat)
+#     metric_dict = {"F_norm_error": float(F_norm_error),
+#                    "spectral_norm_error": float(spectral_norm_error) }
+#     if is_cuda_tensor:
+#         kernel.torch(cuda=True)
+#         kernel_approx.torch(cuda=True)
+# #    error_matrix = kernel_mat_approx - kernel_mat
+# #    F_norm_error = torch.sum(error_matrix**2)
+# ##    spectral_norm_error = np.max(np.abs(get_matrix_spectrum(error_matrix) ) )
+# #    spectrum = get_matrix_spectrum(kernel_mat_approx)
+# #    spectrum_exact = get_matrix_spectrum(kernel_mat)
+# ##    metric_dict = {"F_norm_error": float(F_norm_error),
+# ##                   "spectral_norm_error": float(spectral_norm_error) }
+# ##    spectrum_exact = spectrum
+# #    metric_dict = {}
+#     return metric_dict, spectrum, spectrum_exact
+
+#####################################################################
+# function to calculate Delta
+#####################################################################
+#def get_sample_kernel_metrics(X, kernel, kernel_approx, quantizer, l2_reg):
+#    # X = sample_data(X_all, n_sample)
+#    is_cuda_tensor = X.is_cuda
+#    if is_cuda_tensor:
+#        kernel.cpu()
+#        kernel_approx.cpu()
+#        X = X.cpu()    
+#    kernel_mat = kernel.get_kernel_matrix(X, X)
+#    kernel_mat_approx = kernel_approx.get_kernel_matrix(X, X, quantizer, quantizer)
+#    # # need to use double for XXT if we want the torch equal to hold.
+#    # if not torch.equal(kernel_mat_approx, torch.transpose(kernel_mat_approx, 0, 1) ):
+#    #     raise Exception("Kernel matrix is not symetric!")
+#    error_matrix = kernel_mat_approx.cpu() - kernel_mat.cpu()
+#    F_norm_error = torch.sum(error_matrix**2)
+#    # spectral_norm_error = np.max(np.abs(get_matrix_spectrum(error_matrix) ) )
+#    # spectrum = get_matrix_spectrum(kernel_mat_approx)
+#    # spectrum_exact = get_matrix_spectrum(kernel_mat)
+#    print("calculation delta with lambda = ", l2_reg)
+#    delta = delta_approximation(kernel_mat.cpu().numpy().astype(np.float64), 
+#        kernel_mat_approx.cpu().numpy().astype(np.float64), l2_reg)
+#    spectrum = None
+#    spectrum_exact = None
+#    metric_dict = {"F_norm_error": float(F_norm_error),
+#                   "Delta": float(delta) }
+#    print metric_dict
+#    if is_cuda_tensor:
+#        kernel.torch(cuda=True)
+#        kernel_approx.torch(cuda=True)
+##    error_matrix = kernel_mat_approx - kernel_mat
+##    F_norm_error = torch.sum(error_matrix**2)
+###    spectral_norm_error = np.max(np.abs(get_matrix_spectrum(error_matrix) ) )
+##    spectrum = get_matrix_spectrum(kernel_mat_approx)
+##    spectrum_exact = get_matrix_spectrum(kernel_mat)
+###    metric_dict = {"F_norm_error": float(F_norm_error),
+###                   "spectral_norm_error": float(spectral_norm_error) }
+###    spectrum_exact = spectrum
+##    metric_dict = {}
+#    return metric_dict, spectrum, spectrum_exact
+
+#####################################################################
+# function to calculate Delta
+#####################################################################
+def get_sample_kernel_metrics(X, kernel, kernel_approx, quantizer, l2_reg):
+   # X = sample_data(X_all, n_sample)
+   is_cuda_tensor = X.is_cuda
+   if is_cuda_tensor:
+       kernel.cpu()
+       kernel_approx.cpu()
+       X = X.cpu()    
+   kernel_mat = kernel.get_kernel_matrix(X, X)
+   kernel_mat_approx = kernel_approx.get_kernel_matrix(X, X, quantizer, quantizer)
+   # # need to use double for XXT if we want the torch equal to hold.
+   # if not torch.equal(kernel_mat_approx, torch.transpose(kernel_mat_approx, 0, 1) ):
+   #     raise Exception("Kernel matrix is not symetric!")
+   error_matrix = kernel_mat_approx.cpu() - kernel_mat.cpu()
+   F_norm_error = torch.sum(error_matrix**2)
+   spectral_norm_error = np.max(np.abs(get_matrix_spectrum(error_matrix) ) )
+   # spectrum = get_matrix_spectrum(kernel_mat_approx)
+   # spectrum_exact = get_matrix_spectrum(kernel_mat)
+   print("calculation delta with lambda = ", l2_reg)
+   delta = delta_approximation(kernel_mat.cpu().numpy().astype(np.float64), 
+       kernel_mat_approx.cpu().numpy().astype(np.float64), l2_reg)
+   spectrum = None
+   spectrum_exact = None
+   metric_dict = {"F_norm_error": float(F_norm_error),
+                  "Delta": float(delta),
+                  "spectral_norm_error": float(spectral_norm_error) }
+   print(metric_dict)
+   if is_cuda_tensor:
+       kernel.torch(cuda=True)
+       kernel_approx.torch(cuda=True)
+#    error_matrix = kernel_mat_approx - kernel_mat
+#    F_norm_error = torch.sum(error_matrix**2)
+##    spectral_norm_error = np.max(np.abs(get_matrix_spectrum(error_matrix) ) )
+#    spectrum = get_matrix_spectrum(kernel_mat_approx)
+#    spectrum_exact = get_matrix_spectrum(kernel_mat)
+##    metric_dict = {"F_norm_error": float(F_norm_error),
+##                   "spectral_norm_error": float(spectral_norm_error) }
+##    spectrum_exact = spectrum
+#    metric_dict = {}
+   return metric_dict, spectrum, spectrum_exact
+
+
+# ####################################################################
+# # get spectral norm only
+# ####################################################################
+# def get_sample_kernel_metrics(X, kernel, kernel_approx, quantizer, l2_reg):
+#     # X = sample_data(X_all, n_sample)
+#     is_cuda_tensor = X.is_cuda
+#     if is_cuda_tensor:
+#         kernel.cpu()
+#         kernel_approx.cpu()
+#         X = X.cpu()
+#     kernel_mat = kernel.get_kernel_matrix(X, X)
+#     kernel_mat_approx = kernel_approx.get_kernel_matrix(X, X, quantizer, quantizer)
+#     # # need to use double for XXT if we want the torch equal to hold.
+#     # if not torch.equal(kernel_mat_approx, torch.transpose(kernel_mat_approx, 0, 1) ):
+#     #     raise Exception("Kernel matrix is not symetric!")
+#     error_matrix = kernel_mat_approx.cpu() - kernel_mat.cpu()
+#     F_norm_error = torch.sum(error_matrix**2)
+#     spectral_norm_error = np.max(np.abs(get_matrix_spectrum(error_matrix) ) )
+#     # spectrum = get_matrix_spectrum(kernel_mat_approx)
+#     # spectrum_exact = get_matrix_spectrum(kernel_mat)
+#     #print("calculation delta with lambda = ", l2_reg)
+#     #delta = delta_approximation(kernel_mat.cpu().numpy().astype(np.float64),
+#     #    kernel_mat_approx.cpu().numpy().astype(np.float64), l2_reg)
+#     spectrum = None
+#     spectrum_exact = None
+#     metric_dict = {"F_norm_error": float(F_norm_error),
+#                    "spectral_norm_error": float(spectral_norm_error) }
+#     print(metric_dict)
+#     if is_cuda_tensor:
+#         kernel.torch(cuda=True)
+#         kernel_approx.torch(cuda=True)
+# #    error_matrix = kernel_mat_approx - kernel_mat
+# #    F_norm_error = torch.sum(error_matrix**2)
+# ##    spectral_norm_error = np.max(np.abs(get_matrix_spectrum(error_matrix) ) )
+# #    spectrum = get_matrix_spectrum(kernel_mat_approx)
+# #    spectrum_exact = get_matrix_spectrum(kernel_mat)
+# ##    metric_dict = {"F_norm_error": float(F_norm_error),
+# ##                   "spectral_norm_error": float(spectral_norm_error) }
+# ##    spectrum_exact = spectrum
+# #    metric_dict = {}
+#     return metric_dict, spectrum, spectrum_exact
+
+def get_sample_kernel_F_norm(X, kernel, kernel_approx, quantizer, l2_reg):
+    is_cuda_tensor = X.is_cuda
+    if is_cuda_tensor:
+        kernel.cpu()
+        kernel_approx.cpu()
+        X = X.cpu()    
+    kernel_mat = kernel.get_kernel_matrix(X, X)
+    kernel_mat_approx = kernel_approx.get_kernel_matrix(X, X, quantizer, quantizer)
     # # need to use double for XXT if we want the torch equal to hold.
     # if not torch.equal(kernel_mat_approx, torch.transpose(kernel_mat_approx, 0, 1) ):
     #     raise Exception("Kernel matrix is not symetric!")
-#    error_matrix = kernel_mat_approx - kernel_mat
-#    F_norm_error = torch.sum(error_matrix**2)
-#    spectral_norm_error = np.max(np.abs(get_matrix_spectrum(error_matrix) ) )
-#    spectrum = get_matrix_spectrum(kernel_mat_approx)
-#    spectrum_exact = get_matrix_spectrum(kernel_mat)
-#    metric_dict = {"F_norm_error": float(F_norm_error),
-#                   "spectral_norm_error": float(spectral_norm_error) }
-    error_matrix = kernel_mat_approx - kernel_mat
+    error_matrix = kernel_mat_approx.cpu() - kernel_mat.cpu()
     F_norm_error = torch.sum(error_matrix**2)
-#    spectral_norm_error = np.max(np.abs(get_matrix_spectrum(error_matrix) ) )
-    spectrum = get_matrix_spectrum(kernel_mat_approx)
-    spectrum_exact = get_matrix_spectrum(kernel_mat)
-#    metric_dict = {"F_norm_error": float(F_norm_error),
-#                   "spectral_norm_error": float(spectral_norm_error) }
-#    spectrum_exact = spectrum
-    metric_dict = {}
-    return metric_dict, spectrum, spectrum_exact
+
+    # metric_dict = {"F_norm_error": float(F_norm_error) }
+    if is_cuda_tensor:
+        kernel.torch(cuda=True)
+        kernel_approx.torch(cuda=True)
+    return float(F_norm_error) 
 
 
 
@@ -200,7 +414,7 @@ class ProgressMonitor(object):
         if (self.prev_best is not None) \
             and ( (self.min_metric_better and (metric > self.decay_thresh * self.prev_best) ) \
             or ( (not self.min_metric_better) and (metric < (1.0 + 1.0 - self.decay_thresh) * self.prev_best) ) ):
-            self.lr /= 2.0
+            self.lr /= self.lr_decay_fac
             for g in optimizer.param_groups:
                 g['lr'] = self.lr
             print("lr drop to ", self.lr)

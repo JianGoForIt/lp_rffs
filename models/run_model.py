@@ -16,20 +16,27 @@ sys.path.append("../kernel_reg")
 sys.path.append("../utils")
 sys.path.append("../..")
 from rff import RFF, GaussianKernel
+from circulant_rff import  CirculantRFF
 from nystrom import Nystrom
-from kernel_regressor import Quantizer
+from ensemble_nystrom import EnsembleNystrom
+from kernel_regressor import Quantizer, KernelRidgeRegression
 from data_loader import load_data
 import halp
 import halp.optim
 import halp.quantize
-from train_utils import train, evaluate, ProgressMonitor, get_sample_kernel_metrics
-# import halp.optim
-# from halp import LPSGD
-# from halp import HALP
+from train_utils import train, evaluate, ProgressMonitor
+from train_utils import get_sample_kernel_metrics, get_sample_kernel_F_norm, sample_data
+# imports for fixed design runs
+from misc_utils import expected_loss
+from scipy.optimize import minimize
+
+# EPS to prevent numerical issue in closed form ridge regression solver
+EPS = 1e-10
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--model", type=str, default="logistic_regression")
-parser.add_argument("--minibatch", type=float, default=64)
+parser.add_argument("--minibatch", type=int, default=64)
 # parser.add_argument("--dataset", type=str, default="census")
 parser.add_argument("--l2_reg", type=float, default=0.0)
 parser.add_argument("--kernel_sigma", type=float, default=30.0)
@@ -38,7 +45,6 @@ parser.add_argument("--random_seed", type=int, default=1)
 parser.add_argument("--n_bit_feat", type=int, default=32)
 parser.add_argument("--n_bit_model", type=int, default=32)
 parser.add_argument("--scale_model", type=float, default=0.00001)
-parser.add_argument("--do_fp_model", action="store_true")
 parser.add_argument("--do_fp_feat", action="store_true")
 parser.add_argument("--learning_rate", type=float, default=0.1)
 parser.add_argument("--data_path", type=str, default="../data/census/")
@@ -52,13 +58,26 @@ parser.add_argument("--save_path", type=str, default="./test")
 parser.add_argument("--approx_type", type=str, default="rff", help="specify using exact, rff or nystrom")
 parser.add_argument("--collect_sample_metrics", action="store_true", 
     help="True if we want to collect metrics from the subsampled kernel matrix")
-parser.add_argument("--n_measure_sample", type=int, default=20000, 
+parser.add_argument("--n_sample", type=int, default=-1, 
     help="samples for metric measurements, including approximation error and etc.")
+parser.add_argument("--fixed_design", action="store_true", 
+    help="do fixed design experiment")
+parser.add_argument("--fixed_design_noise_sigma", type=float, help="label noise std")
+parser.add_argument("--fixed_design_auto_l2_reg", action="store_true",
+    help="if true, we auto search for the optimal lambda")
+parser.add_argument("--closed_form_sol", action="store_true", help="use closed form solution")
+parser.add_argument("--fixed_epoch_number", action="store_true", help="if false, use early stopping")
+parser.add_argument("--exit_after_collect_metric", action="store_true", help="if yes, \
+    we only do metric collection on kernel matrix without doing trainining")
+parser.add_argument("--n_ensemble_nystrom", type=int, default=1, help="number of learners in ensembled nystrom")
+parser.add_argument("--only_collect_kernel_approx_error", action="store_true", 
+    help="if True, we only calculate F norm kernel approximation error to save computation")
 args = parser.parse_args()
 
 
 
 if __name__ == "__main__":
+    np.random.seed(args.random_seed)
     use_cuda = torch.cuda.is_available() and args.cuda
     torch.manual_seed(args.random_seed)
     if use_cuda:
@@ -66,11 +85,27 @@ if __name__ == "__main__":
         # torch.cuda.manual_seed_all(args.seed)
     # load dataset
     X_train, X_val, Y_train, Y_val = load_data(args.data_path)
-    X_train = torch.FloatTensor(X_train.astype(np.float32) )
-    X_val = torch.FloatTensor(X_val.astype(np.float32) )
+    if args.fixed_design:
+        print("fixed design using label noise sigma ", args.fixed_design_noise_sigma)
+        Y_train_orig = Y_train.copy()
+        X_val = X_train.copy()
+        Y_val = Y_train.copy()
+        Y_train += np.random.normal(scale=args.fixed_design_noise_sigma, size=Y_train.shape)
+        Y_val += np.random.normal(scale=args.fixed_design_noise_sigma, size=Y_train.shape)
+
+    if args.n_sample > 0:
+        # downsample if specified
+        X_train, Y_train = sample_data(X_train, Y_train, args.n_sample)
+        X_val, Y_val = sample_data(X_val, Y_val, args.n_sample)
+        assert X_train.shape[0] == Y_train.shape[0]
+        assert X_val.shape[0] == Y_val.shape[0]
+        print(X_train.shape[0], " training sample ", X_val.shape[0], "evaluation sample")
+
+    X_train = torch.DoubleTensor(X_train)
+    X_val = torch.DoubleTensor(X_val)
     if args.model == "ridge_regression":
-        Y_train = torch.FloatTensor(Y_train.astype(np.float32) )        
-        Y_val = torch.FloatTensor(Y_val.astype(np.float32) )
+        Y_train = torch.DoubleTensor(Y_train)        
+        Y_val = torch.DoubleTensor(Y_val)
     elif args.model == "logistic_regression":
         Y_train = Y_train.reshape( (Y_train.size) )
         Y_val = Y_val.reshape( (Y_val.size) )
@@ -79,11 +114,6 @@ if __name__ == "__main__":
         Y_val = torch.LongTensor(np.array(Y_val.tolist() ).reshape(Y_val.size, 1) )
     else:
         raise Exception("model not supported")
-    # if use_cuda:
-    #     X_train = X_train.cuda()
-    #     Y_train = Y_train.cuda()
-    #     X_val = X_val.cuda()
-    #     Y_val = Y_val.cuda()
 
     # setup dataloader 
     train_data = \
@@ -106,10 +136,28 @@ if __name__ == "__main__":
         kernel_approx = Nystrom(args.n_fp_rff, kernel=kernel, rand_seed=args.random_seed) 
         kernel_approx.setup(X_train) 
         quantizer = None
+    elif args.approx_type == "ensemble_nystrom":
+        print("ensembled nystrom mode with ", args.n_ensemble_nystrom, "learner")
+        kernel_approx = EnsembleNystrom(args.n_fp_rff, n_learner=args.n_ensemble_nystrom, kernel=kernel, rand_seed=args.random_seed)
+        kernel_approx.setup(X_train)
+        if args.do_fp_feat:
+            quantizer = None
+        else:
+            # decide on the range of representation from training sample based features
+            train_feat = kernel_approx.get_feat(X_train)
+            min_val = torch.min(train_feat)
+            max_val = torch.max(train_feat)
+            quantizer = Quantizer(args.n_bit_feat, min_val, max_val, 
+                rand_seed=args.random_seed, use_cuda=use_cuda)
+            print("range for quantizing nystrom ensemble ", min_val, max_val)
+            print("feature quantization scale, bit ", quantizer.scale, quantizer.nbit)
     elif args.approx_type == "rff" and args.do_fp_feat == False:
         print("lp rff feature mode")
         assert args.n_bit_feat >= 1
-        n_quantized_rff = int(np.floor(args.n_fp_rff / float(args.n_bit_feat) * 32.0) )
+        # n_quantized_rff = int(np.floor(args.n_fp_rff / float(args.n_bit_feat) * 32.0) )
+        # To simplified the interface, we take args.n_fp_rff as the number of low precision features directly
+        n_quantized_rff = args.n_fp_rff
+        print("# feature ", n_quantized_rff)
         kernel_approx = RFF(n_quantized_rff, n_input_feat, kernel, rand_seed=args.random_seed)
         min_val = -np.sqrt(2.0/float(n_quantized_rff) )
         max_val = np.sqrt(2.0/float(n_quantized_rff) )
@@ -120,94 +168,193 @@ if __name__ == "__main__":
         print("fp rff feature mode")
         kernel_approx = RFF(args.n_fp_rff, n_input_feat, kernel, rand_seed=args.random_seed)
         quantizer = None
+    elif args.approx_type == "cir_rff" and args.do_fp_feat == False:
+        print("lp circulant rff feature mode")
+        assert args.n_bit_feat >= 1
+        # n_quantized_rff = int(np.floor(args.n_fp_rff / float(args.n_bit_feat) * 32.0) )
+        # To simplified the interface, we take args.n_fp_rff as the number of low precision features directly
+        n_quantized_rff = args.n_fp_rff
+        print("# feature ", n_quantized_rff)
+        kernel_approx = CirculantRFF(n_quantized_rff, n_input_feat, kernel, rand_seed=args.random_seed)
+        min_val = -np.sqrt(2.0/float(n_quantized_rff) )
+        max_val = np.sqrt(2.0/float(n_quantized_rff) )
+        quantizer = Quantizer(args.n_bit_feat, min_val, max_val, 
+            rand_seed=args.random_seed, use_cuda=use_cuda, for_lm_halp=(args.opt == "lm_halp"))
+        print("feature quantization scale, bit ", quantizer.scale, quantizer.nbit)
+    elif args.approx_type == "cir_rff" and args.do_fp_feat == True:
+        print("fp circulant rff feature mode")
+        kernel_approx = CirculantRFF(args.n_fp_rff, n_input_feat, kernel, rand_seed=args.random_seed)
+        quantizer = None
     else:
         raise Exception("kernel approximation type not specified!")
     kernel.torch(cuda=use_cuda)
     kernel_approx.torch(cuda=use_cuda)
 
-
-    # construct model
-    if args.model == "logistic_regression":
-        model = LogisticRegression(input_dim=kernel_approx.n_feat, 
-            n_class=n_class, reg_lambda=args.l2_reg)
-        # model = LogisticRegression(input_dim=123, 
-        #     n_class=n_class, reg_lambda=args.l2_reg)
-    elif args.model == "ridge_regression":
-        model = RidgeRegression(input_dim=kernel_approx.n_feat, reg_lambda=args.l2_reg)
-    if use_cuda:
-        model.cuda()    
-
-    # set up optimizer
-    if args.opt == "sgd":
-        print("using sgd optimizer")
-        optimizer = optim.SGD(model.parameters(), lr=args.learning_rate, weight_decay=args.l2_reg)
-    elif args.opt == "lpsgd":
-        print("using lp sgd optimizer")
-        optimizer = halp.optim.LPSGD(model.parameters(), lr=args.learning_rate, 
-            scale_factor=args.scale_model, bits=args.n_bit_model, weight_decay=args.l2_reg)
-        print("model quantization scale and bit ", optimizer._scale_factor, optimizer._bits)
-    elif args.opt == "halp":
-        print("using halp optimizer")
-        optimizer = halp.optim.HALP(model.parameters(), lr=args.learning_rate, 
-            T=int(args.halp_epoch_T * X_train.size(0) / float(args.minibatch) ), 
-            data_loader=train_loader, mu=args.halp_mu, bits=args.n_bit_model, weight_decay=args.l2_reg)
-        print("model quantization, interval, mu, bit", optimizer.T, optimizer._mu, 
-            optimizer._bits, optimizer._biased)
+    if args.fixed_design or args.closed_form_sol:
+        # for fixed design experiments and closed form solution form real setting
+        if args.fixed_design_auto_l2_reg:
+            # get kernel matrix and get the decomposition
+            assert isinstance(X_train, torch.DoubleTensor)
+            print("fixed design lambda calculation using kernel ", type(kernel_approx))
+            kernel_mat = kernel_approx.get_kernel_matrix(X_train, X_train, quantizer, quantizer)
+            assert isinstance(kernel_mat, torch.DoubleTensor)
+            U, S, _ = np.linalg.svd(kernel_mat.cpu().numpy().astype(np.float64) )
+            # numerically figure out the best lambda in the fixed design setting
+            x0 = 1.0 
+            f = lambda lam: expected_loss(lam,U,S,Y_train_orig,args.fixed_design_noise_sigma)
+            res = minimize(f, x0, bounds=[(0.0, None)], options={'xtol': 1e-6, 'disp': True})
+            loss = f(res.x)
+            print("fixed design opt reg and loss", res.x, loss)
+            args.l2_reg = max(res.x[0], EPS)
     else:
-        raise Exception("optimizer not supported")
+        # construct model
+        if args.model == "logistic_regression":
+            model = LogisticRegression(input_dim=kernel_approx.n_feat, 
+                n_class=n_class, reg_lambda=args.l2_reg)
+            # model = LogisticRegression(input_dim=123, 
+            #     n_class=n_class, reg_lambda=args.l2_reg)
+        elif args.model == "ridge_regression":
+            model = RidgeRegression(input_dim=kernel_approx.n_feat, reg_lambda=args.l2_reg)
+        if use_cuda:
+            model.cuda() 
+        model.double()   
+
+        # set up optimizer
+        if args.opt == "sgd":
+            print("using sgd optimizer")
+            optimizer = optim.SGD(model.parameters(), lr=args.learning_rate, weight_decay=args.l2_reg)
+        elif args.opt == "lpsgd":
+            print("using lp sgd optimizer")
+            optimizer = halp.optim.LPSGD(model.parameters(), lr=args.learning_rate, 
+                scale_factor=args.scale_model, bits=args.n_bit_model, weight_decay=args.l2_reg)
+            print("model quantization scale and bit ", optimizer._scale_factor, optimizer._bits)
+        elif args.opt == "halp":
+            print("using halp optimizer")
+            optimizer = halp.optim.HALP(model.parameters(), lr=args.learning_rate, 
+                T=int(args.halp_epoch_T * X_train.size(0) / float(args.minibatch) ), 
+                data_loader=train_loader, mu=args.halp_mu, bits=args.n_bit_model, weight_decay=args.l2_reg)
+            print("model quantization, interval, mu, bit", optimizer.T, optimizer._mu, 
+                optimizer._bits, optimizer._biased)
+        elif args.opt == "lm_halp":
+            print("using lm halp optimizer")
+            optimizer = halp.optim.LMHALP(model.parameters(), lr=args.learning_rate, 
+                T=int(args.halp_epoch_T * X_train.size(0) / float(args.minibatch) ), 
+                data_loader=train_loader, mu=args.halp_mu, bits=args.n_bit_model, 
+                weight_decay=args.l2_reg, data_scale=quantizer.scale)
+            print("model quantization, interval, mu, bit", optimizer.T, optimizer._mu, 
+                optimizer._bits, optimizer._biased)
+        else:
+            raise Exception("optimizer not supported")
     
 
     # collect metrics
     if args.collect_sample_metrics:
-        print("start doing sample metric collection with ", args.n_measure_sample, " samples")
-        if use_cuda:
-            metric_dict_sample_train, spectrum_sample_train, spectrum_sample_train_exact = \
-                get_sample_kernel_metrics(X_train.cuda(), kernel, kernel_approx, quantizer, args.n_measure_sample)
-            metric_dict_sample_val, spectrum_sample_val, spectrum_sample_val_exact = \
-                get_sample_kernel_metrics(X_val.cuda(), kernel, kernel_approx, quantizer, args.n_measure_sample)  
+        print("start doing sample metric collection with ", X_train.size(0), " training samples")
+        if args.only_collect_kernel_approx_error:
+            approx_train_error_list = []
+            approx_val_error_list = []
+            # as the data is sampled and fixed here, we only need to do 1 calculation within here
+            for i in range(1):
+                if use_cuda:
+                    #approx_error_train = get_sample_kernel_F_norm(X_train.cuda(), kernel, kernel_approx, quantizer, args.l2_reg)
+                    approx_error_val = get_sample_kernel_F_norm(X_val.cuda(), kernel, kernel_approx, quantizer, args.l2_reg)
+                else:
+                    #approx_error_train = get_sample_kernel_F_norm(X_train, kernel, kernel_approx, quantizer, args.l2_reg)
+                    approx_error_val = get_sample_kernel_F_norm(X_val, kernel, kernel_approx, quantizer, args.l2_reg)
+                #approx_train_error_list.append(approx_error_train)
+                approx_val_error_list.append(approx_error_val)
+            #print("approx train kernel error list ", approx_train_error_list)
+            print("approx val kernel error list ", approx_val_error_list)
+            #kernel_approx_error_dict_train = np.mean(approx_train_error_list)
+            kernel_approx_error_dict_val = np.mean(approx_val_error_list)
+            #kernel_approx_error_dict_train = {"F_norm_error": np.mean(approx_train_error_list) }
+            #kernel_approx_error_dict_val = {"F_norm_error": np.mean(approx_val_error_list) }
+            #with open(args.save_path + "/metric_sample_train.txt", "wb") as f:
+            #    cp.dump(kernel_approx_error_dict_train, f, protocol=2)
+            with open(args.save_path + "/metric_sample_eval.txt", "wb") as f:
+                cp.dump(kernel_approx_error_dict_val, f, protocol=2)
         else:
-            metric_dict_sample_train, spectrum_sample_train, spectrum_sample_train_exact = \
-                get_sample_kernel_metrics(X_train, kernel, kernel_approx, quantizer, args.n_measure_sample)
-            #metric_dict_sample_val, spectrum_sample_val, spectrum_sample_val_exact = \
-            #    get_sample_kernel_metrics(X_val, kernel, kernel_approx, quantizer, args.n_measure_sample) 
-        with open(args.save_path + "/metric_sample_train.txt", "w") as f:
-            cp.dump(metric_dict_sample_train, f)
-        np.save(args.save_path + "/spectrum_train.npy", spectrum_sample_train)
-        np.save(args.save_path + "/spectrum_train_exact.npy", spectrum_sample_train_exact)
-        #with open(args.save_path + "/metric_sample_eval.txt", "w") as f:
-        #    cp.dump(metric_dict_sample_val, f)
-        #np.save(args.save_path + "/spectrum_eval.npy", spectrum_sample_val)
-        #np.save(args.save_path + "/spectrum_eval_exact.npy", spectrum_sample_val_exact)
-        # print metric_dict_sample_train, metric_dict_sample_val
-        # print spectrum_sample_train, spectrum_sample_val
+            if use_cuda:
+                # metric_dict_sample_train, spectrum_sample_train, spectrum_sample_train_exact = \
+                #     get_sample_kernel_metrics(X_train.cuda(), kernel, kernel_approx, quantizer, args.l2_reg)
+                metric_dict_sample_val, spectrum_sample_val, spectrum_sample_val_exact = \
+                    get_sample_kernel_metrics(X_val.cuda(), kernel, kernel_approx, quantizer, args.l2_reg)  
+            else:
+                # metric_dict_sample_train, spectrum_sample_train, spectrum_sample_train_exact = \
+                #     get_sample_kernel_metrics(X_train, kernel, kernel_approx, quantizer, args.l2_reg)
+                metric_dict_sample_val, spectrum_sample_val, spectrum_sample_val_exact = \
+                    get_sample_kernel_metrics(X_val, kernel, kernel_approx, quantizer, args.l2_reg) 
+            if not os.path.isdir(args.save_path):
+                os.makedirs(args.save_path)
+            # with open(args.save_path + "/metric_sample_train.txt", "wb") as f:
+            #     cp.dump(metric_dict_sample_train, f)
+            # np.save(args.save_path + "/spectrum_train.npy", spectrum_sample_train)
+            # np.save(args.save_path + "/spectrum_train_exact.npy", spectrum_sample_train_exact)
+            with open(args.save_path + "/metric_sample_eval.txt", "wb") as f:
+                cp.dump(metric_dict_sample_val, f)
+            np.save(args.save_path + "/spectrum_eval.npy", spectrum_sample_val)
+            np.save(args.save_path + "/spectrum_eval_exact.npy", spectrum_sample_val_exact)
+            # print metric_dict_sample_train, metric_dict_sample_val
+            # print spectrum_sample_train, spectrum_sample_val
         print("Sample metric collection done!")
-        exit(0)
+        #if not (args.fixed_design or args.closed_form_sol):
+            # for closed form solution, we need to carry out closed form training
+        if args.exit_after_collect_metric:
+            print("exit after collect metric")
+            exit(0)
 
-
-    # setup sgd training process
-    train_loss = []
-    eval_metric = []
-    if args.model == "logistic_regression":
-        monitor = ProgressMonitor(init_lr=args.learning_rate, lr_decay_fac=2.0, min_lr=0.00001, min_metric_better=True, decay_thresh=0.999)
-    elif args.model == "ridge_regression":
-        monitor = ProgressMonitor(init_lr=args.learning_rate, lr_decay_fac=2.0, min_lr=0.00001, min_metric_better=True, decay_thresh=0.999)
-    else:
-        raise Exception("model not supported!")
-    for epoch in range(args.epoch):  
-        # train for one epoch
-        loss_per_step = train(args, model, epoch, train_loader, optimizer, quantizer, kernel_approx)
-        train_loss += loss_per_step
-        # evaluate and save evaluate metric
-        metric, monitor_signal = evaluate(args, model, epoch, val_loader, quantizer, kernel_approx)
-        eval_metric.append(metric)
-
+    if args.fixed_design or args.closed_form_sol:
+        # for fixed design experiments and closed form solution form real setting
+        if use_cuda:
+            raise Exception("closed from solution does not support cuda mode")
+            #X_train = X_train.cuda()
+            #X_val = X_val.cuda()
+            #Y_train = Y_train.cuda()
+            #Y_val = Y_val.cuda()
+        print("closed form using kernel type", type(kernel_approx) )
+        regressor = KernelRidgeRegression(kernel_approx, reg_lambda=args.l2_reg)
+        print("start to do regression!")
+        # print("test quantizer", quantizer)
+        regressor.fit(X_train, Y_train, quantizer=quantizer)
+        print("finish regression!")
+        train_error = regressor.get_train_error()
+        pred = regressor.predict(X_val, quantizer_train=quantizer, quantizer_test=quantizer)
+        test_error = regressor.get_test_error(Y_val)
+        print("test error ", test_error)
         if not os.path.isdir(args.save_path):
             os.makedirs(args.save_path)
-        np.savetxt(args.save_path + "/train_loss.txt", train_loss)
-        np.savetxt(args.save_path + "/eval_metric.txt", eval_metric)
-        
-        # for param in optimizer._z:
-        #     print param
-        early_stop = monitor.end_of_epoch(monitor_signal, model, optimizer, epoch)
-        if early_stop:
-            break
+        np.savetxt(args.save_path + "/train_loss.txt", np.array(train_error).reshape( (1, ) ) )
+        np.savetxt(args.save_path + "/eval_metric.txt", np.array(test_error).reshape( (1, ) ) )
+        np.savetxt(args.save_path + "/lambda.txt", np.array(args.l2_reg).reshape( (1, ) ) )
+    else:
+        # setup sgd training process
+        train_loss = []
+        eval_metric = []
+        monitor_signal_history = []
+        if args.model == "logistic_regression":
+            monitor = ProgressMonitor(init_lr=args.learning_rate, lr_decay_fac=2.0, min_lr=0.00001, min_metric_better=True, decay_thresh=0.99)
+        elif args.model == "ridge_regression":
+            monitor = ProgressMonitor(init_lr=args.learning_rate, lr_decay_fac=2.0, min_lr=0.00001, min_metric_better=True, decay_thresh=0.99)
+        else:
+            raise Exception("model not supported!")
+        for epoch in range(args.epoch):  
+            # train for one epoch
+            loss_per_step = train(args, model, epoch, train_loader, optimizer, quantizer, kernel_approx)
+            train_loss += loss_per_step
+            # evaluate and save evaluate metric
+            metric, monitor_signal = evaluate(args, model, epoch, val_loader, quantizer, kernel_approx)
+            eval_metric.append(metric)
+            monitor_signal_history.append(monitor_signal)
+
+            if not os.path.isdir(args.save_path):
+                os.makedirs(args.save_path)
+            np.savetxt(args.save_path + "/train_loss.txt", train_loss)
+            np.savetxt(args.save_path + "/eval_metric.txt", eval_metric)
+            np.savetxt(args.save_path + "/monitor_signal.txt", monitor_signal_history)
+            # for param in optimizer._z:
+            #     print param
+            if not args.fixed_epoch_number:
+                print("using early stopping on lr")
+                early_stop = monitor.end_of_epoch(monitor_signal, model, optimizer, epoch)
+                if early_stop:
+                    break

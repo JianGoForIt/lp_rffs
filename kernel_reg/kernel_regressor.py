@@ -5,12 +5,16 @@ from time import time
 import math
 
 class Quantizer(object):
-  def __init__(self, nbit, min_val, max_val, scale=None, rand_seed=1, use_cuda=False):
+  def __init__(self, nbit, min_val, max_val, scale=None, rand_seed=1, use_cuda=False, for_lm_halp=False):
     self.nbit = nbit
     self.min_val = min_val
     self.max_val = max_val
     if scale == None:
-      self.scale = (max_val - min_val) / float(2**self.nbit - 1)
+      if for_lm_halp == False:
+        self.scale = (max_val - min_val) / float(2**self.nbit - 1)
+      else:
+        # adapt to the halp quantization scheme where 0 is in the representation grid
+        self.scale = (max_val - min_val) / float(2**self.nbit - 2)
     self.rand_seed = rand_seed
     self.use_cuda = use_cuda
 
@@ -132,9 +136,13 @@ class KernelRidgeRegression(object):
     # pytorch is super slow in inverse, so we finish this operation in numpy
     print("using regularior strength ", self.reg_lambda)
     self.alpha = torch.DoubleTensor( \
-      np.dot(np.linalg.inv( (self.kernel_mat + self.reg_lambda * torch.eye(n_sample).double() ).cpu().numpy() ), Y_train) )
+      np.dot(np.linalg.inv(self.kernel_mat.cpu().numpy().astype(np.float64) + self.reg_lambda * np.eye(n_sample) ), Y_train.cpu().numpy().astype(np.float64) ) )
     # self.alpha = torch.mm(torch.inverse(self.kernel_mat + self.reg_lambda * torch.eye(n_sample) ), 
     #   torch.DoubleTensor(Y_train) )
+
+  def torch(self, use_cuda):
+    if use_cuda:
+      self.alpha = self.alpha.cuda()
 
   def get_train_error(self):
     prediction = torch.mm(self.kernel_mat, self.alpha)
@@ -164,7 +172,7 @@ def test_random_quantizer():
   shift = 1/3.0
   value = np.ones( (1000, 1000) ) * (lower + shift)
   value = torch.DoubleTensor(value)
-  quant_val = quantizer.quantize(value, test=True)
+  quant_val = quantizer.quantize(value)
   quant_val = quant_val.cpu().numpy()
   assert np.unique(quant_val).size == 2
   assert np.min(np.unique(quant_val) ) == lower
@@ -177,7 +185,7 @@ def test_random_quantizer():
   shift = 2/3.0
   value = np.ones( (1000, 1000) ) * (lower + shift)
   value = torch.DoubleTensor(value)
-  quant_val = quantizer.quantize(value, test=True)
+  quant_val = quantizer.quantize(value)
   quant_val = quant_val.cpu().numpy()
   assert np.unique(quant_val).size == 2
   assert np.min(np.unique(quant_val) ) == lower
@@ -190,7 +198,7 @@ def test_random_quantizer():
   shift = 0.5
   value = np.ones( (1000, 1000) ) * (lower + shift)
   value = torch.DoubleTensor(value)
-  quant_val = quantizer.quantize(value, test=True)
+  quant_val = quantizer.quantize(value)
   quant_val = quant_val.cpu().numpy()
   assert np.unique(quant_val).size == 2
   assert np.min(np.unique(quant_val) ) == lower
@@ -210,7 +218,7 @@ def test_random_quantizer_fast_impl():
   # value = np.ones( (1000, 1000) ) * (lower + shift)
   value = np.random.uniform((1000, 1000)) * 2**14
   value = torch.DoubleTensor(value)
-  quant_val = quantizer.quantize(value, test=True)
+  quant_val = quantizer.quantize(value)
   quant_val_old = quantizer.quantize_old(value)
   quant_val = quant_val.cpu().numpy()
   quant_val_old = quant_val_old.cpu().numpy()
@@ -227,10 +235,10 @@ def test_auto_scale_random_quantizer():
   value[-1, :] = 1.0
   value = torch.DoubleTensor(value)
   np.random.seed(quantizer.rand_seed)
-  quant_val = quantizer.quantize(value, test=True)
+  quant_val = quantizer.quantize(value)
   quant_val = quant_val.cpu().numpy()
   np.random.seed(quantizer.rand_seed)
-  auto_quant_val = quantizer_auto.quantize(value, test=True)
+  auto_quant_val = quantizer_auto.quantize(value)
   auto_quant_val = auto_quant_val.cpu().numpy()
   np.testing.assert_array_almost_equal(auto_quant_val, quant_val, decimal=7)
 
@@ -241,7 +249,7 @@ def test_auto_scale_random_quantizer():
   value[-1, :] = 1.0
   value = torch.DoubleTensor(value)
   # np.random.seed(quantizer.rand_seed)
-  auto_quant_val = quantizer_auto.quantize(value, test=True)
+  auto_quant_val = quantizer_auto.quantize(value)
   auto_quant_val = auto_quant_val.cpu().numpy()
   np.testing.assert_array_almost_equal(np.max(auto_quant_val, axis=0), 
     np.percentile(value.cpu().numpy(), q=90, axis=0) )
@@ -327,9 +335,9 @@ def test_kernel_ridge_regression2():
 if __name__ == "__main__":
   test_random_quantizer_fast_impl()
   test_random_quantizer()
-  test_auto_scale_random_quantizer()
-  test_kernel_ridge_regression1()
-  test_kernel_ridge_regression2()
+  #test_auto_scale_random_quantizer()
+  #test_kernel_ridge_regression1()
+  #test_kernel_ridge_regression2()
 
 
 
