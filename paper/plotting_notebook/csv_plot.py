@@ -50,6 +50,30 @@ def csv_to_table(file_name, delimiter=',', row_headers=True):
                 data.append(list(map(lambda x: float(x), row)))
     return groups, names, np.array(data)
 
+def plot_figure_without_error_bar(names, data, color_list):
+    '''
+    each column of data is a line
+    the name follows the pattern like ['fp Nystrom-x', 'fp Nystrom-y', 'fp Nystrom-y_std', 'fp RFF-x', 'fp RFF-y', 'fp RFF-y_std']
+    '''
+    marker_list = ['v', 'd', 'o', 's', '+', '^', 'h', '*', 'x']
+    for i in range(data.shape[1] // 3):
+        idx = i * 3
+        label = names[idx].split("|")[0]
+        print "label ", names[idx], label
+        x = data[:, idx]
+        average_y = data[:, idx + 1]
+        std_y = data[:, idx + 2]
+#         print x, average_y, std_y
+        if "FP" in label:
+            print "FP mode plot", marker_list[i]
+            plt.plot(x, average_y, "-", label=label, marker=marker_list[i], markeredgecolor=color_list[i % len(color_list)], markerfacecolor="none", markersize=6, markeredgewidth=1, linewidth=1, color=color_list[i % len(color_list)])
+#             plt.errorbar(x, average_y, yerr=std_y, label=label, marker=marker_list[i], markeredgecolor=color_list[i % len(color_list)], markerfacecolor="none", markersize=5, markeredgewidth=1, fmt="-", linewidth=1, capsize=5, capthick=1, color=color_list[i % len(color_list)])
+        else:
+            print "LP mode plot", marker_list[i]
+            plt.plot(x, average_y, "--", label=label, marker=marker_list[i], markeredgecolor=color_list[i % len(color_list)], markerfacecolor="none", markersize=6, markeredgewidth=1, linewidth=1, color=color_list[i % len(color_list)])
+#             plt.errorbar(x, average_y, yerr=std_y, label=label, marker=marker_list[i], markeredgecolor=color_list[i % len(color_list)], markerfacecolor="none", markersize=5, markeredgewidth=1, fmt="--", linewidth=1, capsize=5, capthick=1, color=color_list[i % len(color_list)])
+
+
 def plot_figure_with_error_bar(names, data, color_list):
     '''
     each column of data is a line

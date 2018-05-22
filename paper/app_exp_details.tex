@@ -77,7 +77,7 @@ In Section~\ref{sec:full_run}, we demonstrate the generalization performance of 
 %\end{figure}
 \begin{figure}
 	\centering
-	\begin{tabular}{c c}
+	\begin{tabular}{@{\hskip -0.1in}c@{\hskip -0.1in}c@{\hskip 0in}}
 %		\subfigure[Census heldout MSE]{\label{fig:census_mem} \includegraphics[width=0.3\linewidth]{figures/census_MSE_vs_n_memory.pdf} } \hfill
 %		\subfigure[Census heldout MSE]{\label{fig:census_feat}\includegraphics[width=0.3\linewidth]{figures/census_MSE_vs_n_feat.pdf} } \hfill
 %		\subfigure[CovType heldout error]{\label{fig:covtype_mem} \includegraphics[width=0.3\linewidth]{figures/covtype_error_vs_n_memory.pdf} } \hfill
@@ -87,17 +87,27 @@ In Section~\ref{sec:full_run}, we demonstrate the generalization performance of 
 %		\includegraphics[width=0.3\linewidth]{figures/timit_error_vs_n_memory_all_line.pdf} &
 %		\includegraphics[width=0.3\linewidth]{figures/timit_error_vs_n_feat_all_line.pdf} \\
 %		(a) Census & (b) YearPred & (c) Covtype & (d) TIMIT \\
-		\includegraphics[width=0.4\linewidth]{figures/census_MSE_vs_n_feat_all_line.pdf} &
-		\includegraphics[width=0.4\linewidth]{figures/census_MSE_vs_n_memory_all_line.pdf} \\
-		\includegraphics[width=0.4\linewidth]{figures/yearpred_MSE_vs_n_feat_all_line.pdf} &
-		\includegraphics[width=0.4\linewidth]{figures/yearpred_MSE_vs_n_memory_all_line.pdf} \\
-		\includegraphics[width=0.4\linewidth]{figures/covtype_error_vs_n_feat_all_line.pdf} &
-		\includegraphics[width=0.4\linewidth]{figures/covtype_error_vs_n_memory_all_line.pdf} \\
-		\includegraphics[width=0.4\linewidth]{figures/timit_error_vs_n_feat_all_line.pdf} &
-		\includegraphics[width=0.4\linewidth]{figures/timit_error_vs_n_memory_all_line.pdf} \\
+
+%		\includegraphics[width=0.4\linewidth]{figures/census_MSE_vs_n_feat_all_line.pdf} &
+%		\includegraphics[width=0.4\linewidth]{figures/census_MSE_vs_n_memory_all_line.pdf} \\
+%		\includegraphics[width=0.4\linewidth]{figures/yearpred_MSE_vs_n_feat_all_line.pdf} &
+%		\includegraphics[width=0.4\linewidth]{figures/yearpred_MSE_vs_n_memory_all_line.pdf} \\
+%		\includegraphics[width=0.4\linewidth]{figures/covtype_error_vs_n_feat_all_line.pdf} &
+%		\includegraphics[width=0.4\linewidth]{figures/covtype_error_vs_n_memory_all_line.pdf} \\
+%		\includegraphics[width=0.4\linewidth]{figures/timit_error_vs_n_feat_all_line.pdf} &
+%		\includegraphics[width=0.4\linewidth]{figures/timit_error_vs_n_memory_all_line.pdf} \\
 %		(a) Census & (b) YearPred & (c) Covtype & (d) TIMIT \\
+
+		\includegraphics[height=0.35\linewidth]{figures/census_MSE_vs_n_feat_every_line.pdf} &
+		\includegraphics[height=0.35\linewidth]{figures/census_MSE_vs_n_memory_every_line.pdf} \\
+		\includegraphics[height=0.35\linewidth]{figures/yearpred_MSE_vs_n_feat_every_line.pdf} &
+		\includegraphics[height=0.35\linewidth]{figures/yearpred_MSE_vs_n_memory_every_line.pdf} \\
+		\includegraphics[height=0.35\linewidth]{figures/covtype_error_vs_n_feat_every_line.pdf} &
+		\includegraphics[height=0.35\linewidth]{figures/covtype_error_vs_n_memory_every_line.pdf} \\
+		\includegraphics[height=0.35\linewidth]{figures/timit_error_vs_n_feat_every_line.pdf} &
+		\includegraphics[height=0.35\linewidth]{figures/timit_error_vs_n_memory_every_line.pdf} \\
 	\end{tabular}
-	\caption{Generalization performance of LP RFF, full precision RFF and \Nystrom with respect to number of features and memory budgets. We can observe that LP RFFs demonstrate better generalization performance than full precision baselines under memory budget. Noticeably, the comparison of different methods on generalization performance behaves differently under memory budget and under number off features. E.g., \Nystrom shows better generalization performance than RFF based approach with the same number of features. However, \Nystrom can be significantly worse under memory budgets.}
+	\caption{Generalization performance of LP RFF, full precision RFF and \Nystrom with respect to number of features and memory budgets. We can observe that LP RFFs demonstrate better generalization performance than full precision baselines under memory budget. Noticeably, the comparison of different methods on generalization performance behaves differently under memory budget and under number off features. E.g., \Nystrom shows better generalization performance than RFF based approach with the same number of features. However, \Nystrom can be significantly worse under memory budgets. Additional, we observe 8, 4 or 2 bits LP-RFFs is typically the best performing approach on the four datasets.}
 	\label{fig:generalization_col_app}
 \end{figure}
 
@@ -106,15 +116,15 @@ In Section~\ref{subsec:perf_vs_rel_spec_dist}, we empirically demonstrate correl
 
 \begin{figure}
 	\centering
-	\begin{tabular}{c c c}
-		\includegraphics[width=0.4\linewidth]{figures/regression_l2_vs_f_norm_all_line.pdf} &
-		\includegraphics[width=0.4\linewidth]{figures/classification_acc_vs_f_norm_all_line.pdf} \\
-		\includegraphics[width=0.4\linewidth]{figures/regression_l2_vs_s_norm_all_line.pdf} &
-		\includegraphics[width=0.4\linewidth]{figures/classification_acc_vs_s_norm_all_line.pdf} \\
-		\includegraphics[width=0.4\linewidth]{figures/regression_l2_vs_delta_all_line.pdf} &
-		\includegraphics[width=0.4\linewidth]{figures/classification_acc_vs_delta_all_line.pdf} \\
-		\includegraphics[width=0.4\linewidth]{figures/regression_delta_vs_mem_all_line.pdf} &
-		\includegraphics[width=0.4\linewidth]{figures/classification_delta_vs_mem_all_line.pdf} \\
+	\begin{tabular}{@{\hskip -0.15in}c@{\hskip -0.15in}c@{\hskip -0.15in}}
+		\includegraphics[height=0.35\linewidth]{figures/regression_l2_vs_f_norm_every_line.pdf} &
+		\includegraphics[height=0.35\linewidth]{figures/classification_acc_vs_f_norm_every_line.pdf} \\
+		\includegraphics[height=0.35\linewidth]{figures/regression_l2_vs_s_norm_every_line.pdf} &
+		\includegraphics[height=0.35\linewidth]{figures/classification_acc_vs_s_norm_every_line.pdf} \\
+		\includegraphics[height=0.35\linewidth]{figures/regression_l2_vs_delta_every_line.pdf} &
+		\includegraphics[height=0.35\linewidth]{figures/classification_acc_vs_delta_every_line.pdf} \\
+		\includegraphics[height=0.35\linewidth]{figures/regression_delta_vs_mem_every_line.pdf} &
+		\includegraphics[height=0.35\linewidth]{figures/classification_delta_vs_mem_every_line.pdf} \\
 	\end{tabular}
 %	\begin{tabular}{@{\hskip -0.25in}c@{\hskip -0.25in}c@{\hskip -0.25in}c@{\hskip -0.25in}}
 %		\subfigure[MSE and Rel. spectral distance distance]{\label{fig:census_delta_all_line} \includegraphics[width=0.33\linewidth]{figures/regression_l2_vs_delta_all_line.pdf} } \hfill
@@ -124,7 +134,7 @@ In Section~\ref{subsec:perf_vs_rel_spec_dist}, we empirically demonstrate correl
 %		\subfigure[Error and Frobenius norm]{\label{fig:covtype_f_norm_all_line} \includegraphics[width=0.33\linewidth]{figures/classification_acc_vs_f_norm_all_line.pdf} } \hfill
 %		\subfigure[Error and spectral norm]{\label{fig:covtype_s_norm_all_line} \includegraphics[width=0.33\linewidth]{figures/classification_acc_vs_s_norm_all_line.pdf}} \hfill
 %	\end{tabular}
-	\caption{Generalization performance vs. relative spectral distance $D_{\lambda}(K,\tK)$, and that Frobenius and spectral norms of $K - \tK$. We observe that $D_{\lambda}(K,\tK)$ aligns much better with generalization performance than the Frobenius and spectral norms, for both the Census and sub-sampled CovType datasets.}
+	\caption{Generalization performance vs. relative spectral distance $D_{\lambda}(K,\tK)$, the Frobenius and spectral norms of $K - \tK$. We observe that $D_{\lambda}(K,\tK)$ aligns much better with generalization performance than the Frobenius and spectral norms, for both the Census and sub-sampled CovType datasets. Under memory budgets, we can also observe (in the last row of the figures) that approximation method with better generalization performance also demonstrate low relative spectral distances.}
 	\label{fig:specdist_app}	
 %	\begin{tabular}{c c c}
 %		\includegraphics[width=0.33\linewidth]{figures/regression_delta_vs_mem_all_line.pdf} &
@@ -188,7 +198,7 @@ In Section~\ref{subsec:perf_vs_rel_spec_dist}, we empirically demonstrate correl
 \caption{The generalization performance and relative spectral distance of Low-precision \Nystrom and low-precision ensemble \Nystrom.}	
 \end{figure}
 
-For our initial experiments, we applied the same stochastic quantization to \Nystrom as to RFFs on the Census dataset. For both LP-\Nystrom and ensemble \Nystrom with 10 blocks~\cite{ensemble09}, we determine the quantization dynamic range with the maximum and minimum value from the \Nystrom features generated from training set. Due to the large dynamic range, we observe for LP-\NystromNS, the generalization performance degrades significant with less than or equal to 8 bits compared to full-precision \NystromNS. We reduce the dynamic range by a factor of $\sqrt{r}$ with $r$ learners using ensemble \NystromNS. Ensemble \Nystrom has the additional benefits on reducing the memory requirement in generating \Nystrom features. However, we observe ensemble \Nystrom demonstrates larger relative spectral distance compared to FP-\Nystrom.
+For our initial experiments, we applied the same stochastic quantization to \Nystrom as to RFFs on the Census dataset. For both LP-\Nystrom and ensemble \Nystrom with 10 blocks~\cite{ensemble09}, we determine the quantization dynamic range with the maximum and minimum value from the \Nystrom features generated from training set. Due to the large dynamic range, we observe for LP-\NystromNS, the generalization performance degrades significant with less than or equal to 8 bits compared to full-precision \NystromNS. We reduce the dynamic range by a factor of $\sqrt{r}$ with $r$ learners using ensemble \NystromNS. Ensemble \Nystrom has the additional benefits on reducing the memory requirement in generating \Nystrom features. However, we observe ensemble \Nystrom demonstrates larger relative spectral distance compared to FP-\Nystrom, which aligns with its degraded empirical heldout MSE.
 
 
 
