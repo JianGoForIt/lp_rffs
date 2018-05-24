@@ -77,7 +77,9 @@ In Section~\ref{sec:full_run}, we demonstrate the generalization performance of 
 %\end{figure}
 \begin{figure}
 	\centering
-	\begin{tabular}{@{\hskip -0.1in}c@{\hskip -0.1in}c@{\hskip 0in}}
+	\vspace{-4em}
+	\begin{tabular}{c c}
+%	\begin{tabular}{@{\hskip -0.1in}c@{\hskip 0.0in}c@{\hskip -0.1in}}
 %		\subfigure[Census heldout MSE]{\label{fig:census_mem} \includegraphics[width=0.3\linewidth]{figures/census_MSE_vs_n_memory.pdf} } \hfill
 %		\subfigure[Census heldout MSE]{\label{fig:census_feat}\includegraphics[width=0.3\linewidth]{figures/census_MSE_vs_n_feat.pdf} } \hfill
 %		\subfigure[CovType heldout error]{\label{fig:covtype_mem} \includegraphics[width=0.3\linewidth]{figures/covtype_error_vs_n_memory.pdf} } \hfill
@@ -97,15 +99,14 @@ In Section~\ref{sec:full_run}, we demonstrate the generalization performance of 
 %		\includegraphics[width=0.4\linewidth]{figures/timit_error_vs_n_feat_all_line.pdf} &
 %		\includegraphics[width=0.4\linewidth]{figures/timit_error_vs_n_memory_all_line.pdf} \\
 %		(a) Census & (b) YearPred & (c) Covtype & (d) TIMIT \\
-
-		\includegraphics[height=0.35\linewidth]{figures/census_MSE_vs_n_feat_every_line.pdf} &
-		\includegraphics[height=0.35\linewidth]{figures/census_MSE_vs_n_memory_every_line.pdf} \\
-		\includegraphics[height=0.35\linewidth]{figures/yearpred_MSE_vs_n_feat_every_line.pdf} &
-		\includegraphics[height=0.35\linewidth]{figures/yearpred_MSE_vs_n_memory_every_line.pdf} \\
-		\includegraphics[height=0.35\linewidth]{figures/covtype_error_vs_n_feat_every_line.pdf} &
-		\includegraphics[height=0.35\linewidth]{figures/covtype_error_vs_n_memory_every_line.pdf} \\
-		\includegraphics[height=0.35\linewidth]{figures/timit_error_vs_n_feat_every_line.pdf} &
-		\includegraphics[height=0.35\linewidth]{figures/timit_error_vs_n_memory_every_line.pdf} \\
+		\includegraphics[height=0.3\linewidth]{figures/census_MSE_vs_n_feat_every_line.pdf} &
+		\includegraphics[height=0.3\linewidth]{figures/census_MSE_vs_n_memory_every_line.pdf} \\ [-0.5em]
+		\includegraphics[height=0.3\linewidth]{figures/yearpred_MSE_vs_n_feat_every_line.pdf} &
+		\includegraphics[height=0.3\linewidth]{figures/yearpred_MSE_vs_n_memory_every_line.pdf} \\ [-0.5em]
+		\includegraphics[height=0.3\linewidth]{figures/covtype_error_vs_n_feat_every_line.pdf} &
+		\includegraphics[height=0.3\linewidth]{figures/covtype_error_vs_n_memory_every_line.pdf} \\ [-0.5em]
+		\includegraphics[height=0.3\linewidth]{figures/timit_error_vs_n_feat_every_line.pdf} &
+		\includegraphics[height=0.3\linewidth]{figures/timit_error_vs_n_memory_every_line.pdf} \\ [-1em]
 	\end{tabular}
 	\caption{Generalization performance of LP RFF, full precision RFF and \Nystrom with respect to number of features and memory budgets. We can observe that LP RFFs demonstrate better generalization performance than full precision baselines under memory budget. Noticeably, the comparison of different methods on generalization performance behaves differently under memory budget and under number off features. E.g., \Nystrom shows better generalization performance than RFF based approach with the same number of features. However, \Nystrom can be significantly worse under memory budgets. Additional, we observe 8, 4 or 2 bits LP-RFFs is typically the best performing approach on the four datasets.}
 	\label{fig:generalization_col_app}
@@ -116,15 +117,17 @@ In Section~\ref{subsec:perf_vs_rel_spec_dist}, we empirically demonstrate correl
 
 \begin{figure}
 	\centering
-	\begin{tabular}{@{\hskip -0.15in}c@{\hskip -0.15in}c@{\hskip -0.15in}}
-		\includegraphics[height=0.35\linewidth]{figures/regression_l2_vs_f_norm_every_line.pdf} &
-		\includegraphics[height=0.35\linewidth]{figures/classification_acc_vs_f_norm_every_line.pdf} \\
-		\includegraphics[height=0.35\linewidth]{figures/regression_l2_vs_s_norm_every_line.pdf} &
-		\includegraphics[height=0.35\linewidth]{figures/classification_acc_vs_s_norm_every_line.pdf} \\
-		\includegraphics[height=0.35\linewidth]{figures/regression_l2_vs_delta_every_line.pdf} &
-		\includegraphics[height=0.35\linewidth]{figures/classification_acc_vs_delta_every_line.pdf} \\
-		\includegraphics[height=0.35\linewidth]{figures/regression_delta_vs_mem_every_line.pdf} &
-		\includegraphics[height=0.35\linewidth]{figures/classification_delta_vs_mem_every_line.pdf} \\
+	\vspace{-4em}
+	\begin{tabular}{c c}
+%	\begin{tabular}{@{\hskip -0.15in}c@{\hskip -0.15in}c@{\hskip -0.15in}}
+		\includegraphics[height=0.3\linewidth]{figures/regression_l2_vs_f_norm_every_line.pdf} &
+		\includegraphics[height=0.3\linewidth]{figures/classification_acc_vs_f_norm_every_line.pdf} \\
+		\includegraphics[height=0.3\linewidth]{figures/regression_l2_vs_s_norm_every_line.pdf} &
+		\includegraphics[height=0.3\linewidth]{figures/classification_acc_vs_s_norm_every_line.pdf} \\
+		\includegraphics[height=0.3\linewidth]{figures/regression_l2_vs_delta_every_line.pdf} &
+		\includegraphics[height=0.3\linewidth]{figures/classification_acc_vs_delta_every_line.pdf} \\
+		\includegraphics[height=0.3\linewidth]{figures/regression_delta_vs_mem_every_line.pdf} &
+		\includegraphics[height=0.3\linewidth]{figures/classification_delta_vs_mem_every_line.pdf} \\
 	\end{tabular}
 %	\begin{tabular}{@{\hskip -0.25in}c@{\hskip -0.25in}c@{\hskip -0.25in}c@{\hskip -0.25in}}
 %		\subfigure[MSE and Rel. spectral distance distance]{\label{fig:census_delta_all_line} \includegraphics[width=0.33\linewidth]{figures/regression_l2_vs_delta_all_line.pdf} } \hfill
