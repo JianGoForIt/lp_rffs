@@ -14,7 +14,10 @@ In this work, we focus on reducing the memory occupied by the mini-batches of ra
 % (1) how does memory utilization relate to generalization guarantees, and (2) how do these results look empirically?
 
 \begin{table}[h]
-	\caption{Kernel approximation method memory utilization. We consider data $x\in\RR^d$, kernel features $z(x)\in\RR^m$, $s$ as the mini-batch size, $c$ as the number of classes ($c=1$ for regression/binary classification), $b$ as the precision of $z(x)$, and $\hb$ as the precision of the model.}
+	\caption{Kernel approximation method memory utilization. We consider data $x\in\RR^d$, kernel features $z(x)\in\RR^m$, $s$ as the mini-batch size, $c$ as the number of classes ($c=1$ for regression/binary classification), 
+%	$b$ as the precision of $z(x)$, and $\hb$ as the precision of the model parameters during training.
+	$b$ and $\hb$ as the precisions of $z(x)$ and the model parameters during training respectively.
+	}
 	\label{table:mem-usage}
 	\centering
 	\begin{tabular}{llll}

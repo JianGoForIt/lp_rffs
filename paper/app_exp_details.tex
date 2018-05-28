@@ -49,6 +49,7 @@ We use the same learning rate schedule as the one in the SGD-based experiments. 
 
 \subsection{Additional experiment results}
 \label{subsec:app_additional_exp_res}
+\paragraph{Empirical evaluations of LP-RFFs}
 In Section~\ref{sec:full_run}, we demonstrate the generalization performance of LP-RFFs on the TIMIT and YearPred datasets. In this section, we demonstrate the full generalization performance comparison on the TIMIT, YearPred, CovType and Census datasets. In Figure~\ref{fig:generalization_col_app}, we show the generalization performance of 8, 4, 1 bit LP-RFFs, with FP-\Nystrom, FP-RFF and circulant FP-RFF as the full precision baselines. We can observe that LP-RFF, by using 4 or 8-bit quantized representation, can systematically outperform full precision baselines across the four datasets under different memory budgets.
 %\begin{figure}
 %	\centering
@@ -112,7 +113,23 @@ In Section~\ref{sec:full_run}, we demonstrate the generalization performance of 
 	\label{fig:generalization_col_app}
 \end{figure}
 
+\paragraph{Generalization performance vs. relative spectral distance}
 In Section~\ref{subsec:perf_vs_rel_spec_dist}, we empirically demonstrate correlation between generalization performance and relative spectral distance. To give an extended view on the correlation, we demonstrate full results on 8, 4, 1-bits LP-RFFs, together with the full precision baselines in Figure~\ref{fig:specdist_app}. In Figure~\ref{fig:specdist_app} (left), we can observe, on both the Census and CovType datasets, relative spectral distance can be predictive for the performance across different methods; i.e. similar relative spectral distance can imply similar generalization performance across different methods. In the contrast, \Nystrom and RFF based approaches can demonstrate significantly different spectral norm and Frobenius norm of $K - \tilde{K}$, the difference of the exact kernel matrix and its approximation.
+
+\paragraph{Low precision training using low-precision LM-Bit-Center SGD}
+To enable the computational benefits of LP-RFFs on real systems, we investigate low-precision training using LM-HALP~\cite{halp18} for linear models in Section~\ref{sec:halp}. During the iterative model update steps, LM-HALP use a technique called \textbf{bit-centering} to reparameterize the linear model using low-precision fixed-point representations. This allows all the matrix multiplication involved in stochastic model updates using integer operations on fixed-point representation.
+	LM-HALP reduces memory footprint by using low-precision fixed-point model parameterization during the iterative model updates. However, LM-HALP needs to store the full-dataset gradient (which is periodically computed) in low-precision fixed-point representation during the model updates. To further eliminate this additional memory consumption, we preliminarily experiment with low precision training using LM-Bit-Center SGD, a straight-forward variant of LM-HALP. LM-Bit-Center SGD is the same as LM-HALP, except using simple SGD updates instead of SVRG updates; in this way, LM-Bit-Center SGD don't need to keep the full-dataset gradient (in low-precision fixed-point representation) during model update steps. Specifically in our experiments, we run 8-bit LM-Bit-Center SGD on 8-bit LP-RFFs for the TIMIT dataset. As shown in Figure~\ref{fig:lm_bit_center}, when the number of features is at least 10000, we can observe that the heldout error from low-precision 8-bit LM-Bit-Center SGD closely matches the ones from full-precision SGD and low-precision 8-bit LM-HALP training.
+
+\begin{figure}
+\centering
+%	\includegraphics[width=0.975\linewidth]{figures/timit_error_vs_n_feat_lm_halp.pdf}
+	\includegraphics[width=0.4\linewidth]{figures/timit_error_vs_n_feat_lm_bit_center_sgd.pdf}
+%	\caption{Low-precision training on TIMIT using 8-bit LM-HALP on 8-bit LP-RFFs, relative to full-precision SGD.
+%		%Low precision training with HALP can demonstrate similar generalization performance as full precision training with SGD.
+%	}	
+	\caption{Low-precision 8-bit LM-HALP, 8-bit LM-Bit-Center-SGD and full-precision SGD training with 8-bit LP-RFFs for TIMIT.}	
+	\label{fig:lm_bit_center}
+\end{figure}
 
 
 \begin{figure}
