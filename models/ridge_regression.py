@@ -7,7 +7,6 @@ class RidgeRegression(torch.nn.Module):
 	def __init__(self, input_dim, reg_lambda, dtype="float"):
 		super(RidgeRegression, self).__init__()
 		self.input_dim = input_dim
-		# self.output_dim = output_dim
 		self.reg_lambda = reg_lambda
 		self.linear = torch.nn.Linear(self.input_dim, out_features=1)
 		self.criterion = torch.nn.MSELoss(size_average=True)
@@ -19,8 +18,6 @@ class RidgeRegression(torch.nn.Module):
 	def forward(self, x, y):
 		self.output = self.linear(x)
 		self.loss = self.criterion(self.output, y)
-		#for w in self.parameters():
-		#	self.loss += self.reg_lambda * w.norm(2)**2
 		return self.loss
 
 	def predict(self, x):

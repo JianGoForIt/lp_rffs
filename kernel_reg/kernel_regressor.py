@@ -116,29 +116,10 @@ class KernelRidgeRegression(object):
     self.X_train, self.Y_train = X_train, Y_train
     self.kernel_mat = self.kernel.get_kernel_matrix(X_train, X_train, quantizer, quantizer)
     n_sample = self.kernel_mat.size(0)
-
-    # # DEBUG
-    # print("start timing ", self.kernel_mat.size() )
-    # test = (self.kernel_mat + self.reg_lambda * torch.eye(n_sample) )
-    # test = test.cpu().numpy()
-    # start_time = time()
-    # np.linalg.inv(test)
-    # end_time = time()
-    # print("numpy inverse time ", end_time - start_time)
-
-    # # test = (self.kernel_mat + self.reg_lambda * torch.eye(n_sample) )[0:5000, 0:5000]
-    # # start_time = time()
-    # # torch.inverse(test)
-    # # end_time = time()
-    # # print("pytorch inverse time ", end_time - start_time)
-    # exit(0)
-    
     # pytorch is super slow in inverse, so we finish this operation in numpy
     print("using regularior strength ", self.reg_lambda)
     self.alpha = torch.DoubleTensor( \
       np.dot(np.linalg.inv(self.kernel_mat.cpu().numpy().astype(np.float64) + self.reg_lambda * np.eye(n_sample) ), Y_train.cpu().numpy().astype(np.float64) ) )
-    # self.alpha = torch.mm(torch.inverse(self.kernel_mat + self.reg_lambda * torch.eye(n_sample) ), 
-    #   torch.DoubleTensor(Y_train) )
 
   def torch(self, use_cuda):
     if use_cuda:
@@ -235,7 +216,7 @@ def test_auto_scale_random_quantizer():
   value[-1, :] = 1.0
   value = torch.DoubleTensor(value)
   np.random.seed(quantizer.rand_seed)
-  quant_val = quantizer.quantize(value)
+  quant_val = quantizer.quantize_old(value)
   quant_val = quant_val.cpu().numpy()
   np.random.seed(quantizer.rand_seed)
   auto_quant_val = quantizer_auto.quantize(value)
@@ -270,31 +251,33 @@ def test_kernel_ridge_regression1():
   Y_train = np.ones( [2, 1] )
   kernel = GaussianKernel(sigma=2.0)
   kernel = RFF(n_rff_feat, n_feat, kernel)
+  kernel.torch(cuda=torch.cuda.is_available())
   reg_lambda = 1.0
   regressor = KernelRidgeRegression(kernel, reg_lambda=reg_lambda)
-  regressor.fit(X_train, Y_train)
+  regressor.torch(use_cuda=torch.cuda.is_available() )
+  regressor.fit(torch.DoubleTensor(X_train), torch.DoubleTensor(Y_train) )
 
   # if test data equals traing data, it should the same L2 error
   X_test = np.copy(X_train)
   Y_test = np.copy(Y_train)
-  test_pred = regressor.predict(X_test)
+  test_pred = regressor.predict(torch.DoubleTensor(X_test) )
   train_error = regressor.get_train_error()
-  test_error = regressor.get_test_error(Y_test)
+  test_error = regressor.get_test_error(torch.DoubleTensor(Y_test) )
   assert np.abs(train_error - test_error) < 1e-6
 
   # if test data is different from traing data, L2 error for train and test should be different
   X_test = np.copy(X_train) * 2
   Y_test = np.copy(Y_train)
-  test_pred = regressor.predict(X_test)
+  test_pred = regressor.predict(torch.DoubleTensor(X_test) )
   train_error = regressor.get_train_error()
-  test_error = regressor.get_test_error(Y_test)
+  test_error = regressor.get_test_error(torch.DoubleTensor(Y_test) )
   assert np.abs(train_error - test_error) >= 1e-3
 
   X_test = np.copy(X_train)
   Y_test = np.copy(Y_train) * 2
-  test_pred = regressor.predict(X_test)
+  test_pred = regressor.predict(torch.DoubleTensor(X_test) )
   train_error = regressor.get_train_error()
-  test_error = regressor.get_test_error(Y_test)
+  test_error = regressor.get_test_error(torch.DoubleTensor(Y_test) )
   assert np.abs(train_error - test_error) >= 1e-3
 
   print("kernel ridge regression test1 passed!")
@@ -312,13 +295,14 @@ def test_kernel_ridge_regression2():
   Y_train = np.ones( [2, 1] )
   kernel = GaussianKernel(sigma=2.0)
   kernel = RFF(n_rff_feat, n_feat, kernel)
+  kernel.torch(cuda=torch.cuda.is_available())
   reg_lambda = 1.0
   regressor = KernelRidgeRegression(kernel, reg_lambda=reg_lambda)
-  regressor.fit(X_train, Y_train)
+  regressor.fit(torch.DoubleTensor(X_train), torch.DoubleTensor(Y_train) )
 
   # compare the two ways of calculating feature weights as sanity check
   # feature weight using the approach inside KernelRidgeRegression
-  kernel.get_kernel_matrix(X_train, X_train)
+  kernel.get_kernel_matrix(torch.DoubleTensor(X_train), torch.DoubleTensor(X_train) )
   # print kernel.rff_x2.size(), regressor.alpha.size()
   w1 = torch.mm(torch.transpose(kernel.rff_x2, 0, 1), regressor.alpha)
   # print w1.size()
@@ -335,9 +319,9 @@ def test_kernel_ridge_regression2():
 if __name__ == "__main__":
   test_random_quantizer_fast_impl()
   test_random_quantizer()
-  #test_auto_scale_random_quantizer()
-  #test_kernel_ridge_regression1()
-  #test_kernel_ridge_regression2()
+  test_auto_scale_random_quantizer()
+  test_kernel_ridge_regression1()
+  test_kernel_ridge_regression2()
 
 
 
