@@ -27,24 +27,9 @@ class Nystrom(object):
 			print("# landmarks ", n_landmark)
 		self.landmark = X[perm[:n_landmark], :]
 		self.n_landmark = n_landmark
-		#self.landmark = X
-		#self.n_landmark = X.size(0)
 		self.K_landmark = \
 			self.kernel.get_kernel_matrix(self.landmark, self.landmark)
-		# # the torch mm function can make very sutle difference of upper and lower triangular in
-		# # a symetric matrix
-		# if not torch.equal(self.K_landmark, torch.transpose(self.K_landmark, 0, 1) ):
-		# 	raise Exception("Kernel matrix is not symetric!")
-		# linalg.eigh can give negative value on cencus regression dataset
-		# So we use svd here and we have not seen numerical issue yet.
-		#S, U = np.linalg.eigh(self.K_landmark.cpu().numpy().astype(np.float64), UPLO='U')
-		#S = S[::-1].copy()
-		#U = U[:, ::-1].copy()
-		#if np.min(S[:self.n_landmark] ) <= 0:
-		#	print("numpy eigh gives negative values, switch to use SVD")
 		U, S, _ = np.linalg.svd(self.K_landmark.cpu().numpy() )
-		#U = np.random.normal(size=(self.K_landmark.size(0), self.K_landmark.size(1)))
-		#S = np.random.normal(size=(self.K_landmark.size(0)) )
 		self.U_d = torch.DoubleTensor(U[:, :n_landmark] )
 		self.S_d = torch.DoubleTensor(S[:n_landmark] )
 		self.A_d = torch.mm(self.U_d, torch.diag(1.0/torch.sqrt(self.S_d) ) )
@@ -68,7 +53,7 @@ class Nystrom(object):
 		self.A_d = self.A_d.cpu()
 		self.landmark = self.landmark.cpu()
 
-# test full dimension almost match exact kernel results
+# test full dimension case match exact kernel results
 def test_nystrom_full():
 	# test if keep all the dimensions is the nystrom kernel matrix equals to the exact kernel
 	n_sample = 15
