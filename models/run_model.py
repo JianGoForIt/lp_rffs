@@ -167,7 +167,7 @@ if __name__ == "__main__":
             print("fp rff feature mode")
             kernel_approx = RFF(args.n_fp_rff, n_input_feat, kernel, rand_seed=args.random_seed)
             quantizer = None
-    elif args.approx_type == "cir_rff"：
+    elif args.approx_type == "cir_rff":
         if args.do_fp_feat == False:
             print("lp circulant rff feature mode")
             assert args.n_bit_feat >= 1
