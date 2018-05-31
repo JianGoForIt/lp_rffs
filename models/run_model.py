@@ -12,14 +12,17 @@ if sys.version_info[0] < 3:
 else:
     import _pickle as cp
 from copy import deepcopy
-sys.path.append("../kernel_reg")
+sys.path.append("../models")
+sys.path.append("../kernels")
 sys.path.append("../utils")
 sys.path.append("../..")
-from rff import RFF, GaussianKernel
+from gaussian_exact import GaussianKernel
+from rff import RFF
 from circulant_rff import  CirculantRFF
 from nystrom import Nystrom
 from ensemble_nystrom import EnsembleNystrom
-from kernel_regressor import Quantizer, KernelRidgeRegression
+from quantizer import Quantizer
+from kernel_regressor import KernelRidgeRegression
 from data_loader import load_data
 import halp
 import halp.optim

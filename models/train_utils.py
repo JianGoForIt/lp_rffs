@@ -21,7 +21,6 @@ def train(args, model, epoch, train_loader, optimizer, quantizer, kernel):
                 if use_cuda:
                     data = data.cuda()
                     target = target.cuda()
-                # print "test 123", type(data), type(target)
                 if args.approx_type == "rff" or args.approx_type == "cir_rff":
                     data = kernel.get_cos_feat(data)
                 elif args.approx_type == "nystrom":
@@ -38,8 +37,6 @@ def train(args, model, epoch, train_loader, optimizer, quantizer, kernel):
                 if not isinstance(target, torch.autograd.variable.Variable):
                     target = Variable(target, requires_grad=False)
 
-                # if use_cuda:
-                #     data, target = data.cuda(), target.cuda()
                 cost = model.forward(data, target)
                 cost.backward()
                 return cost
@@ -75,8 +72,6 @@ def train(args, model, epoch, train_loader, optimizer, quantizer, kernel):
                 if not isinstance(target, torch.autograd.variable.Variable):
                     target = Variable(target, requires_grad=False)
 
-                # if use_cuda:
-                #     data, target = data.cuda(), target.cuda()
                 cost = model.forward(data, target)
                 model.output.retain_grad()
                 cost.backward()
@@ -132,9 +127,6 @@ def evaluate(args, model, epoch, val_loader, quantizer, kernel):
                 Y = Y.squeeze()
             cross_entropy_accum += model.criterion(output, Y).data.cpu().numpy()[0]
             sample_cnt += pred.size
-            # print correct_cnt, sample_cnt
-        # print eval_acc
-        # eval_acc.append(correct_cnt / float(sample_cnt) )
         print("eval_acc at epoch ", epoch, "step", i, " iterations ", " acc ", correct_cnt / float(sample_cnt), " cross entropy ", cross_entropy_accum / float(sample_cnt) )
         return correct_cnt / float(sample_cnt), cross_entropy_accum / float(sample_cnt)
     else:
@@ -159,9 +151,7 @@ def evaluate(args, model, epoch, val_loader, quantizer, kernel):
             l2_accum += np.sum( (pred.reshape(pred.size, 1) \
                 - Y.data.cpu().numpy().reshape(pred.size, 1) )**2)
             sample_cnt += pred.size
-        # eval_l2.append(l2_accum / float(sample_cnt) )
         print("eval_l2 at epoch ", epoch, "step", i, " iterations ", " loss ", np.sqrt(l2_accum / float(sample_cnt) ) )
-        # return np.sqrt(l2_accum / float(sample_cnt) )
         return l2_accum / float(sample_cnt), l2_accum / float(sample_cnt)
 
 
@@ -200,168 +190,39 @@ def get_matrix_spectrum(X):
     return S 
 
 #####################################################################
-# function to calculate LSD
-#####################################################################
-# def get_sample_kernel_metrics(X, kernel, kernel_approx, quantizer):
-#     # X = sample_data(X_all, n_sample)
-#     is_cuda_tensor = X.is_cuda
-#     if is_cuda_tensor:
-#         kernel.cpu()
-#         kernel_approx.cpu()
-#         X = X.cpu()    
-#     kernel_mat = kernel.get_kernel_matrix(X, X)
-#     kernel_mat_approx = kernel_approx.get_kernel_matrix(X, X, quantizer, quantizer)
-#     # # need to use double for XXT if we want the torch equal to hold.
-#     # if not torch.equal(kernel_mat_approx, torch.transpose(kernel_mat_approx, 0, 1) ):
-#     #     raise Exception("Kernel matrix is not symetric!")
-#     error_matrix = kernel_mat_approx.cpu() - kernel_mat.cpu()
-#     F_norm_error = torch.sum(error_matrix**2)
-#     spectral_norm_error = np.max(np.abs(get_matrix_spectrum(error_matrix) ) )
-#     spectrum = get_matrix_spectrum(kernel_mat_approx)
-#     spectrum_exact = get_matrix_spectrum(kernel_mat)
-#     metric_dict = {"F_norm_error": float(F_norm_error),
-#                    "spectral_norm_error": float(spectral_norm_error) }
-#     if is_cuda_tensor:
-#         kernel.torch(cuda=True)
-#         kernel_approx.torch(cuda=True)
-# #    error_matrix = kernel_mat_approx - kernel_mat
-# #    F_norm_error = torch.sum(error_matrix**2)
-# ##    spectral_norm_error = np.max(np.abs(get_matrix_spectrum(error_matrix) ) )
-# #    spectrum = get_matrix_spectrum(kernel_mat_approx)
-# #    spectrum_exact = get_matrix_spectrum(kernel_mat)
-# ##    metric_dict = {"F_norm_error": float(F_norm_error),
-# ##                   "spectral_norm_error": float(spectral_norm_error) }
-# ##    spectrum_exact = spectrum
-# #    metric_dict = {}
-#     return metric_dict, spectrum, spectrum_exact
-
-#####################################################################
-# function to calculate Delta
-#####################################################################
-#def get_sample_kernel_metrics(X, kernel, kernel_approx, quantizer, l2_reg):
-#    # X = sample_data(X_all, n_sample)
-#    is_cuda_tensor = X.is_cuda
-#    if is_cuda_tensor:
-#        kernel.cpu()
-#        kernel_approx.cpu()
-#        X = X.cpu()    
-#    kernel_mat = kernel.get_kernel_matrix(X, X)
-#    kernel_mat_approx = kernel_approx.get_kernel_matrix(X, X, quantizer, quantizer)
-#    # # need to use double for XXT if we want the torch equal to hold.
-#    # if not torch.equal(kernel_mat_approx, torch.transpose(kernel_mat_approx, 0, 1) ):
-#    #     raise Exception("Kernel matrix is not symetric!")
-#    error_matrix = kernel_mat_approx.cpu() - kernel_mat.cpu()
-#    F_norm_error = torch.sum(error_matrix**2)
-#    # spectral_norm_error = np.max(np.abs(get_matrix_spectrum(error_matrix) ) )
-#    # spectrum = get_matrix_spectrum(kernel_mat_approx)
-#    # spectrum_exact = get_matrix_spectrum(kernel_mat)
-#    print("calculation delta with lambda = ", l2_reg)
-#    delta = delta_approximation(kernel_mat.cpu().numpy().astype(np.float64), 
-#        kernel_mat_approx.cpu().numpy().astype(np.float64), l2_reg)
-#    spectrum = None
-#    spectrum_exact = None
-#    metric_dict = {"F_norm_error": float(F_norm_error),
-#                   "Delta": float(delta) }
-#    print metric_dict
-#    if is_cuda_tensor:
-#        kernel.torch(cuda=True)
-#        kernel_approx.torch(cuda=True)
-##    error_matrix = kernel_mat_approx - kernel_mat
-##    F_norm_error = torch.sum(error_matrix**2)
-###    spectral_norm_error = np.max(np.abs(get_matrix_spectrum(error_matrix) ) )
-##    spectrum = get_matrix_spectrum(kernel_mat_approx)
-##    spectrum_exact = get_matrix_spectrum(kernel_mat)
-###    metric_dict = {"F_norm_error": float(F_norm_error),
-###                   "spectral_norm_error": float(spectral_norm_error) }
-###    spectrum_exact = spectrum
-##    metric_dict = {}
-#    return metric_dict, spectrum, spectrum_exact
-
-#####################################################################
 # function to calculate Delta
 #####################################################################
 def get_sample_kernel_metrics(X, kernel, kernel_approx, quantizer, l2_reg):
-   # X = sample_data(X_all, n_sample)
-   is_cuda_tensor = X.is_cuda
-   if is_cuda_tensor:
+    # X = sample_data(X_all, n_sample)
+    is_cuda_tensor = X.is_cuda
+    if is_cuda_tensor:
        kernel.cpu()
        kernel_approx.cpu()
        X = X.cpu()    
-   kernel_mat = kernel.get_kernel_matrix(X, X)
-   kernel_mat_approx = kernel_approx.get_kernel_matrix(X, X, quantizer, quantizer)
-   # # need to use double for XXT if we want the torch equal to hold.
-   # if not torch.equal(kernel_mat_approx, torch.transpose(kernel_mat_approx, 0, 1) ):
-   #     raise Exception("Kernel matrix is not symetric!")
-   error_matrix = kernel_mat_approx.cpu() - kernel_mat.cpu()
-   F_norm_error = torch.sum(error_matrix**2)
-   spectral_norm_error = np.max(np.abs(get_matrix_spectrum(error_matrix) ) )
-   # spectrum = get_matrix_spectrum(kernel_mat_approx)
-   # spectrum_exact = get_matrix_spectrum(kernel_mat)
-   print("calculation delta with lambda = ", l2_reg)
-   delta = delta_approximation(kernel_mat.cpu().numpy().astype(np.float64), 
+    kernel_mat = kernel.get_kernel_matrix(X, X)
+    kernel_mat_approx = kernel_approx.get_kernel_matrix(X, X, quantizer, quantizer)
+    # # need to use double for XXT if we want the torch equal to hold.
+    # if not torch.equal(kernel_mat_approx, torch.transpose(kernel_mat_approx, 0, 1) ):
+    #     raise Exception("Kernel matrix is not symetric!")
+    error_matrix = kernel_mat_approx.cpu() - kernel_mat.cpu()
+    F_norm_error = torch.sum(error_matrix**2)
+    spectral_norm_error = np.max(np.abs(get_matrix_spectrum(error_matrix) ) )
+    # spectrum = get_matrix_spectrum(kernel_mat_approx)
+    # spectrum_exact = get_matrix_spectrum(kernel_mat)
+    print("calculation delta with lambda = ", l2_reg)
+    delta = delta_approximation(kernel_mat.cpu().numpy().astype(np.float64), 
        kernel_mat_approx.cpu().numpy().astype(np.float64), l2_reg)
-   spectrum = None
-   spectrum_exact = None
-   metric_dict = {"F_norm_error": float(F_norm_error),
+    spectrum = None
+    spectrum_exact = None
+    metric_dict = {"F_norm_error": float(F_norm_error),
                   "Delta": float(delta),
                   "spectral_norm_error": float(spectral_norm_error) }
-   print(metric_dict)
-   if is_cuda_tensor:
+    print(metric_dict)
+    if is_cuda_tensor:
        kernel.torch(cuda=True)
        kernel_approx.torch(cuda=True)
-#    error_matrix = kernel_mat_approx - kernel_mat
-#    F_norm_error = torch.sum(error_matrix**2)
-##    spectral_norm_error = np.max(np.abs(get_matrix_spectrum(error_matrix) ) )
-#    spectrum = get_matrix_spectrum(kernel_mat_approx)
-#    spectrum_exact = get_matrix_spectrum(kernel_mat)
-##    metric_dict = {"F_norm_error": float(F_norm_error),
-##                   "spectral_norm_error": float(spectral_norm_error) }
-##    spectrum_exact = spectrum
-#    metric_dict = {}
-   return metric_dict, spectrum, spectrum_exact
+    return metric_dict, spectrum, spectrum_exact
 
-
-# ####################################################################
-# # get spectral norm only
-# ####################################################################
-# def get_sample_kernel_metrics(X, kernel, kernel_approx, quantizer, l2_reg):
-#     # X = sample_data(X_all, n_sample)
-#     is_cuda_tensor = X.is_cuda
-#     if is_cuda_tensor:
-#         kernel.cpu()
-#         kernel_approx.cpu()
-#         X = X.cpu()
-#     kernel_mat = kernel.get_kernel_matrix(X, X)
-#     kernel_mat_approx = kernel_approx.get_kernel_matrix(X, X, quantizer, quantizer)
-#     # # need to use double for XXT if we want the torch equal to hold.
-#     # if not torch.equal(kernel_mat_approx, torch.transpose(kernel_mat_approx, 0, 1) ):
-#     #     raise Exception("Kernel matrix is not symetric!")
-#     error_matrix = kernel_mat_approx.cpu() - kernel_mat.cpu()
-#     F_norm_error = torch.sum(error_matrix**2)
-#     spectral_norm_error = np.max(np.abs(get_matrix_spectrum(error_matrix) ) )
-#     # spectrum = get_matrix_spectrum(kernel_mat_approx)
-#     # spectrum_exact = get_matrix_spectrum(kernel_mat)
-#     #print("calculation delta with lambda = ", l2_reg)
-#     #delta = delta_approximation(kernel_mat.cpu().numpy().astype(np.float64),
-#     #    kernel_mat_approx.cpu().numpy().astype(np.float64), l2_reg)
-#     spectrum = None
-#     spectrum_exact = None
-#     metric_dict = {"F_norm_error": float(F_norm_error),
-#                    "spectral_norm_error": float(spectral_norm_error) }
-#     print(metric_dict)
-#     if is_cuda_tensor:
-#         kernel.torch(cuda=True)
-#         kernel_approx.torch(cuda=True)
-# #    error_matrix = kernel_mat_approx - kernel_mat
-# #    F_norm_error = torch.sum(error_matrix**2)
-# ##    spectral_norm_error = np.max(np.abs(get_matrix_spectrum(error_matrix) ) )
-# #    spectrum = get_matrix_spectrum(kernel_mat_approx)
-# #    spectrum_exact = get_matrix_spectrum(kernel_mat)
-# ##    metric_dict = {"F_norm_error": float(F_norm_error),
-# ##                   "spectral_norm_error": float(spectral_norm_error) }
-# ##    spectrum_exact = spectrum
-# #    metric_dict = {}
-#     return metric_dict, spectrum, spectrum_exact
 
 def get_sample_kernel_F_norm(X, kernel, kernel_approx, quantizer, l2_reg):
     is_cuda_tensor = X.is_cuda
@@ -376,8 +237,6 @@ def get_sample_kernel_F_norm(X, kernel, kernel_approx, quantizer, l2_reg):
     #     raise Exception("Kernel matrix is not symetric!")
     error_matrix = kernel_mat_approx.cpu() - kernel_mat.cpu()
     F_norm_error = torch.sum(error_matrix**2)
-
-    # metric_dict = {"F_norm_error": float(F_norm_error) }
     if is_cuda_tensor:
         kernel.torch(cuda=True)
         kernel_approx.torch(cuda=True)

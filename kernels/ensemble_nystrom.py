@@ -2,11 +2,11 @@ import numpy as np
 import scipy
 import torch
 from nystrom import Nystrom
-from rff import GaussianKernel
-from kernel_regressor import Quantizer
+from gaussian_exact import GaussianKernel
 import sys
 sys.path.append("../utils")
 from misc_utils import set_random_seed
+from quantizer import Quantizer
 import math
 
 EPS = 1e-15

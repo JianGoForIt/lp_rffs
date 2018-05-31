@@ -1,7 +1,7 @@
 import numpy as np
 import scipy
 import torch
-from rff import GaussianKernel
+from gaussian_exact import GaussianKernel
 
 EPS = 1e-15
 

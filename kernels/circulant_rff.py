@@ -1,6 +1,7 @@
 import numpy as np
 import torch
-from rff import GaussianKernel, RFF
+from gaussian_exact import GaussianKernel
+from rff import RFF
 from scipy.linalg import circulant
 import math
 
