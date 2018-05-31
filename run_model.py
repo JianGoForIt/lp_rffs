@@ -3,8 +3,6 @@ import torch.optim as optim
 import torch.utils.data
 from torch.autograd import Variable
 import numpy as np
-from logistic_regression import LogisticRegression
-from ridge_regression import RidgeRegression
 import argparse
 import sys, os
 if sys.version_info[0] < 3:
@@ -12,16 +10,18 @@ if sys.version_info[0] < 3:
 else:
     import _pickle as cp
 from copy import deepcopy
-sys.path.append("../models")
-sys.path.append("../kernels")
-sys.path.append("../utils")
-sys.path.append("../..")
+sys.path.append("./models")
+sys.path.append("./kernels")
+sys.path.append("./utils")
+sys.path.append("./..")
 from gaussian_exact import GaussianKernel
 from rff import RFF
 from circulant_rff import  CirculantRFF
 from nystrom import Nystrom
 from ensemble_nystrom import EnsembleNystrom
 from quantizer import Quantizer
+from logistic_regression import LogisticRegression
+from ridge_regression import RidgeRegression
 from kernel_regressor import KernelRidgeRegression
 from data_loader import load_data
 import halp
