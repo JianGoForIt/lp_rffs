@@ -40,7 +40,7 @@ parser.add_argument("--minibatch", type=int, default=64)
 # parser.add_argument("--dataset", type=str, default="census")
 parser.add_argument("--l2_reg", type=float, default=0.0)
 parser.add_argument("--kernel_sigma", type=float, default=30.0)
-parser.add_argument("--n_fp_rff", type=int, default=32)
+parser.add_argument("--n_feat", type=int, default=32)
 parser.add_argument("--random_seed", type=int, default=1)
 parser.add_argument("--n_bit_feat", type=int, default=32)
 parser.add_argument("--n_bit_model", type=int, default=32)
@@ -133,12 +133,12 @@ if __name__ == "__main__":
         quantizer = None
     elif args.approx_type == "nystrom":
         print("fp nystrom mode")
-        kernel_approx = Nystrom(args.n_fp_rff, kernel=kernel, rand_seed=args.random_seed) 
+        kernel_approx = Nystrom(args.n_feat, kernel=kernel, rand_seed=args.random_seed) 
         kernel_approx.setup(X_train) 
         quantizer = None
     elif args.approx_type == "ensemble_nystrom":
         print("ensembled nystrom mode with ", args.n_ensemble_nystrom, "learner")
-        kernel_approx = EnsembleNystrom(args.n_fp_rff, n_learner=args.n_ensemble_nystrom, kernel=kernel, rand_seed=args.random_seed)
+        kernel_approx = EnsembleNystrom(args.n_feat, n_learner=args.n_ensemble_nystrom, kernel=kernel, rand_seed=args.random_seed)
         kernel_approx.setup(X_train)
         if args.do_fp_feat:
             quantizer = None
@@ -155,7 +155,7 @@ if __name__ == "__main__":
         if args.do_fp_feat == False:
             print("lp rff feature mode")
             assert args.n_bit_feat >= 1
-            n_quantized_rff = args.n_fp_rff
+            n_quantized_rff = args.n_feat
             print("# feature ", n_quantized_rff)
             kernel_approx = RFF(n_quantized_rff, n_input_feat, kernel, rand_seed=args.random_seed)
             min_val = -np.sqrt(2.0/float(n_quantized_rff) )
@@ -165,13 +165,13 @@ if __name__ == "__main__":
             print("feature quantization scale, bit ", quantizer.scale, quantizer.nbit)
         elif args.do_fp_feat == True:
             print("fp rff feature mode")
-            kernel_approx = RFF(args.n_fp_rff, n_input_feat, kernel, rand_seed=args.random_seed)
+            kernel_approx = RFF(args.n_feat, n_input_feat, kernel, rand_seed=args.random_seed)
             quantizer = None
     elif args.approx_type == "cir_rff":
         if args.do_fp_feat == False:
             print("lp circulant rff feature mode")
             assert args.n_bit_feat >= 1
-            n_quantized_rff = args.n_fp_rff
+            n_quantized_rff = args.n_feat
             print("# feature ", n_quantized_rff)
             kernel_approx = CirculantRFF(n_quantized_rff, n_input_feat, kernel, rand_seed=args.random_seed)
             min_val = -np.sqrt(2.0/float(n_quantized_rff) )
@@ -181,7 +181,7 @@ if __name__ == "__main__":
             print("feature quantization scale, bit ", quantizer.scale, quantizer.nbit)
         elif args.do_fp_feat == True:
             print("fp circulant rff feature mode")
-            kernel_approx = CirculantRFF(args.n_fp_rff, n_input_feat, kernel, rand_seed=args.random_seed)
+            kernel_approx = CirculantRFF(args.n_feat, n_input_feat, kernel, rand_seed=args.random_seed)
             quantizer = None
     else:
         raise Exception("kernel approximation type not specified or not supported!")
