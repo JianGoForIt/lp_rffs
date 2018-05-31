@@ -151,42 +151,40 @@ if __name__ == "__main__":
                 rand_seed=args.random_seed, use_cuda=use_cuda)
             print("range for quantizing nystrom ensemble ", min_val, max_val)
             print("feature quantization scale, bit ", quantizer.scale, quantizer.nbit)
-    elif args.approx_type == "rff" and args.do_fp_feat == False:
-        print("lp rff feature mode")
-        assert args.n_bit_feat >= 1
-        # n_quantized_rff = int(np.floor(args.n_fp_rff / float(args.n_bit_feat) * 32.0) )
-        # To simplified the interface, we take args.n_fp_rff as the number of low precision features directly
-        n_quantized_rff = args.n_fp_rff
-        print("# feature ", n_quantized_rff)
-        kernel_approx = RFF(n_quantized_rff, n_input_feat, kernel, rand_seed=args.random_seed)
-        min_val = -np.sqrt(2.0/float(n_quantized_rff) )
-        max_val = np.sqrt(2.0/float(n_quantized_rff) )
-        quantizer = Quantizer(args.n_bit_feat, min_val, max_val, 
-            rand_seed=args.random_seed, use_cuda=use_cuda)
-        print("feature quantization scale, bit ", quantizer.scale, quantizer.nbit)
-    elif args.approx_type == "rff" and args.do_fp_feat == True:
-        print("fp rff feature mode")
-        kernel_approx = RFF(args.n_fp_rff, n_input_feat, kernel, rand_seed=args.random_seed)
-        quantizer = None
-    elif args.approx_type == "cir_rff" and args.do_fp_feat == False:
-        print("lp circulant rff feature mode")
-        assert args.n_bit_feat >= 1
-        # n_quantized_rff = int(np.floor(args.n_fp_rff / float(args.n_bit_feat) * 32.0) )
-        # To simplified the interface, we take args.n_fp_rff as the number of low precision features directly
-        n_quantized_rff = args.n_fp_rff
-        print("# feature ", n_quantized_rff)
-        kernel_approx = CirculantRFF(n_quantized_rff, n_input_feat, kernel, rand_seed=args.random_seed)
-        min_val = -np.sqrt(2.0/float(n_quantized_rff) )
-        max_val = np.sqrt(2.0/float(n_quantized_rff) )
-        quantizer = Quantizer(args.n_bit_feat, min_val, max_val, 
-            rand_seed=args.random_seed, use_cuda=use_cuda, for_lm_halp=( (args.opt == "lm_halp") or (args.opt == "lm_bit_center_sgd")  ) )
-        print("feature quantization scale, bit ", quantizer.scale, quantizer.nbit)
-    elif args.approx_type == "cir_rff" and args.do_fp_feat == True:
-        print("fp circulant rff feature mode")
-        kernel_approx = CirculantRFF(args.n_fp_rff, n_input_feat, kernel, rand_seed=args.random_seed)
-        quantizer = None
+    elif args.approx_type == "rff":
+        if args.do_fp_feat == False:
+            print("lp rff feature mode")
+            assert args.n_bit_feat >= 1
+            n_quantized_rff = args.n_fp_rff
+            print("# feature ", n_quantized_rff)
+            kernel_approx = RFF(n_quantized_rff, n_input_feat, kernel, rand_seed=args.random_seed)
+            min_val = -np.sqrt(2.0/float(n_quantized_rff) )
+            max_val = np.sqrt(2.0/float(n_quantized_rff) )
+            quantizer = Quantizer(args.n_bit_feat, min_val, max_val, 
+                rand_seed=args.random_seed, use_cuda=use_cuda)
+            print("feature quantization scale, bit ", quantizer.scale, quantizer.nbit)
+        elif args.do_fp_feat == True:
+            print("fp rff feature mode")
+            kernel_approx = RFF(args.n_fp_rff, n_input_feat, kernel, rand_seed=args.random_seed)
+            quantizer = None
+    elif args.approx_type == "cir_rff"：
+        if args.do_fp_feat == False:
+            print("lp circulant rff feature mode")
+            assert args.n_bit_feat >= 1
+            n_quantized_rff = args.n_fp_rff
+            print("# feature ", n_quantized_rff)
+            kernel_approx = CirculantRFF(n_quantized_rff, n_input_feat, kernel, rand_seed=args.random_seed)
+            min_val = -np.sqrt(2.0/float(n_quantized_rff) )
+            max_val = np.sqrt(2.0/float(n_quantized_rff) )
+            quantizer = Quantizer(args.n_bit_feat, min_val, max_val, 
+                rand_seed=args.random_seed, use_cuda=use_cuda, for_lm_halp=( (args.opt == "lm_halp") or (args.opt == "lm_bit_center_sgd")  ) )
+            print("feature quantization scale, bit ", quantizer.scale, quantizer.nbit)
+        elif args.do_fp_feat == True:
+            print("fp circulant rff feature mode")
+            kernel_approx = CirculantRFF(args.n_fp_rff, n_input_feat, kernel, rand_seed=args.random_seed)
+            quantizer = None
     else:
-        raise Exception("kernel approximation type not specified!")
+        raise Exception("kernel approximation type not specified or not supported!")
     kernel.torch(cuda=use_cuda)
     kernel_approx.torch(cuda=use_cuda)
 
@@ -211,8 +209,6 @@ if __name__ == "__main__":
         if args.model == "logistic_regression":
             model = LogisticRegression(input_dim=kernel_approx.n_feat, 
                 n_class=n_class, reg_lambda=args.l2_reg)
-            # model = LogisticRegression(input_dim=123, 
-            #     n_class=n_class, reg_lambda=args.l2_reg)
         elif args.model == "ridge_regression":
             model = RidgeRegression(input_dim=kernel_approx.n_feat, reg_lambda=args.l2_reg)
         if use_cuda:
@@ -302,11 +298,7 @@ if __name__ == "__main__":
                 cp.dump(metric_dict_sample_val, f)
             np.save(args.save_path + "/spectrum_eval.npy", spectrum_sample_val)
             np.save(args.save_path + "/spectrum_eval_exact.npy", spectrum_sample_val_exact)
-            # print metric_dict_sample_train, metric_dict_sample_val
-            # print spectrum_sample_train, spectrum_sample_val
         print("Sample metric collection done!")
-        #if not (args.fixed_design or args.closed_form_sol):
-            # for closed form solution, we need to carry out closed form training
         if args.exit_after_collect_metric:
             print("exit after collect metric")
             exit(0)
@@ -315,10 +307,6 @@ if __name__ == "__main__":
         # for fixed design experiments and closed form solution form real setting
         if use_cuda:
             raise Exception("closed from solution does not support cuda mode")
-            #X_train = X_train.cuda()
-            #X_val = X_val.cuda()
-            #Y_train = Y_train.cuda()
-            #Y_val = Y_val.cuda()
         print("closed form using kernel type", type(kernel_approx) )
         regressor = KernelRidgeRegression(kernel_approx, reg_lambda=args.l2_reg)
         print("start to do regression!")
@@ -359,8 +347,6 @@ if __name__ == "__main__":
             np.savetxt(args.save_path + "/train_loss.txt", train_loss)
             np.savetxt(args.save_path + "/eval_metric.txt", eval_metric)
             np.savetxt(args.save_path + "/monitor_signal.txt", monitor_signal_history)
-            # for param in optimizer._z:
-            #     print param
             if not args.fixed_epoch_number:
                 print("using early stopping on lr")
                 early_stop = monitor.end_of_epoch(monitor_signal, model, optimizer, epoch)
