@@ -148,93 +148,93 @@
 #cat /dfs/scratch0/zjian/lp_kernel/lp_ensemble_nystrom/regression_real_setting/census_type_ensemble_nystrom_l2_reg_0.0005_n_feat_2500_n_bit_8_n_learner_10_seed_1/eval_metric.txt
 #echo
 
-## tests using subsample covtype for sgd based solutions
-# rff fp new
-echo rff fp
-cd /dfs/scratch0/zjian/lp_kernel_code_release/lp_kernel/ && python /dfs/scratch0/zjian/lp_kernel_code_release/lp_kernel/run_model.py \
-  --model=logistic_regression --l2_reg=1e-05  --kernel_sigma=0.9128709291752769 --random_seed=3 \
-  --data_path=/dfs/scratch0/zjian/data/lp_kernel_data/covtype --save_path=./tmp/new --approx_type=rff --collect_sample_metrics \
-  --n_feat=2000 --fixed_epoch_number --n_sample=20000 --do_fp_feat  --opt=sgd --learning_rate=10 --epoch=3 --minibatch=250 --cuda \
-  | grep "spectral_norm_error\|at epoch"
-# rff fp old
-cd /dfs/scratch0/zjian/lp_kernel_code/lp_kernel/models && python /dfs/scratch0/zjian/lp_kernel_code/lp_kernel/models/run_model.py \
-  --model=logistic_regression --l2_reg=1e-05  --kernel_sigma=0.9128709291752769 --random_seed=3 \
-  --data_path=/dfs/scratch0/zjian/data/lp_kernel_data/covtype --save_path=./tmp/old --approx_type=rff --collect_sample_metrics \
-  --n_fp_rff=2000 --fixed_epoch_number --n_sample=20000 --do_fp_feat  --opt=sgd --learning_rate=10 --epoch=3 --minibatch=250 --cuda \
-  | grep "spectral_norm_error\|at epoch"
-cat /dfs/scratch0/zjian/lp_kernel/lp_rff/real_classification/covtype_type_rff_l2_reg_1e-05_n_feat_2000_n_bit_64_opt_sgd_lr_10_seed_3/eval_metric.txt
-echo
-
-# nystrom fp new
-echo nystrom fp
-cd /dfs/scratch0/zjian/lp_kernel_code_release/lp_kernel/ && python /dfs/scratch0/zjian/lp_kernel_code_release/lp_kernel/run_model.py \
-  --model=logistic_regression --minibatch=250 --l2_reg=1e-05 --kernel_sigma=0.912870929175 --n_feat=2500 --random_seed=5 \
-  --learning_rate=10 --data_path=/dfs/scratch0/zjian/data/lp_kernel_data/covtype --opt=sgd --epoch=3 \
-  --save_path=./tmp/new --approx_type=nystrom --do_fp_feat --collect_sample_metrics --n_sample=20000 --fixed_epoch_number \
-  | grep "spectral_norm_error\|at epoch"
-# nystrom fp old
-cd /lfs/1/zjian/lp_kernel/lp_kernel/models && python /lfs/1/zjian/lp_kernel/lp_kernel/models/run_model.py \
-  --model=logistic_regression --minibatch=250 --l2_reg=1e-05 --kernel_sigma=0.912870929175 --n_fp_rff=2500 --random_seed=5 \
-  --learning_rate=10 --data_path=/dfs/scratch0/zjian/data/lp_kernel_data/covtype --opt=sgd --epoch=3 \
-  --save_path=./tmp/old --approx_type=nystrom --do_fp_feat --collect_sample_metrics --n_sample=20000 --fixed_epoch_number \
-  | grep "spectral_norm_error\|at epoch"
-cat /dfs/scratch0/zjian/lp_kernel/closeness/classification_real_setting/covtype_with_metric_type_nystrom_l2_reg_1e-05_n_fp_feat_2500_opt_sgd_lr_10_seed_5/eval_metric.txt 
-
-# cir rff fp new
-echo cir rff fp
-cd /dfs/scratch0/zjian/lp_kernel_code_release/lp_kernel/ && python /dfs/scratch0/zjian/lp_kernel_code_release/lp_kernel/run_model.py \
-  --model=logistic_regression --l2_reg=1e-05  --kernel_sigma=0.9128709291752769 --random_seed=5 \
-  --data_path=/dfs/scratch0/zjian/data/lp_kernel_data/covtype --save_path=./tmp/new --approx_type=cir_rff --n_feat=2000 \
-   --n_sample=20000 --do_fp_feat  --opt=sgd --learning_rate=10 --collect_sample_metrics --epoch=3 \
-  | grep "spectral_norm_error\|at epoch"
-# cir rff fp old
-cd /dfs/scratch0/zjian/lp_kernel_code/lp_kernel/models && python /dfs/scratch0/zjian/lp_kernel_code/lp_kernel/models/run_model.py \
-  --model=logistic_regression --l2_reg=1e-05  --kernel_sigma=0.9128709291752769 --random_seed=5 \
-  --data_path=/dfs/scratch0/zjian/data/lp_kernel_data/covtype --save_path=./tmp/old --approx_type=cir_rff --n_fp_rff=2000 \
-   --n_sample=20000 --do_fp_feat  --opt=sgd --learning_rate=10 --collect_sample_metrics --epoch=3 \
-  | grep "spectral_norm_error\|at epoch"
-cat /dfs/scratch0/zjian/lp_kernel/lp_rff/real_classification/covtype_type_cir_rff_l2_reg_1e-05_n_feat_2000_n_bit_64_opt_sgd_lr_10_seed_5/eval_metric.txt
-
-# cir rff lp 8 bit new
-echo cir rff lp 8 bit
-cd /dfs/scratch0/zjian/lp_kernel_code_release/lp_kernel/ && python /dfs/scratch0/zjian/lp_kernel_code_release/lp_kernel/run_model.py \
-  --model=logistic_regression --l2_reg=1e-05  --kernel_sigma=0.9128709291752769 --random_seed=2 \
-  --data_path=/dfs/scratch0/zjian/data/lp_kernel_data/covtype --save_path=./tmp/new --approx_type=cir_rff --n_feat=5000 \
-  --fixed_epoch_number --n_sample=20000 --n_bit_feat=8 --opt=sgd --learning_rate=10 --epoch=3 --minibatch=250 --cuda --collect_sample_metrics \
-  | grep "spectral_norm_error\|at epoch"
-# cir rff lp 8 bit old
-cd /dfs/scratch0/zjian/lp_kernel_code/lp_kernel/models && python /dfs/scratch0/zjian/lp_kernel_code/lp_kernel/models/run_model.py \
-  --model=logistic_regression --l2_reg=1e-05  --kernel_sigma=0.9128709291752769 --random_seed=2 \
-  --data_path=/dfs/scratch0/zjian/data/lp_kernel_data/covtype --save_path=./tmp/old --approx_type=cir_rff --n_fp_rff=5000 \
-  --fixed_epoch_number --n_sample=20000 --n_bit_feat=8 --opt=sgd --learning_rate=10 --epoch=3 --minibatch=250 --cuda --collect_sample_metrics \
-  | grep "spectral_norm_error\|at epoch"
-cat /dfs/scratch0/zjian/lp_kernel/lp_rff/real_classification/covtype_type_cir_rff_l2_reg_1e-05_n_feat_5000_n_bit_8_opt_sgd_lr_10_seed_2/eval_metric.txt
-echo
-
-## lm halp 8 bit new
-#echo lm halp 8 bit
+### tests using subsample covtype for sgd based solutions
+## rff fp new
+#echo rff fp
 #cd /dfs/scratch0/zjian/lp_kernel_code_release/lp_kernel/ && python /dfs/scratch0/zjian/lp_kernel_code_release/lp_kernel/run_model.py \
-#  --model=logistic_regression --minibatch=250 --l2_reg=0 --kernel_sigma=18.257418583505537 --n_feat=10000 --random_seed=1 --learning_rate=100.0 --data_path=/dfs/scratch0/zjian/data/lp_kernel_data/covtype --opt=lm_halp --epoch=20 --halp_mu=0.1 --halp_epoch_T=1.0 \
-#  --save_path=./tmp/old --approx_type=cir_rff --n_bit_feat=8 --n_bit_model=8 --cuda \
-#  | grep "spectral_norm_error\|epoch at"
-## lm halp 8 bit old
+#  --model=logistic_regression --l2_reg=1e-05  --kernel_sigma=0.9128709291752769 --random_seed=3 \
+#  --data_path=/dfs/scratch0/zjian/data/lp_kernel_data/covtype --save_path=./tmp/new --approx_type=rff --collect_sample_metrics \
+#  --n_feat=2000 --fixed_epoch_number --n_sample=20000 --do_fp_feat  --opt=sgd --learning_rate=10 --epoch=3 --minibatch=250 --cuda \
+#  | grep "spectral_norm_error\|at epoch"
+## rff fp old
 #cd /dfs/scratch0/zjian/lp_kernel_code/lp_kernel/models && python /dfs/scratch0/zjian/lp_kernel_code/lp_kernel/models/run_model.py \
-#  --model=logistic_regression --minibatch=250 --l2_reg=0 --kernel_sigma=18.257418583505537 --n_fp_rff=10000 --random_seed=1 --learning_rate=100.0 --data_path=/dfs/scratch0/zjian/data/lp_kernel_data/covtype --opt=lm_halp --epoch=20 --halp_mu=0.1 --halp_epoch_T=1.0 \
-#  --save_path=./tmp/old --approx_type=cir_rff --n_bit_feat=8 --n_bit_model=8 --cuda \
-#  | grep "spectral_norm_error\|epoch at"
+#  --model=logistic_regression --l2_reg=1e-05  --kernel_sigma=0.9128709291752769 --random_seed=3 \
+#  --data_path=/dfs/scratch0/zjian/data/lp_kernel_data/covtype --save_path=./tmp/old --approx_type=rff --collect_sample_metrics \
+#  --n_fp_rff=2000 --fixed_epoch_number --n_sample=20000 --do_fp_feat  --opt=sgd --learning_rate=10 --epoch=3 --minibatch=250 --cuda \
+#  | grep "spectral_norm_error\|at epoch"
+#cat /dfs/scratch0/zjian/lp_kernel/lp_rff/real_classification/covtype_type_rff_l2_reg_1e-05_n_feat_2000_n_bit_64_opt_sgd_lr_10_seed_3/eval_metric.txt
 #echo
 #
-## lm bit center sgd 8 bit new
-#echo lm bit center sgd
+## nystrom fp new
+#echo nystrom fp
 #cd /dfs/scratch0/zjian/lp_kernel_code_release/lp_kernel/ && python /dfs/scratch0/zjian/lp_kernel_code_release/lp_kernel/run_model.py \
-#  --model=logistic_regression --minibatch=250 --l2_reg=0 --kernel_sigma=18.257418583505537 --n_feat=10000 --random_seed=1 --learning_rate=100.0 \
-#  --data_path=/dfs/scratch0/zjian/data/lp_kernel_data/covtype --opt=lm_bit_center_sgd --epoch=20 --halp_mu=0.1 --halp_epoch_T=1.0 \
-#  --save_path=./tmp/old --approx_type=cir_rff --n_bit_feat=8 --n_bit_model=8 --cuda \
-#  | grep "spectral_norm_error\|epoch at"
-## lm bit center sgd 8 bit old
-#cd /dfs/scratch0/zjian/lp_kernel_code/lp_kernel/models && python /dfs/scratch0/zjian/lp_kernel_code/lp_kernel/models/run_model.py \
-#  --model=logistic_regression --minibatch=250 --l2_reg=0 --kernel_sigma=18.257418583505537 --n_fp_rff=10000 --random_seed=1 --learning_rate=100.0 \
-#  --data_path=/dfs/scratch0/zjian/data/lp_kernel_data/covtype --opt=lm_bit_center_sgd --epoch=20 --halp_mu=0.1 --halp_epoch_T=1.0 \
-#  --save_path=./tmp/old --approx_type=cir_rff --n_bit_feat=8 --n_bit_model=8 --cuda \
-#  | grep "spectral_norm_error\|epoch at"
+#  --model=logistic_regression --minibatch=250 --l2_reg=1e-05 --kernel_sigma=0.912870929175 --n_feat=2500 --random_seed=5 \
+#  --learning_rate=10 --data_path=/dfs/scratch0/zjian/data/lp_kernel_data/covtype --opt=sgd --epoch=3 \
+#  --save_path=./tmp/new --approx_type=nystrom --do_fp_feat --collect_sample_metrics --n_sample=20000 --fixed_epoch_number \
+#  | grep "spectral_norm_error\|at epoch"
+## nystrom fp old
+#cd /lfs/1/zjian/lp_kernel/lp_kernel/models && python /lfs/1/zjian/lp_kernel/lp_kernel/models/run_model.py \
+#  --model=logistic_regression --minibatch=250 --l2_reg=1e-05 --kernel_sigma=0.912870929175 --n_fp_rff=2500 --random_seed=5 \
+#  --learning_rate=10 --data_path=/dfs/scratch0/zjian/data/lp_kernel_data/covtype --opt=sgd --epoch=3 \
+#  --save_path=./tmp/old --approx_type=nystrom --do_fp_feat --collect_sample_metrics --n_sample=20000 --fixed_epoch_number \
+#  | grep "spectral_norm_error\|at epoch"
+#cat /dfs/scratch0/zjian/lp_kernel/closeness/classification_real_setting/covtype_with_metric_type_nystrom_l2_reg_1e-05_n_fp_feat_2500_opt_sgd_lr_10_seed_5/eval_metric.txt 
 #
+## cir rff fp new
+#echo cir rff fp
+#cd /dfs/scratch0/zjian/lp_kernel_code_release/lp_kernel/ && python /dfs/scratch0/zjian/lp_kernel_code_release/lp_kernel/run_model.py \
+#  --model=logistic_regression --l2_reg=1e-05  --kernel_sigma=0.9128709291752769 --random_seed=5 \
+#  --data_path=/dfs/scratch0/zjian/data/lp_kernel_data/covtype --save_path=./tmp/new --approx_type=cir_rff --n_feat=2000 \
+#   --n_sample=20000 --do_fp_feat  --opt=sgd --learning_rate=10 --collect_sample_metrics --epoch=3 \
+#  | grep "spectral_norm_error\|at epoch"
+## cir rff fp old
+#cd /dfs/scratch0/zjian/lp_kernel_code/lp_kernel/models && python /dfs/scratch0/zjian/lp_kernel_code/lp_kernel/models/run_model.py \
+#  --model=logistic_regression --l2_reg=1e-05  --kernel_sigma=0.9128709291752769 --random_seed=5 \
+#  --data_path=/dfs/scratch0/zjian/data/lp_kernel_data/covtype --save_path=./tmp/old --approx_type=cir_rff --n_fp_rff=2000 \
+#   --n_sample=20000 --do_fp_feat  --opt=sgd --learning_rate=10 --collect_sample_metrics --epoch=3 \
+#  | grep "spectral_norm_error\|at epoch"
+#cat /dfs/scratch0/zjian/lp_kernel/lp_rff/real_classification/covtype_type_cir_rff_l2_reg_1e-05_n_feat_2000_n_bit_64_opt_sgd_lr_10_seed_5/eval_metric.txt
+#
+## cir rff lp 8 bit new
+#echo cir rff lp 8 bit
+#cd /dfs/scratch0/zjian/lp_kernel_code_release/lp_kernel/ && python /dfs/scratch0/zjian/lp_kernel_code_release/lp_kernel/run_model.py \
+#  --model=logistic_regression --l2_reg=1e-05  --kernel_sigma=0.9128709291752769 --random_seed=2 \
+#  --data_path=/dfs/scratch0/zjian/data/lp_kernel_data/covtype --save_path=./tmp/new --approx_type=cir_rff --n_feat=5000 \
+#  --fixed_epoch_number --n_sample=20000 --n_bit_feat=8 --opt=sgd --learning_rate=10 --epoch=3 --minibatch=250 --cuda --collect_sample_metrics \
+#  | grep "spectral_norm_error\|at epoch"
+## cir rff lp 8 bit old
+#cd /dfs/scratch0/zjian/lp_kernel_code/lp_kernel/models && python /dfs/scratch0/zjian/lp_kernel_code/lp_kernel/models/run_model.py \
+#  --model=logistic_regression --l2_reg=1e-05  --kernel_sigma=0.9128709291752769 --random_seed=2 \
+#  --data_path=/dfs/scratch0/zjian/data/lp_kernel_data/covtype --save_path=./tmp/old --approx_type=cir_rff --n_fp_rff=5000 \
+#  --fixed_epoch_number --n_sample=20000 --n_bit_feat=8 --opt=sgd --learning_rate=10 --epoch=3 --minibatch=250 --cuda --collect_sample_metrics \
+#  | grep "spectral_norm_error\|at epoch"
+#cat /dfs/scratch0/zjian/lp_kernel/lp_rff/real_classification/covtype_type_cir_rff_l2_reg_1e-05_n_feat_5000_n_bit_8_opt_sgd_lr_10_seed_2/eval_metric.txt
+#echo
+
+# lm halp 8 bit new
+echo lm halp 8 bit
+cd /dfs/scratch0/zjian/lp_kernel_code_release/lp_kernel/ && python /dfs/scratch0/zjian/lp_kernel_code_release/lp_kernel/run_model.py \
+  --model=logistic_regression --minibatch=250 --l2_reg=0 --kernel_sigma=18.257418583505537 --n_feat=10000 --random_seed=1 --learning_rate=100.0 --data_path=/dfs/scratch0/zjian/data/lp_kernel_data/covtype --opt=lm_halp --epoch=20 --halp_mu=0.1 --halp_epoch_T=1.0 \
+  --save_path=./tmp/old --approx_type=cir_rff --n_bit_feat=8 --n_bit_model=8 --cuda
+#  | grep "spectral_norm_error\|at epoch"
+# lm halp 8 bit old
+cd /dfs/scratch0/zjian/lp_kernel_code/lp_kernel/models && python /dfs/scratch0/zjian/lp_kernel_code/lp_kernel/models/run_model.py \
+  --model=logistic_regression --minibatch=250 --l2_reg=0 --kernel_sigma=18.257418583505537 --n_fp_rff=10000 --random_seed=1 --learning_rate=100.0 --data_path=/dfs/scratch0/zjian/data/lp_kernel_data/covtype --opt=lm_halp --epoch=20 --halp_mu=0.1 --halp_epoch_T=1.0 \
+  --save_path=./tmp/old --approx_type=cir_rff --n_bit_feat=8 --n_bit_model=8 --cuda
+#  | grep "spectral_norm_error\|at epoch"
+echo
+
+# lm bit center sgd 8 bit new
+echo lm bit center sgd
+cd /dfs/scratch0/zjian/lp_kernel_code_release/lp_kernel/ && python /dfs/scratch0/zjian/lp_kernel_code_release/lp_kernel/run_model.py \
+  --model=logistic_regression --minibatch=250 --l2_reg=0 --kernel_sigma=18.257418583505537 --n_feat=10000 --random_seed=1 --learning_rate=100.0 \
+  --data_path=/dfs/scratch0/zjian/data/lp_kernel_data/covtype --opt=lm_bit_center_sgd --epoch=20 --halp_mu=0.1 --halp_epoch_T=1.0 \
+  --save_path=./tmp/old --approx_type=cir_rff --n_bit_feat=8 --n_bit_model=8 --cuda
+#  | grep "spectral_norm_error\|at epoch"
+# lm bit center sgd 8 bit old
+cd /dfs/scratch0/zjian/lp_kernel_code/lp_kernel/models && python /dfs/scratch0/zjian/lp_kernel_code/lp_kernel/models/run_model.py \
+  --model=logistic_regression --minibatch=250 --l2_reg=0 --kernel_sigma=18.257418583505537 --n_fp_rff=10000 --random_seed=1 --learning_rate=100.0 \
+  --data_path=/dfs/scratch0/zjian/data/lp_kernel_data/covtype --opt=lm_bit_center_sgd --epoch=20 --halp_mu=0.1 --halp_epoch_T=1.0 \
+  --save_path=./tmp/old --approx_type=cir_rff --n_bit_feat=8 --n_bit_model=8 --cuda
+#  | grep "spectral_norm_error\|at epoch"
+
