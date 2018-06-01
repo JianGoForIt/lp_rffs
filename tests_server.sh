@@ -215,13 +215,13 @@
 echo lm halp 8 bit
 cd /dfs/scratch0/zjian/lp_kernel_code_release/lp_kernel/ && python /dfs/scratch0/zjian/lp_kernel_code_release/lp_kernel/run_model.py \
   --model=logistic_regression --minibatch=250 --l2_reg=0 --kernel_sigma=18.257418583505537 --n_feat=10000 --random_seed=1 --learning_rate=100.0 --data_path=/dfs/scratch0/zjian/data/lp_kernel_data/covtype --opt=lm_halp --epoch=20 --halp_mu=0.1 --halp_epoch_T=1.0 \
-  --save_path=./tmp/old --approx_type=cir_rff --n_bit_feat=8 --n_bit_model=8 --cuda
-#  | grep "spectral_norm_error\|at epoch"
+  --save_path=./tmp/old --approx_type=cir_rff --n_bit_feat=8 --n_bit_model=8 --cuda \
+  | grep eval_acc
 # lm halp 8 bit old
 cd /dfs/scratch0/zjian/lp_kernel_code/lp_kernel/models && python /dfs/scratch0/zjian/lp_kernel_code/lp_kernel/models/run_model.py \
   --model=logistic_regression --minibatch=250 --l2_reg=0 --kernel_sigma=18.257418583505537 --n_fp_rff=10000 --random_seed=1 --learning_rate=100.0 --data_path=/dfs/scratch0/zjian/data/lp_kernel_data/covtype --opt=lm_halp --epoch=20 --halp_mu=0.1 --halp_epoch_T=1.0 \
-  --save_path=./tmp/old --approx_type=cir_rff --n_bit_feat=8 --n_bit_model=8 --cuda
-#  | grep "spectral_norm_error\|at epoch"
+  --save_path=./tmp/old --approx_type=cir_rff --n_bit_feat=8 --n_bit_model=8 --cuda \
+  | grep eval_acc
 echo
 
 # lm bit center sgd 8 bit new
@@ -229,12 +229,12 @@ echo lm bit center sgd
 cd /dfs/scratch0/zjian/lp_kernel_code_release/lp_kernel/ && python /dfs/scratch0/zjian/lp_kernel_code_release/lp_kernel/run_model.py \
   --model=logistic_regression --minibatch=250 --l2_reg=0 --kernel_sigma=18.257418583505537 --n_feat=10000 --random_seed=1 --learning_rate=100.0 \
   --data_path=/dfs/scratch0/zjian/data/lp_kernel_data/covtype --opt=lm_bit_center_sgd --epoch=20 --halp_mu=0.1 --halp_epoch_T=1.0 \
-  --save_path=./tmp/old --approx_type=cir_rff --n_bit_feat=8 --n_bit_model=8 --cuda
-#  | grep "spectral_norm_error\|at epoch"
+  --save_path=./tmp/old --approx_type=cir_rff --n_bit_feat=8 --n_bit_model=8 --cuda \
+  | grep eval_acc
 # lm bit center sgd 8 bit old
 cd /dfs/scratch0/zjian/lp_kernel_code/lp_kernel/models && python /dfs/scratch0/zjian/lp_kernel_code/lp_kernel/models/run_model.py \
   --model=logistic_regression --minibatch=250 --l2_reg=0 --kernel_sigma=18.257418583505537 --n_fp_rff=10000 --random_seed=1 --learning_rate=100.0 \
   --data_path=/dfs/scratch0/zjian/data/lp_kernel_data/covtype --opt=lm_bit_center_sgd --epoch=20 --halp_mu=0.1 --halp_epoch_T=1.0 \
-  --save_path=./tmp/old --approx_type=cir_rff --n_bit_feat=8 --n_bit_model=8 --cuda
-#  | grep "spectral_norm_error\|at epoch"
+  --save_path=./tmp/old --approx_type=cir_rff --n_bit_feat=8 --n_bit_model=8 --cuda \
+  | grep eval_acc
 
