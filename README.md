@@ -70,7 +70,9 @@ wget https://www.dropbox.com/s/l1jy7ilifrknd82/LP-RFFs-Data.zip?dl=0
 
   * --collect_sample_metrics indicates to calculate relative spectral distance, Frobenius norm error, spectral norm error on the heldout set kernel matrix. For large datasest, these metrics can be computed on a subsampled heldout set, the size of the subsampled heldout set can be specified by --n_sample=size of subsampled heldout set.
   
-  * The dataset path and the output saving path can be specified with --data_path and --save_path
+  * The dataset path and the output saving path can be specified with --data_path and --save_path.
+  
+  * The l2 regularization strength can be specified by --l2_reg.
 
 ## Citation
 If you use LP-RFFs in your project, please cite our paper
