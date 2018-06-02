@@ -73,6 +73,8 @@ wget https://www.dropbox.com/s/l1jy7ilifrknd82/LP-RFFs-Data.zip?dl=0
   * The dataset path and the output saving path can be specified with --data_path and --save_path.
   
   * The l2 regularization strength can be specified by --l2_reg.
+  
+  * The sigma value for the underlying Gaussian kernel can be specified via --kernel_sigma.
 
 ## Citation
 If you use LP-RFFs in your project, please cite our paper
