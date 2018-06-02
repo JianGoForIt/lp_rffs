@@ -14,7 +14,9 @@
 ```
 git clone https://github.com/JianGoForIt/lp_kernel.git
 git clone https://github.com/mleszczy/halp.git
+cd halp
 git checkout lp_kernel
+cd ..
 ```
 * Download data from dropbox in the same folder with the cloned LP-RFFs and HALP repo. We provide preprocessed training and heldout dataset in our paper, including the Census, CovType and YearPred datasets. For the TIMIT dataset, we do not provide it here due to licensing restriction. We refer to the our [paper]() for details in preprocessing the raw TIMIT dataset.
 ```
@@ -62,11 +64,17 @@ wget https://www.dropbox.com/s/l1jy7ilifrknd82/LP-RFFs-Data.zip?dl=0
     
   The learning rate and minibatch size can be specified using --learning_rate and --minibatch.
   For GPU based iterative training, please use --cuda.
+  --epoch specifies the maximal possible training epochs. 
+  Early stopping can be turned off by --fixed_epoch_number.
   ```
 
   * --collect_sample_metrics indicates to calculate relative spectral distance, Frobenius norm error, spectral norm error on the heldout set kernel matrix. For large datasest, these metrics can be computed on a subsampled heldout set, the size of the subsampled heldout set can be specified by --n_sample=size of subsampled heldout set.
   
-  * The dataset path and the output saving path can be specified with --data_path and --save_path
+  * The dataset path and the output saving path can be specified with --data_path and --save_path.
+  
+  * The l2 regularization strength can be specified by --l2_reg.
+  
+  * The sigma value for the underlying Gaussian kernel can be specified via --kernel_sigma.
 
 ## Citation
 If you use LP-RFFs in your project, please cite our paper
