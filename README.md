@@ -62,7 +62,8 @@ wget https://www.dropbox.com/s/l1jy7ilifrknd82/LP-RFFs-Data.zip?dl=0
     
   The learning rate and minibatch size can be specified using --learning_rate and --minibatch.
   For GPU based iterative training, please use --cuda.
-  --epoch specifies the maximal possible training epochs. Early stopping can be turned off by --fixed_epoch_number.
+  --epoch specifies the maximal possible training epochs. 
+  Early stopping can be turned off by --fixed_epoch_number.
   ```
 
   * --collect_sample_metrics indicates to calculate relative spectral distance, Frobenius norm error, spectral norm error on the heldout set kernel matrix. For large datasest, these metrics can be computed on a subsampled heldout set, the size of the subsampled heldout set can be specified by --n_sample=size of subsampled heldout set.
