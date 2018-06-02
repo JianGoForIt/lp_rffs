@@ -20,5 +20,10 @@ git checkout lp_kernel
 ## Command guidelines
 
 ## Citation
+If you use LP-RFFs in your project, please cite our paper
+```
+ArXiv entry
+```
 
 ## Acknowledgement
+We thank Fred Sala, Virginia Smith, Will Hamilton, Paroma Varma, Sen Wu and Megan Leszczynski for the helpful discussion and feedbacks.
