@@ -60,10 +60,13 @@ wget https://www.dropbox.com/s/l1jy7ilifrknd82/LP-RFFs-Data.zip?dl=0
   * LM-Bit-Center SGD (low precision training):
     --opt=lm_bit_center_sgd --n_bit_model=# of bit for model parameter during training --halp_mu=the value do determine the scale factor in LM-Bit-Center SGD --halp_epoch_T=# of epochs as interval to compute the scale factor in LM-Bit-Center SGD
     
-  The learning rate can be specified using --learning_rate.
+  The learning rate and minibatch size can be specified using --learning_rate and --minibatch.
+  For GPU based iterative training, please use --cuda.
   ```
 
-  * use --collect_sample_metrics to calculate relative spectral distance, Frobenius norm error, spectral norm error on the heldout set kernel matrix. For large datasest, these metrics can be computed on a subsampled heldout set, the size of the subsampled heldout set can be specified by --n_sample=size of subsampled heldout set.
+  * --collect_sample_metrics indicates to calculate relative spectral distance, Frobenius norm error, spectral norm error on the heldout set kernel matrix. For large datasest, these metrics can be computed on a subsampled heldout set, the size of the subsampled heldout set can be specified by --n_sample=size of subsampled heldout set.
+  
+  * The dataset path and the output saving path can be specified with --data_path and --save_path
 
 ## Citation
 If you use LP-RFFs in your project, please cite our paper
