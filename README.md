@@ -25,7 +25,7 @@ wget https://www.dropbox.com/s/l1jy7ilifrknd82/LP-RFFs-Data.zip?dl=0
 
 ## Command guidelines
 
-* Key arguments
+* **Key arguments**
 
   * specify kernel approximation method
   ```
@@ -75,6 +75,38 @@ wget https://www.dropbox.com/s/l1jy7ilifrknd82/LP-RFFs-Data.zip?dl=0
   * The l2 regularization strength can be specified by --l2_reg.
   
   * The sigma value for the underlying Gaussian kernel can be specified via --kernel_sigma.
+  
+* **example runs**
+  
+  We present the command for a couple of configurations. For more examples please browse to [example_runs.sh](./example_runs.sh)
+  
+  * closed-form kernel ridge regression using 4 bit LP-RFFs.
+  ```
+  python run_model.py \
+    --approx_type=cir_rff --n_feat=1000  --n_bit_feat=4  \
+    --model=ridge_regression --closed_form_sol --l2_reg=0.0005 --kernel_sigma=28.867513459481287 --random_seed=1 \
+    --data_path=../LP-RFFs-Data/census --save_path=./tmp --collect_sample_metrics
+  ```
+  
+  * SGD-based training for kernel logistic regression using 8 bit LP-RFFs
+  ```
+  python run_model.py \
+    --approx_type=cir_rff --n_feat=5000 --n_bit_feat=8 \
+    --model=logistic_regression --opt=sgd --minibatch=250 --l2_reg=1e-05  \
+    --epoch=3 --learning_rate=10 --fixed_epoch_number \
+    --kernel_sigma=0.9128709291752769 --random_seed=2 \
+    --data_path=../LP-RFFs-Data/covtype --save_path=./tmp --collect_sample_metrics --n_sample=20000 --cuda
+  ```
+
+  * Low-precision 8-bit LM-HALP-based training for kernel logistic regression using 8 bit LP-RFFs
+  ```
+  python run_model.py \
+    --approx_type=cir_rff --n_bit_feat=8 --n_feat=10000 \
+    --model=logistic_regression --n_bit_model=8 --opt=lm_halp --minibatch=250 --l2_reg=0 \
+    --learning_rate=100.0 --epoch=20 --halp_mu=0.1 --halp_epoch_T=1.0 \
+    --kernel_sigma=18.257418583505537 --random_seed=1 \
+    --data_path=../LP-RFFs-Data/covtype --save_path=./tmp --cuda
+  ```
 
 ## Citation
 If you use LP-RFFs in your project, please cite our paper
