@@ -16,8 +16,13 @@ git clone https://github.com/JianGoForIt/lp_kernel.git
 git clone https://github.com/mleszczy/halp.git
 git checkout lp_kernel
 ```
+* Download data from dropbox in the same folder with the cloned LP-RFFs and HALP repo. We provide preprocessed training and heldout dataset in our paper, including the Census, CovType and YearPred datasets. For the TIMIT dataset, we do not provide it here due to licensing restriction. We refer to the our [paper]() for details in preprocessing the raw TIMIT dataset.
+```
+
+```
 
 ## Command guidelines
+
 
 ## Citation
 If you use LP-RFFs in your project, please cite our paper
