@@ -17,7 +17,7 @@ git clone https://github.com/JianGoForIt/halp.git
 ```
 * Download data from dropbox in the same folder with the cloned LP-RFFs and HALP repo. We provide preprocessed training and heldout dataset in our paper, including the Census, CovType and YearPred datasets. For the TIMIT dataset, we do not provide it here due to licensing restriction. We refer to the our [paper]() for details in preprocessing the raw TIMIT dataset.
 ```
-wget https://www.dropbox.com/s/l1jy7ilifrknd82/LP-RFFs-Data.zip?dl=0
+wget https://www.dropbox.com/s/l1jy7ilifrknd82/LP-RFFs-Data.zip
 ```
 
 ## Command guidelines
