@@ -10,10 +10,10 @@
 
 ## Setup instructions
 * Install PyTorch. Our implementation is tested under PyTorch 0.3.1.
-* Clone the LP-RFFs repo, along with the HALP repo (lp_kernel branch) in the same folder.
+* Clone the LP-RFFs repo, along with the HALP repo (**lp_kernel branch**) in the same folder.
 ```
 git clone https://github.com/JianGoForIt/lp_kernel.git
-git clone https://github.com/mleszczy/halp.git
+https://github.com/JianGoForIt/halp.git
 cd halp
 git checkout lp_kernel
 cd ..
