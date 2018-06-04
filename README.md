@@ -12,7 +12,7 @@
 * Install PyTorch. Our implementation is tested under PyTorch 0.3.1.
 * Clone the LP-RFFs repo, along with the HALP repo (duplicated and adapted from the repo of the original authors) in the same folder.
 ```
-git clone https://github.com/JianGoForIt/lp_kernel.git
+git clone https://github.com/JianGoForIt/lp_rffs.git
 git clone https://github.com/JianGoForIt/halp.git
 ```
 * Download data from dropbox in the same folder with the cloned LP-RFFs and HALP repo. We provide preprocessed training and heldout dataset in our paper, including the Census, CovType and YearPred datasets. For the TIMIT dataset, we do not provide it here due to licensing restriction. We refer to the our [paper]() for details in preprocessing the raw TIMIT dataset.
