@@ -36,7 +36,7 @@ unzip LP-RFFs-Data.zip
   * FP-RFFs (--approx_type=rff --do_fp_feat)
   * circulant FP-RFFs (--approx_type=cir_rff --do_fp_feat)
   * FP-Nystrom (--approx_type=nystrom --do_fp_feat)
-  * ensemble FP-Nystrom (--approx_type=ensemble_nystrom --do_fp_feat)
+  * ensemble FP-Nystrom (--approx_type=ensemble_nystrom --do_fp_feat --n_ensemble_nystrom=# of learners of ensemble Nystrom)
   * LP-RFFs (--approx_type=cir_rff --n_bit_feat=# of bits)
   * LP-Nystrom (--approx_type=ensemble_nystrom --n_bit_feat=# of bits --n_ensemble_nystrom=1)
   * ensemble LP-Nystrom (--approx_type=ensemble_nystrom --n_bit_feat=# of bits --n_ensemble_nystrom=# of learners of ensemble Nystrom).
