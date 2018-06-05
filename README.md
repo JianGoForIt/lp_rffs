@@ -105,7 +105,7 @@ unzip LP-RFFs-Data.zip
   python run_model.py \
     --approx_type=cir_rff --n_feat=5000 --n_bit_feat=8 \
     --model=logistic_regression --opt=sgd --minibatch=250 --l2_reg=1e-05  \
-    --epoch=3 --learning_rate=10 --fixed_epoch_number \
+    --epoch=10 --learning_rate=10 \
     --kernel_sigma=0.9128709291752769 --random_seed=2 \
     --data_path=../LP-RFFs-Data/covtype --save_path=./tmp --cuda
   ```
