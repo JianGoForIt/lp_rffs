@@ -28,6 +28,7 @@ python run_model.py \
 
 
 ## tests using subsample covtype for sgd based solutions
+# metric collection can take up to 10 min on high performance cpu servers
 echo rff fp sgd
 python run_model.py \
   --approx_type=rff --n_feat=2000 --do_fp_feat \
@@ -38,6 +39,7 @@ python run_model.py \
 
 # sgd 8 bit lp rff
 echo cir rff lp 8 bit
+# metric collection can take up to 10 min on high performance cpu servers
 python run_model.py \
   --approx_type=cir_rff --n_feat=5000 --n_bit_feat=8 \
   --model=logistic_regression --opt=sgd --minibatch=250 --l2_reg=1e-05  \
@@ -52,7 +54,7 @@ python run_model.py \
   --approx_type=cir_rff --n_bit_feat=8 --n_feat=10000 \
   --model=logistic_regression --n_bit_model=8 --opt=lm_halp --minibatch=250 --l2_reg=0 \
   --learning_rate=100.0 --epoch=20 --opt_mu=0.1 --opt_epoch_T=1.0 \
-  --kernel_sigma=18.257418583505537 --random_seed=1 \
+  --kernel_sigma=0.9128709291752769 --random_seed=1 \
   --data_path=../LP-RFFs-Data/covtype --save_path=./tmp --cuda
 
 
@@ -62,5 +64,5 @@ python run_model.py \
   --approx_type=cir_rff --n_bit_feat=8 --n_feat=10000 \
   --model=logistic_regression --n_bit_model=8 --opt=lm_bit_center_sgd --minibatch=250 --l2_reg=0 \
   --learning_rate=100.0 --epoch=20 --opt_mu=0.1 --opt_epoch_T=1.0 \
-  --kernel_sigma=18.257418583505537  --random_seed=1  \
+  --kernel_sigma=0.9128709291752769 --random_seed=1  \
   --data_path=../LP-RFFs-Data/covtype --save_path=./tmp --cuda 
