@@ -68,10 +68,12 @@ unzip LP-RFFs-Data.zip
   
   For GPU based iterative training, please use --cuda. 
   
-  By default, we use the early stopping protocol described in [Appendix C.1 of our paper](). Early stopping can be turned off by --fixed_epoch_number. The maximal possible training epochs can be specified by --epoch for both training with and without early stopping.
+  By default, we use the early stopping protocol described in the Appendix C.1 of our arxiv paper. 
+  Early stopping can be turned off by --fixed_epoch_number. 
+  The maximal possible training epochs can be specified by --epoch for both training with and without early stopping.
   ```
 
-  * --collect_sample_metrics indicates to calculate relative spectral distance, Frobenius norm error, spectral norm error on the heldout set kernel matrix. For large datasest, these metrics can be computed on a subsampled heldout set, the size of the subsampled heldout set can be specified by --n_sample=size of subsampled heldout set.
+  * --collect_sample_metrics indicates to calculate relative spectral distance, Frobenius norm error, spectral norm error on the heldout set kernel matrix. *The computation of relative spectral distance can be time-consuming for a large heldout set, e.g. it can take up to ~10 minutes for 20k data points on a high-performance CPU server.* For large datasests, these metrics can be computed on a subsampled heldout set, the size of the subsampled heldout set can be specified by --n_sample=size of subsampled heldout set.
   
   * The dataset path and the output saving path can be specified with --data_path and --save_path.
   
