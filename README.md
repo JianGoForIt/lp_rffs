@@ -27,10 +27,10 @@ unzip LP-RFFs-Data.zip
 
   * specify kernel approximation method
   ```
-  --approx_type: specifies the kernel approximation method.
-  --n_feat: the number of kernel approximation features.
-  --do_fp_feat: use full precision kernel approximation features.
-  --n_bit_feat: the number of bits for low precision fixed-point representation of kernel approximation features.
+  --approx_type: a string specifying the kernel approximation method.
+  --n_feat: a positive integer specifying the number of kernel approximation features.
+  --do_fp_feat: a flag to use full precision kernel approximation features.
+  --n_bit_feat: a positive integer specifying the number of bits for low precision fixed-point representation of kernel approximation features.
 
   LP-RFFs currently support:
   * FP-RFFs (--approx_type=rff --do_fp_feat)
