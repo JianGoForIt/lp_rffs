@@ -51,7 +51,7 @@ echo lm halp 8 bit
 python run_model.py \
   --approx_type=cir_rff --n_bit_feat=8 --n_feat=10000 \
   --model=logistic_regression --n_bit_model=8 --opt=lm_halp --minibatch=250 --l2_reg=0 \
-  --learning_rate=100.0 --epoch=20 --halp_mu=0.1 --halp_epoch_T=1.0 \
+  --learning_rate=100.0 --epoch=20 --opt_mu=0.1 --opt_epoch_T=1.0 \
   --kernel_sigma=18.257418583505537 --random_seed=1 \
   --data_path=../LP-RFFs-Data/covtype --save_path=./tmp --cuda
 
@@ -61,6 +61,6 @@ echo lm bit center sgd
 python run_model.py \
   --approx_type=cir_rff --n_bit_feat=8 --n_feat=10000 \
   --model=logistic_regression --n_bit_model=8 --opt=lm_bit_center_sgd --minibatch=250 --l2_reg=0 \
-  --learning_rate=100.0 --epoch=20 --halp_mu=0.1 --halp_epoch_T=1.0 \
+  --learning_rate=100.0 --epoch=20 --opt_mu=0.1 --opt_epoch_T=1.0 \
   --kernel_sigma=18.257418583505537  --random_seed=1  \
   --data_path=../LP-RFFs-Data/covtype --save_path=./tmp --cuda 

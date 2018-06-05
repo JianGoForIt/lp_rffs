@@ -69,8 +69,8 @@ parser.add_argument("--fixed_design_noise_sigma", type=float, help="label noise 
 parser.add_argument("--fixed_design_auto_l2_reg", action="store_true",
     help="if true, we auto search for the optimal lambda")
 parser.add_argument("--closed_form_sol", action="store_true", help="use closed form solution")
-parser.add_argument("--fixed_epoch_number", action="store_true", help="if false, use early stopping")
-parser.add_argument("--exit_after_collect_metric", action="store_true", help="if yes, \
+parser.add_argument("--fixed_epoch_number", action="store_true", help="if the flag is not used, use early stopping")
+parser.add_argument("--exit_after_collect_metric", action="store_true", help="if the flag is used, \
     we only do metric collection on kernel matrix without doing trainining")
 parser.add_argument("--n_ensemble_nystrom", type=int, default=1, help="number of learners in ensembled nystrom")
 args = parser.parse_args()
@@ -263,7 +263,7 @@ if __name__ == "__main__":
                 get_sample_kernel_metrics(X_val, kernel, kernel_approx, quantizer, args.l2_reg) 
         if not os.path.isdir(args.save_path):
             os.makedirs(args.save_path)
-        with open(args.save_path + "/metric_sample_eval.txt", "wb") as f:
+        with open(args.save_path + "/metric_sample_eval.json", "wb") as f:
             cp.dump(metric_dict_sample_val, f)
         np.save(args.save_path + "/spectrum_eval.npy", spectrum_sample_val)
         np.save(args.save_path + "/spectrum_eval_exact.npy", spectrum_sample_val_exact)
@@ -276,7 +276,7 @@ if __name__ == "__main__":
         # for fixed design experiments and closed form solution form real setting
         if use_cuda:
             raise Exception("closed from solution does not support cuda mode")
-        print("closed form using kernel type", type(kernel_approx) )
+        print("closed form using kernel type ", args.approx_type)
         regressor = KernelRidgeRegression(kernel_approx, reg_lambda=args.l2_reg)
         print("start to do regression!")
         # print("test quantizer", quantizer)

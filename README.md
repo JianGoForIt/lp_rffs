@@ -58,11 +58,11 @@ unzip LP-RFFs-Data.zip
   * LM-HALP (low precision training):
     --opt=lm_halp --n_bit_model=<# of bit for model parameter during training> \
     --opt_mu=<the value determine the scale factor in LM-HALP> \
-    --halp_epoch_T=<for --halp_epoch_T=t, the scale factor in LM-HALP will be updated every t epochs>
+    --opt_epoch_T=<for --opt_epoch_T=t, the scale factor in LM-HALP will be updated every t epochs>
   * LM-Bit-Center SGD (low precision training):
     --opt=lm_bit_center_sgd --n_bit_model=<# of bit for model parameter during training> \
     --opt_mu=<the value do determine the scale factor in LM-Bit-Center SGD> \
-    --halp_epoch_T=<# of epochs as interval to compute the scale factor in LM-Bit-Center SGD>
+    --opt_epoch_T=<# of epochs as interval to compute the scale factor in LM-Bit-Center SGD>
     
   The learning rate and minibatch size can be specified using --learning_rate and --minibatch.
   
@@ -80,6 +80,13 @@ unzip LP-RFFs-Data.zip
   * The l2 regularization strength can be specified by --l2_reg.
   
   * The \sigma value for the underlying Gaussian kernel \exp(1/(2*\sigma^2) ||x_1 - x_2||^2 ) ) can be specified via --kernel_sigma.
+
+* **Outputs**
+  * The output folder is specified by --save_path 
+
+  * The heldout performance (single value for closed-solution, or history (for every epoch) for mini-batch based training) is saved into ```eval_metric.txt```.
+
+  * If --collect_sample_metric is specified, the collected metric (e.g. relative spectral distance, Frobenius norm kernel approximation error) are saved into ```metric_sample_eval.json```.
   
 * **Example runs**
   
@@ -108,7 +115,7 @@ unzip LP-RFFs-Data.zip
   python run_model.py \
     --approx_type=cir_rff --n_bit_feat=8 --n_feat=10000 \
     --model=logistic_regression --n_bit_model=8 --opt=lm_halp --minibatch=250 --l2_reg=0 \
-    --learning_rate=100.0 --epoch=20 --halp_mu=0.1 --halp_epoch_T=1.0 \
+    --learning_rate=100.0 --epoch=20 --halp_mu=0.1 --opt_epoch_T=1.0 \
     --kernel_sigma=18.257418583505537 --random_seed=1 \
     --data_path=../LP-RFFs-Data/covtype --save_path=./tmp --cuda
   ```
