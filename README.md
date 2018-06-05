@@ -27,10 +27,10 @@ unzip LP-RFFs-Data.zip
 
   * specify kernel approximation method
   ```
-  --approx_type: specifies the kernel approximation method.
-  --n_feat: the number of kernel approximation features.
-  --do_fp_feat: use full precision kernel approximation features.
-  --n_bit_feat: the number of bits for low precision fixed-point representation of kernel approximation features.
+  --approx_type: a string specifying the kernel approximation method.
+  --n_feat: a positive integer specifying the number of kernel approximation features.
+  --do_fp_feat: a flag to use full precision kernel approximation features.
+  --n_bit_feat: a positive integer specifying the number of bits for low precision fixed-point representation of kernel approximation features.
 
   LP-RFFs currently support:
   * FP-RFFs (--approx_type=rff --do_fp_feat)
@@ -105,9 +105,9 @@ unzip LP-RFFs-Data.zip
   python run_model.py \
     --approx_type=cir_rff --n_feat=5000 --n_bit_feat=8 \
     --model=logistic_regression --opt=sgd --minibatch=250 --l2_reg=1e-05  \
-    --epoch=10 --learning_rate=10 \
+    --epoch=10 --learning_rate=10 --fixed_epoch_number \
     --kernel_sigma=0.9128709291752769 --random_seed=2 \
-    --data_path=../LP-RFFs-Data/covtype --save_path=./tmp --cuda
+    --data_path=../LP-RFFs-Data/covtype --save_path=./tmp --n_sample=20000 --cuda
   ```
 
   * Low-precision 8-bit LM-HALP-based training for kernel logistic regression using 8 bit LP-RFFs on GPU
