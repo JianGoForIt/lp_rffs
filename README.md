@@ -10,7 +10,7 @@
 
 ## Setup instructions
 * Install PyTorch. Our implementation is tested under PyTorch 0.3.1.
-* Clone the LP-RFFs repo, along with the HALP repo (duplicated and adapted from the repo of the original authors) in the same folder.
+* Clone the LP-RFFs repo, along with the HALP repo (duplicated and adapted from the repo of the original authors) into **the same folder**.
 ```
 git clone https://github.com/JianGoForIt/lp_rffs.git
 git clone https://github.com/JianGoForIt/halp.git
@@ -52,13 +52,13 @@ unzip LP-RFFs-Data.zip
   * mini-batch based iterative training for logistic regression: 
     --model=logistic_regression --opt=type of the optimizer
     
-  LP-RFFs can use the following optimizers for min-batch based iterative training:
+  LP-RFFs can use the following optimizers for mini-batch based iterative training:
   * plain SGD (full precision training):
     --opt=sgd
   * LM-HALP (low precision training):
     --opt=lm_halp --n_bit_model=<# of bit for model parameter during training> \
     --halp_mu=<the value determine the scale factor in LM-HALP> \
-    --halp_epoch_T=<# of epochs as interval to compute the scale factor in LM-HALP>
+    --halp_epoch_T=<for --halp_epoch_T=t, the scale factor in LM-HALP will be updated every t epochs>
   * LM-Bit-Center SGD (low precision training):
     --opt=lm_bit_center_sgd --n_bit_model=<# of bit for model parameter during training> \
     --halp_mu=<the value do determine the scale factor in LM-Bit-Center SGD> \
@@ -77,13 +77,13 @@ unzip LP-RFFs-Data.zip
   
   * The l2 regularization strength can be specified by --l2_reg.
   
-  * The sigma value for the underlying Gaussian kernel can be specified via --kernel_sigma.
+  * The \sigma value for the underlying Gaussian kernel \exp(1/(2*\sigma^2) \|x_1 - x_2\|^2 ) ) can be specified via --kernel_sigma.
   
-* **example runs**
+* **Example runs**
   
   We present the command for a couple of configurations. For more examples please browse to [example_runs.sh](./example_runs.sh)
   
-  * closed-form kernel ridge regression using 4 bit LP-RFFs.
+  * closed-form kernel ridge regression using 4 bit LP-RFFs on CPU
   ```
   python run_model.py \
     --approx_type=cir_rff --n_feat=1000  --n_bit_feat=4  \
@@ -91,7 +91,7 @@ unzip LP-RFFs-Data.zip
     --data_path=../LP-RFFs-Data/census --save_path=./tmp --collect_sample_metrics
   ```
   
-  * SGD-based training for kernel logistic regression using 8 bit LP-RFFs
+  * SGD-based training for kernel logistic regression using 8 bit LP-RFFs on GPU
   ```
   python run_model.py \
     --approx_type=cir_rff --n_feat=5000 --n_bit_feat=8 \
@@ -101,7 +101,7 @@ unzip LP-RFFs-Data.zip
     --data_path=../LP-RFFs-Data/covtype --save_path=./tmp --n_sample=20000 --cuda
   ```
 
-  * Low-precision 8-bit LM-HALP-based training for kernel logistic regression using 8 bit LP-RFFs
+  * Low-precision 8-bit LM-HALP-based training for kernel logistic regression using 8 bit LP-RFFs on GPU
   ```
   python run_model.py \
     --approx_type=cir_rff --n_bit_feat=8 --n_feat=10000 \
