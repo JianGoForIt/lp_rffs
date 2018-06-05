@@ -77,7 +77,7 @@ unzip LP-RFFs-Data.zip
   
   * The l2 regularization strength can be specified by --l2_reg.
   
-  * The \sigma value for the underlying Gaussian kernel \exp(1/(2*\sigma^2) \|x_1 - x_2\|^2 ) ) can be specified via --kernel_sigma.
+  * The \sigma value for the underlying Gaussian kernel \exp(1/(2*\sigma^2) ||x_1 - x_2||^2 ) ) can be specified via --kernel_sigma.
   
 * **Example runs**
   
