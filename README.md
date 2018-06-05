@@ -57,11 +57,11 @@ unzip LP-RFFs-Data.zip
     --opt=sgd
   * LM-HALP (low precision training):
     --opt=lm_halp --n_bit_model=<# of bit for model parameter during training> \
-    --halp_mu=<the value determine the scale factor in LM-HALP> \
+    --opt_mu=<the value determine the scale factor in LM-HALP> \
     --halp_epoch_T=<for --halp_epoch_T=t, the scale factor in LM-HALP will be updated every t epochs>
   * LM-Bit-Center SGD (low precision training):
     --opt=lm_bit_center_sgd --n_bit_model=<# of bit for model parameter during training> \
-    --halp_mu=<the value do determine the scale factor in LM-Bit-Center SGD> \
+    --opt_mu=<the value do determine the scale factor in LM-Bit-Center SGD> \
     --halp_epoch_T=<# of epochs as interval to compute the scale factor in LM-Bit-Center SGD>
     
   The learning rate and minibatch size can be specified using --learning_rate and --minibatch.

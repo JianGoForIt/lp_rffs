@@ -54,9 +54,9 @@ parser.add_argument("--data_path", type=str, default="../data/census/")
 parser.add_argument("--epoch", type=int, default=40)
 parser.add_argument("--cuda", action="store_true")
 parser.add_argument("--opt", type=str, default="sgd")
-parser.add_argument("--halp_mu", type=float, default=10.0)
-parser.add_argument("--halp_epoch_T", type=float, default=1.0, 
-    help="The # of epochs as interval of full gradient calculation")
+parser.add_argument("--opt_mu", type=float, default=10.0)
+parser.add_argument("--opt_epoch_T", type=float, default=1.0, 
+    help="The # of epochs as interval between two consecutive scale updates/full gradient calculation")
 parser.add_argument("--save_path", type=str, default="./test")
 parser.add_argument("--approx_type", type=str, default="rff", help="specify using exact, rff or nystrom")
 parser.add_argument("--collect_sample_metrics", action="store_true", 
@@ -228,23 +228,23 @@ if __name__ == "__main__":
         elif args.opt == "halp":
             print("using halp optimizer")
             optimizer = halp.optim.HALP(model.parameters(), lr=args.learning_rate, 
-                T=int(args.halp_epoch_T * X_train.size(0) / float(args.minibatch) ), 
-                data_loader=train_loader, mu=args.halp_mu, bits=args.n_bit_model, weight_decay=args.l2_reg)
+                T=int(args.opt_epoch_T * X_train.size(0) / float(args.minibatch) ), 
+                data_loader=train_loader, mu=args.opt_mu, bits=args.n_bit_model, weight_decay=args.l2_reg)
             print("model quantization, interval, mu, bit", optimizer.T, optimizer._mu, 
                 optimizer._bits, optimizer._biased)
         elif args.opt == "lm_halp":
             print("using lm halp optimizer")
             optimizer = halp.optim.LMHALP(model.parameters(), lr=args.learning_rate, 
-                T=int(args.halp_epoch_T * X_train.size(0) / float(args.minibatch) ), 
-                data_loader=train_loader, mu=args.halp_mu, bits=args.n_bit_model, 
+                T=int(args.opt_epoch_T * X_train.size(0) / float(args.minibatch) ), 
+                data_loader=train_loader, mu=args.opt_mu, bits=args.n_bit_model, 
                 weight_decay=args.l2_reg, data_scale=quantizer.scale)
             print("model quantization, interval, mu, bit", optimizer.T, optimizer._mu, 
                 optimizer._bits, optimizer._biased)
         elif args.opt == "lm_bit_center_sgd":
             print("using lm bit center sgd optimizer")
             optimizer = halp.optim.BitCenterLMSGD(model.parameters(), lr=args.learning_rate,
-                T=int(args.halp_epoch_T * X_train.size(0) / float(args.minibatch) ),
-                data_loader=train_loader, mu=args.halp_mu, bits=args.n_bit_model,
+                T=int(args.opt_epoch_T * X_train.size(0) / float(args.minibatch) ),
+                data_loader=train_loader, mu=args.opt_mu, bits=args.n_bit_model,
                 weight_decay=args.l2_reg, data_scale=quantizer.scale)
             print("model quantization, interval, mu, bit", optimizer.T, optimizer._mu,
                 optimizer._bits, optimizer._biased)
