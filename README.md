@@ -107,7 +107,7 @@ unzip LP-RFFs-Data.zip
     --model=logistic_regression --opt=sgd --minibatch=250 --l2_reg=1e-05  \
     --epoch=10 --learning_rate=10 \
     --kernel_sigma=0.9128709291752769 --random_seed=2 \
-    --data_path=../LP-RFFs-Data/covtype --save_path=./tmp --cuda
+    --data_path=../LP-RFFs-Data/covtype --save_path=./tmp --n_sample=20000 --cuda
   ```
 
   * Low-precision 8-bit LM-HALP-based training for kernel logistic regression using 8 bit LP-RFFs on GPU
