@@ -46,24 +46,29 @@ unzip LP-RFFs-Data.zip
   ```
   LP-RFFs currently support training the following models:
   * closed-form kernel ridge regression: 
-    --closed_form_sol --model=ridge_regression
+    --model=ridge_regression --closed_form_sol 
   * mini-batch based iterative training for kernel ridge regression: 
     --model=ridge_regression --opt=type of the optimizer
   * mini-batch based iterative training for logistic regression: 
-    --model=logistic regression --opt=type of the optimizer
+    --model=logistic_regression --opt=type of the optimizer
     
   LP-RFFs can use the following optimizers for min-batch based iterative training:
   * plain SGD (full precision training):
     --opt=sgd
   * LM-HALP (low precision training):
-    --opt=lm_halp --n_bit_model=# of bit for model parameter during training --halp_mu=the value do determine the scale factor in LM-HALP --halp_epoch_T=#of epochs as interval to compute the scale factor in LM-HALP
+    --opt=lm_halp --n_bit_model=<# of bit for model parameter during training> \
+    --halp_mu=<the value determine the scale factor in LM-HALP> \
+    --halp_epoch_T=<# of epochs as interval to compute the scale factor in LM-HALP>
   * LM-Bit-Center SGD (low precision training):
-    --opt=lm_bit_center_sgd --n_bit_model=# of bit for model parameter during training --halp_mu=the value do determine the scale factor in LM-Bit-Center SGD --halp_epoch_T=# of epochs as interval to compute the scale factor in LM-Bit-Center SGD
+    --opt=lm_bit_center_sgd --n_bit_model=<# of bit for model parameter during training> \
+    --halp_mu=<the value do determine the scale factor in LM-Bit-Center SGD> \
+    --halp_epoch_T=<# of epochs as interval to compute the scale factor in LM-Bit-Center SGD>
     
   The learning rate and minibatch size can be specified using --learning_rate and --minibatch.
-  For GPU based iterative training, please use --cuda.
-  --epoch specifies the maximal possible training epochs. 
-  Early stopping can be turned off by --fixed_epoch_number.
+  
+  For GPU based iterative training, please use --cuda. 
+  
+  By default, we use the early stopping protocol described in [Appendix C.1 of our paper](). Early stopping can be turned off by --fixed_epoch_number. The maximal possible training epochs can be specified by --epoch for both training with and without early stopping.
   ```
 
   * --collect_sample_metrics indicates to calculate relative spectral distance, Frobenius norm error, spectral norm error on the heldout set kernel matrix. For large datasest, these metrics can be computed on a subsampled heldout set, the size of the subsampled heldout set can be specified by --n_sample=size of subsampled heldout set.
