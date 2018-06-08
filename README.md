@@ -10,6 +10,7 @@
 
 ## Setup instructions
 * Install PyTorch. Our implementation is tested under PyTorch 0.3.1.
+* Install h5py by ```pip install h5py```
 * Clone the LP-RFFs repo, along with the HALP repo (duplicated and adapted from the repo of the original authors) into **the same folder**.
 ```
 git clone https://github.com/JianGoForIt/lp_rffs.git
